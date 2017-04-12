@@ -1,0 +1,50 @@
+{
+  "_lookup": ["name"],
+  "_translate": ["title"],
+  "name": "segments",
+  "title": "Segments",
+  "is_reserved": "0",
+  "is_active": "1",
+  "_values": [
+    {
+      "_lookup": ["value"],
+      "_translate": ["label"],
+      "label": "Segment A (generic)",
+      "value": "SEG-A",
+      "name": "seg_a",
+      "filter": "0",
+      "is_reserved": "0",
+      "is_active": "1"
+    },
+    {
+      "_lookup": ["value"],
+      "_translate": ["label"],
+      "label": "Segment B (generic)",
+      "value": "SEG-B",
+      "name": "seg_b",
+      "filter": "0",
+      "is_reserved": "0",
+      "is_active": "1"
+    },
+    {
+      "_lookup": ["value"],
+      "_translate": ["label"],
+      "label": "Segment C (generic)",
+      "value": "SEG-C",
+      "name": "seg_c",
+      "filter": "0",
+      "is_reserved": "0",
+      "is_active": "1"
+    },
+    {
+      "_lookup": ["value"],
+      "_translate": ["label"],
+      "label": "Segment D (generic)",
+      "value": "SEG-D",
+      "name": "seg_d",
+      "filter": "0",
+      "is_reserved": "0",
+      "is_active": "1"
+    }
+  ]
+}
