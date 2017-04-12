@@ -17,6 +17,24 @@
 require_once 'segmentation.civix.php';
 
 /**
+* Add an "Assign to Campaign" for contact / membership search results
+*
+* @param string $objectType specifies the component
+* @param array $tasks the list of actions
+*
+* @access public
+*/
+function segmentation_civicrm_searchTasks($objectType, &$tasks) {
+  if ($objectType == 'contact') {
+    // TODO: permissions? if (CRM_Core_Permission::check('create and withdraw receipts')) {
+    $tasks[] = array(
+        'title' => ts('Assign to Campaign', array('domain' => 'de.systopia.segmentation')),
+        'class' => 'CRM_Segmentation_Form_Task_Assign',
+        'result' => false);
+  }
+}
+
+/**
  * Implements hook_civicrm_config().
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_config
