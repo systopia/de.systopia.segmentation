@@ -35,6 +35,23 @@ function segmentation_civicrm_searchTasks($objectType, &$tasks) {
 }
 
 /**
+ * implement the hook to customize the rendered tab of our custom group
+ */
+function segmentation_civicrm_pageRun( &$page ) {
+  if ($page->getVar('_name') == 'CRM_Contact_Page_View_CustomData') {
+    $segmentation_group_id = CRM_Segmentation_Configuration::groupID();
+    if ($page->_groupId == $segmentation_group_id) {
+      // this is the right view -> inject JS
+      $script = file_get_contents(__DIR__ . '/js/adjust_segment_tab.js');
+      $script = str_replace('SEGMENT_GROUP_ID', $segmentation_group_id, $script);
+      CRM_Core_Region::instance('page-header')->add(array(
+        'script' => $script,
+        ));
+    }
+  }
+}
+
+/**
  * Implements hook_civicrm_config().
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_config
