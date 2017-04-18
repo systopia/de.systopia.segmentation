@@ -31,6 +31,19 @@ function segmentation_civicrm_searchTasks($objectType, &$tasks) {
         'title' => ts('Assign to Campaign', array('domain' => 'de.systopia.segmentation')),
         'class' => 'CRM_Segmentation_Form_Task_Assign',
         'result' => false);
+
+  } elseif ($objectType == 'membership') {
+    // this gets called multiple types -> check if already in there
+    foreach ($tasks as $task) {
+      if (isset($task['class']) && $task['class'] == 'CRM_Segmentation_Form_Task_AssignMembership') {
+        return; // it's already in there
+      }
+    }
+    // it's not in here yet -> add
+    $tasks[] = array(
+        'title' => ts('Assign to Campaign', array('domain' => 'de.systopia.segmentation')),
+        'class' => 'CRM_Segmentation_Form_Task_AssignMembership',
+        'result' => false);
   }
 }
 

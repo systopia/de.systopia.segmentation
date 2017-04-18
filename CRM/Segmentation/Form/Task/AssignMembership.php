@@ -21,7 +21,7 @@ require_once 'CRM/Core/Form.php';
  *
  * @see http://wiki.civicrm.org/confluence/display/CRMDOC43/QuickForm+Reference
  */
-class CRM_Segmentation_Form_Task_Assign extends CRM_Contact_Form_Task {
+class CRM_Segmentation_Form_Task_AssignMembership extends CRM_Member_Form_Task {
 
   /**
    * Compile task form
@@ -74,17 +74,17 @@ class CRM_Segmentation_Form_Task_Assign extends CRM_Contact_Form_Task {
     $values = $this->exportValues();
 
     // TODO: use API?
-    if (!empty($this->_contactIds)) {
-      $contact_id_list = implode(',', $this->_contactIds);
+    if (!empty($this->_memberIds)) {
+      $membership_id_list = implode(',', $this->_memberIds);
       CRM_Core_DAO::executeQuery("
           INSERT IGNORE INTO `civicrm_segmentation` (entity_id,datetime,campaign_id,segment_id,test_group,membership_id)
-          SELECT civicrm_contact.id AS entity_id,
-                 NOW()              AS datetime,
-                 %1                 AS campaign_id,
-                 %2                 AS segment_id,
-                 NULL               AS test_group,
-                 NULL               AS membership_id
-          FROM civicrm_contact WHERE civicrm_contact.id IN ({$contact_id_list})",
+          SELECT civicrm_membership.contact_id AS entity_id,
+                 NOW()                         AS datetime,
+                 %1                            AS campaign_id,
+                 %2                            AS segment_id,
+                 NULL                          AS test_group,
+                 civicrm_membership.id         AS membership_id
+          FROM civicrm_membership WHERE civicrm_membership.id IN ({$membership_id_list})",
           array(
             1 => array($values['campaign_id'], 'Integer'),
             2 => array($values['segment_id'],  'String'),
