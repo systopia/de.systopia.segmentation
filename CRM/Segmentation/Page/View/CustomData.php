@@ -38,7 +38,6 @@ class CRM_Segmentation_Page_View_CustomData {
     while ($campaign_query->fetch()) {
       $campaign_details[$campaign_query->campaign_id] = "{$campaign_query->campaign_title} [{$campaign_query->campaign_id}]";
     }
-    // $page->assign('campaign_details', $campaign_details);
 
     // compile membership data
     $membership_details = array();
@@ -56,13 +55,14 @@ class CRM_Segmentation_Page_View_CustomData {
     while ($membership_query->fetch()) {
       $membership_details[$membership_query->membership_id] = "{$membership_query->type_name} [{$membership_query->membership_id}]";
     }
-    // $page->assign('membership_details', $membership_details);
 
 
     // inject script
     $script = file_get_contents("{$extension_folder}/js/adjust_segment_tab.js");
     $script = str_replace('MEMBERSHIP_DETAILS', json_encode($membership_details), $script);
+    $script = str_replace('MEMBERSHIP_FIELD_ID', CRM_Segmentation_Configuration::getFieldID('membership_id'), $script);
     $script = str_replace('CAMPAIGN_DETAILS',   json_encode($campaign_details), $script);
+    $script = str_replace('CAMPAIGN_FIELD_ID', CRM_Segmentation_Configuration::getFieldID('campaign_id'), $script);
     $script = str_replace('SEGMENT_GROUP_ID',   CRM_Segmentation_Configuration::groupID(), $script);
     CRM_Core_Region::instance('page-header')->add(array(
       'script' => $script,

@@ -21,6 +21,7 @@
 class CRM_Segmentation_Configuration {
 
   protected static $custom_group_id = NULL;
+  protected static $custom_fields = NULL;
 
   /**
    * Get the ID of the segmentation custom group
@@ -35,4 +36,29 @@ class CRM_Segmentation_Configuration {
     return self::$custom_group_id;
   }
 
+
+  /**
+   * get all custom fileds in the segmentation custom group
+   */
+  public static function segmentationFields() {
+    if (self::$custom_fields === NULL) {
+      $query = civicrm_api3('CustomField', 'get', array('custom_group_id' => self::groupID()));
+      self::$custom_fields = $query['values'];
+    }
+    return self::$custom_fields;
+  }
+
+  /**
+   * get the ID of the segmentation custom field with the given column name
+   */
+  public static function getFieldID($column_name) {
+    $fields = self::segmentationFields();
+    foreach ($fields as $field) {
+      if ($field['column_name'] == $column_name) {
+        return $field['id'];
+      }
+    }
+    // not found
+    return NULL;
+  }
 }

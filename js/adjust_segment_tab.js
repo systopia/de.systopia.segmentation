@@ -5,8 +5,10 @@
 | http://www.systopia.de/                                |
 +-------------------------------------------------------*/
 
-var membership_details = MEMBERSHIP_DETAILS;
-var campaign_details   = CAMPAIGN_DETAILS;
+var membership_details  = MEMBERSHIP_DETAILS;
+var membership_field_id = "MEMBERSHIP_FIELD_ID";
+var campaign_details    = CAMPAIGN_DETAILS;
+var campaign_field_id   = "CAMPAIGN_FIELD_ID";
 var panel = cj("#custom-SEGMENT_GROUP_ID-table-wrapper").parent();
 
 // remove the "Add Segments Record" button
@@ -29,10 +31,10 @@ panel.find("a.action-item")
      });
 
 // replace campaign / membership labels
-panel.find("td[class^='crmf-custom_91']").each(function() {
+panel.find("td[class^='crmf-custom_" + campaign_field_id + "']").each(function() {
   cj(this).html(campaign_details[cj(this).html()]);
 });
 
-panel.find("td[class^='crmf-custom_94']").each(function() {
+panel.find("td[class^='crmf-custom_" + membership_field_id + "']").each(function() {
   cj(this).html(membership_details[cj(this).html()]);
 });
