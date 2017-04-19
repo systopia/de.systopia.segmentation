@@ -55,11 +55,7 @@ function segmentation_civicrm_pageRun( &$page ) {
     $segmentation_group_id = CRM_Segmentation_Configuration::groupID();
     if ($page->_groupId == $segmentation_group_id) {
       // this is the right view -> inject JS
-      $script = file_get_contents(__DIR__ . '/js/adjust_segment_tab.js');
-      $script = str_replace('SEGMENT_GROUP_ID', $segmentation_group_id, $script);
-      CRM_Core_Region::instance('page-header')->add(array(
-        'script' => $script,
-        ));
+      CRM_Segmentation_Page_View_CustomData::adjustPage($page, __DIR__);
     }
   }
 }
