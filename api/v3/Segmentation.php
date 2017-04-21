@@ -67,7 +67,6 @@ function civicrm_api3_segmentation_segmentlist($params) {
   }
 
   return civicrm_api3_create_success($segments);
-  // return civicrm_api3_create_success($stats, $params, 'Data', 'import', $NULL, $extra_values);
 }
 
 

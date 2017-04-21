@@ -26,7 +26,7 @@ require_once 'segmentation.civix.php';
 */
 function segmentation_civicrm_searchTasks($objectType, &$tasks) {
   if ($objectType == 'contact') {
-    if (CRM_Core_Permission::check('reserve campaign contacts')) {
+    if (CRM_Core_Permission::check('manage campaign')) {
       $tasks[] = array(
           'title' => ts('Assign to Campaign', array('domain' => 'de.systopia.segmentation')),
           'class' => 'CRM_Segmentation_Form_Task_Assign',
@@ -34,7 +34,7 @@ function segmentation_civicrm_searchTasks($objectType, &$tasks) {
     }
 
   } elseif ($objectType == 'membership') {
-    if (CRM_Core_Permission::check('reserve campaign contacts')) {
+    if (CRM_Core_Permission::check('manage campaign')) {
       // this gets called multiple types -> check if already in there
       foreach ($tasks as $task) {
         if (isset($task['class']) && $task['class'] == 'CRM_Segmentation_Form_Task_AssignMembership') {
@@ -62,6 +62,14 @@ function segmentation_civicrm_pageRun( &$page ) {
     }
   }
 }
+
+/**
+ * implement hook to set permissions for API calls
+ */
+function segmentation_civicrm_alterAPIPermissions($entity, $action, &$params, &$permissions) {
+  $permissions['segmentation']['segmentlist'] = array('manage campaign');
+}
+
 
 /**
  * Implements hook_civicrm_config().
