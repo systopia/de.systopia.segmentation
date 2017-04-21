@@ -9,7 +9,7 @@
     {
       "_lookup": ["value"],
       "_translate": ["label"],
-      "label": "Segment A (generic)",
+      "label": "Segment A",
       "value": "SEG-A",
       "name": "seg_a",
       "filter": "0",
@@ -19,7 +19,7 @@
     {
       "_lookup": ["value"],
       "_translate": ["label"],
-      "label": "Segment B (generic)",
+      "label": "Segment B",
       "value": "SEG-B",
       "name": "seg_b",
       "filter": "0",
@@ -29,7 +29,7 @@
     {
       "_lookup": ["value"],
       "_translate": ["label"],
-      "label": "Segment C (generic)",
+      "label": "Segment C",
       "value": "SEG-C",
       "name": "seg_c",
       "filter": "0",
@@ -39,7 +39,7 @@
     {
       "_lookup": ["value"],
       "_translate": ["label"],
-      "label": "Segment D (generic)",
+      "label": "Segment D",
       "value": "SEG-D",
       "name": "seg_d",
       "filter": "0",

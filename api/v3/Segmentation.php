@@ -1,0 +1,82 @@
+<?php
+/*-------------------------------------------------------+
+| SYSTOPIA Contact Segmentation Extension                |
+| Copyright (C) 2017 SYSTOPIA                            |
+| Author: B. Endres (endres@systopia.de)                 |
+| http://www.systopia.de/                                |
++--------------------------------------------------------+
+| This program is released as free software under the    |
+| Affero GPL license. You can redistribute it and/or     |
+| modify it under the terms of this license which you    |
+| can read by viewing the included agpl.txt or online    |
+| at www.gnu.org/licenses/agpl.html. Removal of this     |
+| copyright header is strictly prohibited without        |
+| written permission from the original author(s).        |
++--------------------------------------------------------*/
+
+/**
+ * List the different segments for all assignments
+ * matching the given parameters
+ */
+function civicrm_api3_segmentation_segmentlist($params) {
+
+  // build query
+  $where_clauses = array();
+  $where_params = array();
+
+  if (!empty($params['contact_id'])) {
+    $index = count($where_clauses) + 1;
+    $where_clauses[] = "entity_id = %{$index}";
+    $where_params[$index] = array($params['contact_id'], 'Integer');
+  }
+
+  if (!empty($params['campaign_id'])) {
+    $index = count($where_clauses) + 1;
+    $where_clauses[] = "campaign_id = %{$index}";
+    $where_params[$index] = array($params['campaign_id'], 'Integer');
+  }
+
+  if (!empty($params['membership_id'])) {
+    $index = count($where_clauses) + 1;
+    $where_clauses[] = "membership_id = %{$index}";
+    $where_params[$index] = array($params['membership_id'], 'Integer');
+  }
+
+  if (!empty($params['test_group'])) {
+    $index = count($where_clauses) + 1;
+    $where_clauses[] = "test_group = %{$index}";
+    $where_params[$index] = array($params['test_group'], 'String');
+  }
+
+  if (empty($where_clauses)) {
+    $sql_where = '';
+  } else {
+    $sql_where = 'WHERE ' . implode(' AND ', $where_clauses);
+  }
+
+  // now generate and execute query
+  $query = CRM_Core_DAO::executeQuery("
+      SELECT DISTINCT(segment) AS segment
+      FROM civicrm_segmentation {$sql_where};", $where_params);
+
+  $segments = array();
+  while ($query->fetch()) {
+    if ($query->segment !== NULL) {
+      $segments[] = $query->segment;
+    }
+  }
+
+  return civicrm_api3_create_success($segments);
+  // return civicrm_api3_create_success($stats, $params, 'Data', 'import', $NULL, $extra_values);
+}
+
+
+/**
+ * API3 action specs
+ */
+function _civicrm_api3_segmentation_segmentlist_spec(&$params) {
+  $params['contact_id']['title'] = "Contact ID";
+  $params['campaign_id']['title'] = "Campaign ID";
+  $params['membership_id']['title'] = "Membership ID";
+  $params['test_group']['title'] = "Test Subgroup";
+}

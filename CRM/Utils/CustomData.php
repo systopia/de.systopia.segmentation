@@ -83,7 +83,7 @@ class CRM_Utils_CustomData {
          $customGroup = $this->createEntity('CustomGroup', $data);
       } else {
          // update CustomGroup
-         $this->updateEntity('CustomGroup', $data, $customGroup, array('extends'));
+         $this->updateEntity('CustomGroup', $data, $customGroup, array('extends', 'in_selector', 'is_view'));
       }
 
       // now run the update for the CustomFields
