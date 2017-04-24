@@ -15,6 +15,47 @@
 +--------------------------------------------------------*/
 
 /**
+ * Get the segment ID for the given name
+ * If the segement doesn't exist yet, it'll be created.
+ */
+function civicrm_api3_segmentation_getsegmentid($params) {
+  if (empty($params['name'])) {
+    return civicrm_api3_create_error("Required field 'name' was not properly set.");
+  }
+
+  // first try to find it
+  $segment_id = CRM_Core_DAO::singleValueQuery("SELECT MAX(id) FROM civicrm_segmentation_index WHERE name = %1;",
+    array(1 => array($params['name'], 'String')));
+
+  // if it doesn't exist: create
+  if (!$segment_id) {
+    CRM_Core_DAO::executeQuery("INSERT INTO civicrm_segmentation_index SET name = %1 ",
+      array(1 => array($params['name'], 'String')));
+    // then reload it
+    $segment_id = CRM_Core_DAO::singleValueQuery("SELECT MAX(id) FROM civicrm_segmentation_index WHERE name = %1;",
+      array(1 => array($params['name'], 'String')));
+  }
+
+  if (!$segment_id) {
+    return civicrm_api3_create_error("Internal error, please contact segmentation extension maintainer.");
+  } else {
+    // $result = array('id' => $segment_id, 'name' => $params['name']);
+    // $noDAO = NULL;
+    // return civicrm_api3_create_success($result, $params, NULL, NULL, $noDAO, array('id' => $segment_id));
+    return civicrm_api3_create_success(array($segment_id => $params['name']));
+  }
+}
+
+/**
+ * API3 action specs
+ */
+function _civicrm_api3_segmentation_getsegmentid_spec(&$params) {
+  $params['name']['title'] = "Segment Name";
+  $params['name']['api.required'] = 1;
+}
+
+
+/**
  * List the different segments for all assignments
  * matching the given parameters
  */
@@ -56,19 +97,24 @@ function civicrm_api3_segmentation_segmentlist($params) {
 
   // now generate and execute query
   $query = CRM_Core_DAO::executeQuery("
-      SELECT DISTINCT(segment) AS segment
-      FROM civicrm_segmentation {$sql_where};", $where_params);
+      SELECT
+        civicrm_segmentation_index.name AS segment,
+        civicrm_segmentation.segment_id AS segment_id
+      FROM civicrm_segmentation
+      LEFT JOIN civicrm_segmentation_index ON civicrm_segmentation.segment_id = civicrm_segmentation_index.id
+      {$sql_where}
+      GROUP BY civicrm_segmentation.segment_id
+      ;", $where_params);
 
   $segments = array();
   while ($query->fetch()) {
     if ($query->segment !== NULL) {
-      $segments[] = $query->segment;
+      $segments[$query->segment_id] = $query->segment;
     }
   }
 
   return civicrm_api3_create_success($segments);
 }
-
 
 /**
  * API3 action specs

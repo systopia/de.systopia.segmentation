@@ -5,6 +5,8 @@
 | http://www.systopia.de/                                |
 +-------------------------------------------------------*/
 
+var segments_details    = SEGMENTS_DETAILS;
+var segments_field_id   = "SEGMENTS_FIELD_ID";
 var membership_details  = MEMBERSHIP_DETAILS;
 var membership_field_id = "MEMBERSHIP_FIELD_ID";
 var campaign_details    = CAMPAIGN_DETAILS;
@@ -30,7 +32,11 @@ panel.find("a.action-item")
         bay.find('span').remove();
      });
 
-// replace campaign / membership labels
+// replace segment / campaign / membership labels
+panel.find("td[class^='crmf-custom_" + segments_field_id + "']").each(function() {
+  cj(this).html(segments_details[cj(this).html()]);
+});
+
 panel.find("td[class^='crmf-custom_" + campaign_field_id + "']").each(function() {
   cj(this).html(campaign_details[cj(this).html()]);
 });

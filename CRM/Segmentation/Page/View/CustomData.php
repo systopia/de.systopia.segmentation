@@ -24,6 +24,10 @@ class CRM_Segmentation_Page_View_CustomData {
       return;
     }
 
+    // compile segments data
+    $segments_query = civicrm_api3('Segmentation', 'segmentlist', array('contact_id' => $page->_contactId));
+    $segments_details = $segments_query['values'];
+
     // compile campaign data
     $campaign_details = array();
     $campaign_query = CRM_Core_DAO::executeQuery("
@@ -59,6 +63,8 @@ class CRM_Segmentation_Page_View_CustomData {
 
     // inject script
     $script = file_get_contents("{$extension_folder}/js/adjust_segment_tab.js");
+    $script = str_replace('SEGMENTS_DETAILS', json_encode($segments_details), $script);
+    $script = str_replace('SEGMENTS_FIELD_ID', CRM_Segmentation_Configuration::getFieldID('segment_id'), $script);
     $script = str_replace('MEMBERSHIP_DETAILS', json_encode($membership_details), $script);
     $script = str_replace('MEMBERSHIP_FIELD_ID', CRM_Segmentation_Configuration::getFieldID('membership_id'), $script);
     $script = str_replace('CAMPAIGN_DETAILS',   json_encode($campaign_details), $script);

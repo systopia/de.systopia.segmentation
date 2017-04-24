@@ -99,19 +99,23 @@ class CRM_Segmentation_Form_Task_Assign extends CRM_Contact_Form_Task {
 
     // TODO: use API?
     if (!empty($this->_contactIds)) {
+      // look up segment ID
+      $segment = civicrm_api3('Segmentation', 'getsegmentid', array(
+        'name' => $values['segment']));
+
       $contact_id_list = implode(',', $this->_contactIds);
       CRM_Core_DAO::executeQuery("
-          INSERT IGNORE INTO `civicrm_segmentation` (entity_id,datetime,campaign_id,segment,test_group,membership_id)
+          INSERT IGNORE INTO `civicrm_segmentation` (entity_id,datetime,campaign_id,segment_id,test_group,membership_id)
           SELECT civicrm_contact.id AS entity_id,
                  NOW()              AS datetime,
                  %1                 AS campaign_id,
-                 %2                 AS segment,
+                 %2                 AS segment_id,
                  NULL               AS test_group,
                  NULL               AS membership_id
           FROM civicrm_contact WHERE civicrm_contact.id IN ({$contact_id_list})",
           array(
             1 => array($values['campaign_id'], 'Integer'),
-            2 => array($values['segment'],  'String'),
+            2 => array($segment['id'],         'Integer'),
           )
         );
     }

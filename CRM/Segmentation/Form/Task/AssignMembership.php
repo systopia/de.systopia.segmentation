@@ -63,19 +63,23 @@ class CRM_Segmentation_Form_Task_AssignMembership extends CRM_Member_Form_Task {
 
     // TODO: use API?
     if (!empty($this->_memberIds)) {
+      // look up segment ID
+      $segment = civicrm_api3('Segmentation', 'getsegmentid', array(
+        'name' => $values['segment']));
+
       $membership_id_list = implode(',', $this->_memberIds);
       CRM_Core_DAO::executeQuery("
-          INSERT IGNORE INTO `civicrm_segmentation` (entity_id,datetime,campaign_id,segment,test_group,membership_id)
+          INSERT IGNORE INTO `civicrm_segmentation` (entity_id,datetime,campaign_id,segment_id,test_group,membership_id)
           SELECT civicrm_membership.contact_id AS entity_id,
                  NOW()                         AS datetime,
                  %1                            AS campaign_id,
-                 %2                            AS segment,
+                 %2                            AS segment_id,
                  NULL                          AS test_group,
                  civicrm_membership.id         AS membership_id
           FROM civicrm_membership WHERE civicrm_membership.id IN ({$membership_id_list})",
           array(
             1 => array($values['campaign_id'], 'Integer'),
-            2 => array($values['segment'],  'String'),
+            2 => array($segment['id'],         'Integer'),
           )
         );
     }

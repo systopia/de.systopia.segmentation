@@ -68,6 +68,7 @@ function segmentation_civicrm_pageRun( &$page ) {
  */
 function segmentation_civicrm_alterAPIPermissions($entity, $action, &$params, &$permissions) {
   $permissions['segmentation']['segmentlist'] = array('manage campaign');
+  $permissions['segmentation']['getsegmentid'] = array('manage campaign');
 }
 
 
@@ -96,6 +97,11 @@ function segmentation_civicrm_xmlMenu(&$files) {
  */
 function segmentation_civicrm_install() {
   _segmentation_civix_civicrm_install();
+
+  // create semgentation index table
+  $config = CRM_Core_Config::singleton();
+  $sql = file_get_contents(dirname( __FILE__ ) .'/sql/civicrm_segment_index.sql', true);
+  CRM_Utils_File::sourceSQLFile($config->dsn, $sql, NULL, true);
 }
 
 /**
