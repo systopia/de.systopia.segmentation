@@ -11,7 +11,8 @@ var membership_details  = MEMBERSHIP_DETAILS;
 var membership_field_id = "MEMBERSHIP_FIELD_ID";
 var campaign_details    = CAMPAIGN_DETAILS;
 var campaign_field_id   = "CAMPAIGN_FIELD_ID";
-var panel = cj("#custom-SEGMENT_GROUP_ID-table-wrapper").parent();
+var table_wrapper = cj("#custom-SEGMENT_GROUP_ID-table-wrapper");
+var panel = table_wrapper.parent();
 
 // remove the "Add Segments Record" button
 panel.find("a.button[accesskey='N']")
@@ -43,4 +44,18 @@ panel.find("td[class^='crmf-custom_" + campaign_field_id + "']").each(function()
 
 panel.find("td[class^='crmf-custom_" + membership_field_id + "']").each(function() {
   cj(this).html(membership_details[cj(this).html()]);
+});
+
+// sort table by first column (date)
+var dt_hooked = false;
+cj(table_wrapper).bind("DOMSubtreeModified", function(){
+  if (dt_hooked) return;
+  var dt = table_wrapper.find("table.dataTable");
+  if (dt.length) {
+    // there, the datatable is finally here -> add event hook
+    cj(dt).on("init.dt", function(e, myDT) {
+      table_wrapper.find("table.dataTable").dataTable().fnSort([[0,'desc']]);
+    });
+    dt_hooked = true;
+  }
 });
