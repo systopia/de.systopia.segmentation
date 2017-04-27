@@ -21,7 +21,10 @@
 
 <div class="crm-section">
   <div class="label">{$form.segment_list.label}</div>
-  <div class="content">{$form.segment_list.html}</div>
+  <div class="content">
+    {$form.segment_list.html}
+    <a href="{$segments_url}" target="_blank" id="crm-segments-configure" class="crm-hover-button show-add"><span class="icon ui-icon-wrench"></span></a>
+  </div>
   <div class="clear"></div>
 </div>
 

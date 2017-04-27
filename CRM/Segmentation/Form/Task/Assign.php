@@ -55,6 +55,10 @@ class CRM_Segmentation_Form_Task_Assign extends CRM_Contact_Form_Task {
                       array('class' => 'huge'));
     $this->addRule('segment', ts('Please select a segment or enter a new name.', array('domain' => 'de.systopia.segmentation')), 'required');
 
+    // add segments URL
+    $group_id = CRM_Segmentation_Configuration::segmentsGroupID();
+    $this->assign('segments_url', CRM_Utils_System::url('civicrm/admin/options', "reset=1&gid={$group_id}"));
+
     CRM_Core_Form::addDefaultButtons("Assign");
   }
 

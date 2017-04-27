@@ -21,6 +21,7 @@
 class CRM_Segmentation_Configuration {
 
   protected static $custom_group_id = NULL;
+  protected static $option_group_id = NULL;
   protected static $custom_fields = NULL;
 
   /**
@@ -61,4 +62,18 @@ class CRM_Segmentation_Configuration {
     // not found
     return NULL;
   }
+
+  /**
+   * Get the ID of the segmentation custom group
+   */
+  public static function segmentsGroupID() {
+    if (self::$option_group_id === NULL) {
+      $query = civicrm_api3('OptionGroup', 'getvalue', array(
+        'return' => 'id',
+        'name'   => 'segments'));
+      self::$option_group_id = (int) $query;
+    }
+    return self::$option_group_id;
+  }
+
 }
