@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<menu>
+  <item>
+    <path>civicrm/segmentation/start</path>
+    <page_callback>CRM_Segmentation_Page_Start</page_callback>
+    <title>Start Campaign</title>
+    <access_arguments>access CiviCRM</access_arguments>
+  </item>
+</menu>

@@ -17,6 +17,25 @@
 require_once 'segmentation.civix.php';
 
 /**
+ * add the "start campaign" action to campaigns
+ */
+function segmentation_civicrm_links($op, $objectName, $objectId, &$links, &$mask, &$values) {
+  if ($op == 'campaign.selector.row' && $objectName == 'Campaign') {
+    $campaign = civicrm_api3('Campaign', 'getsingle', array(
+      'id'     => $objectId,
+      'return' => 'status_id'));
+    if ($campaign['status_id'] == 1) {
+      $links[] = array(
+              'name'  => ts('Start'),
+              'url'   => CRM_Utils_System::url('civicrm/segmentation/start', "cid={$objectId}"),
+              'title' => ts('Start Campaign'),
+              'class' => 'no-popup',
+            );
+    }
+  }
+}
+
+/**
 * Add an "Assign to Campaign" for contact / membership search results
 *
 * @param string $objectType specifies the component

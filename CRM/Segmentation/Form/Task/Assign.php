@@ -89,6 +89,7 @@ class CRM_Segmentation_Form_Task_Assign extends CRM_Contact_Form_Task {
     $campaign_query = civicrm_api3('Campaign', 'get', array(
       'is_active'    => 1,
       'option.limit' => 0,
+      'status_id'    => 1, // only planned campaigns
       'return'       => 'id,title'
       ));
     foreach ($campaign_query['values'] as $campaign) {
