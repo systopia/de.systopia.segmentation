@@ -52,7 +52,8 @@ class CRM_Segmentation_Page_Start extends CRM_Core_Page {
       }
     }
 
-    // TODO: process commands to change order
+    // process commands to change order
+    $segment_order = $this->processOrderCommands($segment_order);
 
     // store in session to keep alive
     $session->set("segmentation_order_{$campaign_id}", $segment_order);
@@ -65,11 +66,46 @@ class CRM_Segmentation_Page_Start extends CRM_Core_Page {
     $this->assign('segment_titles', $segment_titles);
     $this->assign('campaign', $campaign);
     $this->assign('baseurl', $base_url);
+    $this->assign('campaign_id', $campaign['id']);
     CRM_Utils_System::setTitle(ts("Start Campaign '%1'", array(1 => $campaign['title'])));
 
     parent::run();
   }
 
+
+  /**
+   * process any ordering commands to modify the given segment_order
+   *
+   * @param $segment_order  the current segment order
+   * @return the new segment order
+   */
+  protected function processOrderCommands($segment_order) {
+    foreach (array('top', 'up', 'down', 'bottom') as $cmd) {
+      $segment_id = CRM_Utils_Request::retrieve($cmd, 'Integer');
+      $index = array_search($segment_id, $segment_order);
+      if ($index !== FALSE) {
+        switch ($cmd) {
+          case 'top':
+            $new_index = 0;
+            break;
+          case 'up':
+            $new_index = max(0, $index-1);
+            break;
+          case 'down':
+            $new_index = min(count($segment_order)-1, $index+1);
+            break;
+          default:
+          case 'bottom':
+            $new_index = count($segment_order)-1;
+            break;
+        }
+        // copied from https://stackoverflow.com/questions/12624153/move-an-array-element-to-a-new-index-in-php
+        $out = array_splice($segment_order, $index, 1);
+        array_splice($segment_order, $new_index, 0, $out);
+      }
+    }
+    return $segment_order;
+  }
 
   /**
    * get a list segment_id -> contact_count for the given campaign
