@@ -35,7 +35,7 @@ class CRM_Segmentation_Page_Start extends CRM_Core_Page {
     $campaign = civicrm_api3('Campaign', 'getsingle', array('id' => $campaign_id));
 
     // load segments
-    $used_segments  = self::getCampaignSegments($campaign_id);
+    $used_segments  = CRM_Segmentation_Logic::getCampaignSegments($campaign_id);
 
     // get segment order
     $session = CRM_Core_Session::singleton();
@@ -58,15 +58,25 @@ class CRM_Segmentation_Page_Start extends CRM_Core_Page {
     // store in session to keep alive
     $session->set("segmentation_order_{$campaign_id}", $segment_order);
 
+    // start the campaign if requested
+    $start = CRM_Utils_Request::retrieve('start', 'String');
+    if (!empty($start)) {
+      CRM_Segmentation_Logic::startCampaign($campaign_id, $segment_order);
+      $campaign_view_url = CRM_Utils_System::url("civicrm/a/#/campaign/{$campaign_id}/view");
+      CRM_Utils_System::redirect($campaign_view_url);
+    }
+
+
     // finally: calculate counts based on order, and render page
-    $segment_counts = self::getSegmentCounts($campaign_id, $segment_order);
-    $segment_titles = self::getSegmentTitles($segment_order);
+    $segment_counts = CRM_Segmentation_Logic::getSegmentCounts($campaign_id, $segment_order);
+    $segment_titles = CRM_Segmentation_Logic::getSegmentTitles($segment_order);
     $this->assign('segment_order',  $segment_order);
     $this->assign('segment_counts', $segment_counts);
     $this->assign('segment_titles', $segment_titles);
     $this->assign('campaign', $campaign);
     $this->assign('baseurl', $base_url);
     $this->assign('campaign_id', $campaign['id']);
+    $this->assign('total_count', array_sum($segment_counts));
     CRM_Utils_System::setTitle(ts("Start Campaign '%1'", array(1 => $campaign['title'])));
 
     parent::run();
@@ -105,76 +115,5 @@ class CRM_Segmentation_Page_Start extends CRM_Core_Page {
       }
     }
     return $segment_order;
-  }
-
-  /**
-   * get a list segment_id -> contact_count for the given campaign
-   *
-   * @todo optimise into one query?
-   * @todo move to another class
-   */
-  public static function getSegmentCounts($campaign_id, $segment_order) {
-    $segment_counts = array();
-    $segments_to_exclude = array(0);
-    foreach ($segment_order as $segment_id) {
-      $exclude_list = implode(',', $segments_to_exclude);
-      $segment_count = CRM_Core_DAO::singleValueQuery("
-        SELECT COUNT(DISTINCT(positive.entity_id))
-        FROM civicrm_segmentation positive
-        LEFT JOIN civicrm_segmentation negative ON positive.entity_id = negative.entity_id
-                                               AND negative.campaign_id = {$campaign_id}
-                                               AND negative.segment_id IN ({$exclude_list})
-        WHERE positive.segment_id = {$segment_id}
-          AND positive.campaign_id = {$campaign_id}
-          AND negative.segment_id IS NULL");
-      $segment_counts[$segment_id] = $segment_count;
-      $segments_to_exclude[] = $segment_id;
-    }
-    return $segment_counts;
-  }
-
-  /**
-   * get a list segment_id -> segment_title for the given segment ids
-   *
-   * @todo move to another class
-   */
-  public static function getSegmentTitles($segment_ids) {
-    if (empty($segment_ids)) return array();
-
-    $segment_id_list = implode(',', $segment_ids);
-    $query = CRM_Core_DAO::executeQuery("
-      SELECT
-        id    AS segment_id,
-        name  AS segment_title
-      FROM civicrm_segmentation_index
-      WHERE id IN ({$segment_id_list})");
-
-    $segment_titles = array();
-    while ($query->fetch()) {
-      $segment_titles[$query->segment_id] = $query->segment_title;
-    }
-    return $segment_titles;
-  }
-
-  /**
-   * get a list segment_id -> contact_count for the given campaign
-   *
-   * @todo move to another class
-   */
-  public static function getCampaignSegments($campaign_id) {
-    $query = CRM_Core_DAO::executeQuery("
-      SELECT
-        segment_id                 AS segment_id,
-        COUNT(DISTINCT(entity_id)) AS contact_count
-      FROM civicrm_segmentation
-      WHERE segment_id IS NOT NULL
-        AND campaign_id = %1
-      GROUP BY segment_id", array(1 => array($campaign_id, 'Integer')));
-
-    $result = array();
-    while ($query->fetch()) {
-      $result[$query->segment_id] = $query->contact_count;
-    }
-    return $result;
   }
 }

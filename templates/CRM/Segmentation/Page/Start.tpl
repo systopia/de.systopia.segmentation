@@ -13,6 +13,19 @@
 | written permission from the original author(s).        |
 +-------------------------------------------------------*}
 
+<div>
+  <p>
+    {ts}Starting the campaign will do the following:{/ts}
+    <ol>
+      <li>{ts}Set the status to 'In Progress'{/ts}</li>
+      <li>{ts}If the campaign's start date is in the past, it will be set to <code>now</code>{/ts}</li>
+      <li>{ts}Freeze the contact segments, i.e. each contact is only linked with the highest segment as of the table below.{/ts}</li>
+    </ol>
+  </p>
+  <p>{ts}You can use the arrows below to re-order the segments. Note, that the counts will change if some contacts are in multiple segments. They will only be counted in the highest segment, so the numbers reflect the situation after starting the project{/ts}</p>
+  <p><b>{ts 1=$total_count}There is a total of %1 contacts connected to this campaign.{/ts}</b></p>
+</div>
+
 <table id="options" class="row-highlight">
   <thead>
       <tr>
@@ -46,6 +59,10 @@
   {/foreach}
   </tbody>
 </table>
+
+<div>
+  <a href="{crmURL p='civicrm/segmentation/start' q="cid=$campaign_id&start=now"}" class="button"><span>{ts}Start Campaign{/ts}</span></a>
+</div>
 
 <script type="text/javascript">
 // reset the URL

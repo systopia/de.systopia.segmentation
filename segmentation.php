@@ -90,6 +90,45 @@ function segmentation_civicrm_alterAPIPermissions($entity, $action, &$params, &$
   $permissions['segmentation']['getsegmentid'] = array('manage campaign');
 }
 
+/**
+ * implement hook to add KPI
+ */
+function segmentation_civicrm_campaignKpis ($campaign_id, &$kpi_array, $tree_level) {
+  // TODO: make more performant
+  // calculate segmentation data
+  $segmentation_data = array();
+  $used_segments  = array_keys(CRM_Segmentation_Logic::getCampaignSegments($campaign_id));
+  $segment_titles = CRM_Segmentation_Logic::getSegmentTitles($used_segments);
+  $segment_counts = CRM_Segmentation_Logic::getSegmentCounts($campaign_id, $used_segments);
+  $total_count    = array_sum($segment_counts);
+  foreach ($segment_counts as $segment_id => $segment_count) {
+    if ($segment_count > 0) {
+      $segmentation_data[] = array(
+        'label' => $segment_titles[$segment_id],
+        'value' => ((float) $segment_count) / (float) $total_count);
+    }
+  }
+  if (!empty($segmentation_data)) {
+    $kpi_array["segmentation"] = array(
+      "id" => "segmentation",
+      "title" => ts("Contact Segmentation"),
+      "kpi_type" => "hidden",
+      "vis_type" => "pie_chart",
+      "description" => ts("Displays the contacts assigned via the SYSTOPIA segmentation extension."),
+      "value" => $segmentation_data,
+      "link" => ""
+    );
+  }
+  $kpi_array["contact_count"] = array(
+    "id" => "contact_count",
+    "title" => ts("Contact Count"),
+    "kpi_type" => "number",
+    "vis_type" => "",
+    "description" => ts("Number of contacts assigned via the SYSTOPIA segmentation extension."),
+    "value" => $total_count,
+    "link" => ""
+  );
+}
 
 /**
  * Implements hook_civicrm_config().
