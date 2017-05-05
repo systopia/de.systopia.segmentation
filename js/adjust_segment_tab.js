@@ -10,6 +10,7 @@ var segments_field_id   = "SEGMENTS_FIELD_ID";
 var membership_details  = MEMBERSHIP_DETAILS;
 var membership_field_id = "MEMBERSHIP_FIELD_ID";
 var campaign_details    = CAMPAIGN_DETAILS;
+var campaign_status     = CAMPAIGN_STATUS;
 var campaign_field_id   = "CAMPAIGN_FIELD_ID";
 var table_wrapper = cj("#custom-SEGMENT_GROUP_ID-table-wrapper");
 var panel = table_wrapper.parent();
@@ -27,6 +28,9 @@ panel.find("td[class^='crmf-custom_" + segments_field_id + "']").each(function()
 });
 
 panel.find("td[class^='crmf-custom_" + campaign_field_id + "']").each(function() {
+  if (campaign_status[cj(this).html()] == '1') {
+    cj(this).closest("tr").addClass("segmentation-planned");
+  }
   cj(this).html(campaign_details[cj(this).html()]);
 });
 
