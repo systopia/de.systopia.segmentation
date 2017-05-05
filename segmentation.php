@@ -21,6 +21,13 @@ require_once 'segmentation.civix.php';
  */
 function segmentation_civicrm_links($op, $objectName, $objectId, &$links, &$mask, &$values) {
   if ($op == 'campaign.selector.row' && $objectName == 'Campaign') {
+    $links[] = array(
+            'name'  => ts('Contacts'),
+            'url'   => CRM_Segmentation_Form_Search_SegmentSearch::generateSearchLink($objectId),
+            'title' => ts('Find Contacts'),
+            'class' => 'no-popup',
+          );
+
     $campaign = civicrm_api3('Campaign', 'getsingle', array(
       'id'     => $objectId,
       'return' => 'status_id'));

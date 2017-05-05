@@ -20,6 +20,9 @@
  */
 class CRM_Segmentation_Logic {
 
+  /** cache all campaigns */
+  private static $all_campaigns = NULL;
+
   /**
    * will do the following:
    *   - Set the status to 'In Progress'
@@ -159,5 +162,35 @@ class CRM_Segmentation_Logic {
       $result[$query->segment_id] = $query->contact_count;
     }
     return $result;
+  }
+
+  /**
+   * Get a list of all campaigns
+   */
+  public static function getAllCampaigns() {
+    if (self::$all_campaigns == NULL) {
+      self::$all_campaigns = array();
+      $campaign_query = civicrm_api3('Campaign', 'get', array(
+        'option.limit' => 0,
+        'is_active'    => 1,
+        'return'       => 'id,title'
+        ));
+      foreach ($campaign_query['values'] as $campaign) {
+        self::$all_campaigns[$campaign['id']] = $campaign['title'];
+      }
+    }
+    return self::$all_campaigns;
+  }
+
+  /**
+   * Get a list of all campaigns
+   */
+  public static function getAllSegments() {
+    $all_segments = array(0 => ts("any"));
+    $query = CRM_Core_DAO::executeQuery("SELECT id AS segment_id, name AS segment_name FROM civicrm_segmentation_index;");
+    while ($query->fetch()) {
+      $all_segments[$query->segment_id] = $query->segment_name;
+    }
+    return $all_segments;
   }
 }
