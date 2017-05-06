@@ -61,18 +61,22 @@ class CRM_Segmentation_Form_Search_SegmentSearch extends CRM_Contact_Form_Search
                       array('class' => 'crm-select2 huge'));
 
     // segment options
-    $segment_list = CRM_Segmentation_Logic::getAllSegments();
     $form->addElement('select',
-                      'segment_id',
+                      'segment_list',
                       ts('Segment', array('domain' => 'de.systopia.segmentation')),
-                      $segment_list,
+                      array(),
                       array('class' => 'crm-select2 huge'));
+
+    // hidden field for value
+    $form->addElement('text', // hidden doesn't work...
+                      'segment_id',
+                      ts('Segment ID', array('domain' => 'de.systopia.segmentation')));
 
     /**
      * if you are using the standard template, this array tells the template what elements
      * are part of the search criteria
      */
-    $form->assign('elements', array('campaign_id', 'segment_id'));
+    $form->assign('elements', array('campaign_id', 'segment_list', 'segment_id'));
   }
 
   /**
@@ -185,7 +189,7 @@ class CRM_Segmentation_Form_Search_SegmentSearch extends CRM_Contact_Form_Search
    * @return string, template path (findable through Smarty template path)
    */
   function templateFile() {
-    return 'CRM/Contact/Form/Search/Custom.tpl';
+    return 'CRM/Segmentation/Form/Search/SegmentSearch.tpl';
   }
 
   /**

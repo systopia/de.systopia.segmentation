@@ -186,7 +186,7 @@ class CRM_Segmentation_Logic {
    * Get a list of all campaigns
    */
   public static function getAllSegments() {
-    $all_segments = array(0 => ts("any"));
+    $all_segments = array();
     $query = CRM_Core_DAO::executeQuery("SELECT id AS segment_id, name AS segment_name FROM civicrm_segmentation_index;");
     while ($query->fetch()) {
       $all_segments[$query->segment_id] = $query->segment_name;
