@@ -20,7 +20,7 @@ require_once 'segmentation.civix.php';
  * add the "start campaign" action to campaigns
  */
 function segmentation_civicrm_links($op, $objectName, $objectId, &$links, &$mask, &$values) {
-  if ($op == 'campaign.selector.row' && $objectName == 'Campaign') {
+  if ($objectName == 'Campaign' && ($op == 'campaign.selector.row' || $op == 'campaign.dashboard.row')) {
     $links[] = array(
             'name'  => ts('Contacts'),
             'url'   => CRM_Segmentation_Form_Search_SegmentSearch::generateSearchLink($objectId),
