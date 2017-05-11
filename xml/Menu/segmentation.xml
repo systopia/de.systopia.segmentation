@@ -6,4 +6,10 @@
     <title>Start Campaign</title>
     <access_arguments>access CiviCRM</access_arguments>
   </item>
+  <item>
+    <path>civicrm/segmentation/export</path>
+    <page_callback>CRM_Segmentation_Form_Export</page_callback>
+    <title>Export Campaign</title>
+    <access_arguments>access CiviCRM</access_arguments>
+  </item>
 </menu>

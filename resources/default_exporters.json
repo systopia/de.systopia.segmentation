@@ -1,0 +1,27 @@
+[
+  {
+    "name": "Test 1 (CSV)",
+    "id": 1,
+    "format": "CSV",
+    "encoding": "UTF8",
+    "delimiter": ",",
+    "columns": ["Contact ID", "Contact Name", "Campaign ID"],
+    "rules": [
+      {
+        "action": "copy",
+        "from": "contact.id",
+        "to": "Contact ID"
+      },
+      {
+        "action": "copy",
+        "from": "contact.display_name",
+        "to": "Contact Name"
+      },
+      {
+        "action": "copy",
+        "from": "campaign.id",
+        "to": "Campaign ID"
+      }
+    ]
+  }
+]

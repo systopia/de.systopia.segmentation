@@ -38,6 +38,13 @@ function segmentation_civicrm_links($op, $objectName, $objectId, &$links, &$mask
               'title' => ts('Start Campaign'),
               'class' => 'no-popup',
             );
+    } else {
+      $links[] = array(
+              'name'  => ts('Export'),
+              'url'   => CRM_Utils_System::url('civicrm/segmentation/export', "cid={$objectId}"),
+              'title' => ts('Export Segments'),
+              'class' => 'no-popup',
+            );
     }
   }
 }
