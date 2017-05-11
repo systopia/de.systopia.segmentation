@@ -43,10 +43,10 @@
       </td>
       <td class="crm-admin-options-value">{$segment_counts.$segment_id}</td>
       <td class="nowrap crm-admin-options-order">
-          <a class="crm-weight-arrow" href="{crmURL p='civicrm/segmentation/start' q="cid=$campaign_id&top=$segment_id"}"><img src="http://localhost:8888/gp/sites/all/modules/civicrm/i/arrow/first.gif" title="Move to top" alt="Move to top" class="order-icon"></a>&nbsp;
-          <a class="crm-weight-arrow" href="{crmURL p='civicrm/segmentation/start' q="cid=$campaign_id&up=$segment_id"}"><img src="http://localhost:8888/gp/sites/all/modules/civicrm/i/arrow/up.gif" title="Move up one row" alt="Move up one row" class="order-icon"></a>&nbsp;
-          <a class="crm-weight-arrow" href="{crmURL p='civicrm/segmentation/start' q="cid=$campaign_id&down=$segment_id"}"><img src="http://localhost:8888/gp/sites/all/modules/civicrm/i/arrow/down.gif" title="Move down one row" alt="Move down one row" class="order-icon"></a>&nbsp;
-          <a class="crm-weight-arrow" href="{crmURL p='civicrm/segmentation/start' q="cid=$campaign_id&bottom=$segment_id"}"><img src="http://localhost:8888/gp/sites/all/modules/civicrm/i/arrow/last.gif" title="Move to bottom" alt="Move to bottom" class="order-icon"></a>
+          <a class="crm-weight-arrow" href="{crmURL p='civicrm/segmentation/start' q="cid=$campaign_id&top=$segment_id"}"><img src="{$config->resourceBase}i/arrow/first.gif" title="Move to top" alt="Move to top" class="order-icon"></a>&nbsp;
+          <a class="crm-weight-arrow" href="{crmURL p='civicrm/segmentation/start' q="cid=$campaign_id&up=$segment_id"}"><img src="{$config->resourceBase}i/arrow/up.gif" title="Move up one row" alt="Move up one row" class="order-icon"></a>&nbsp;
+          <a class="crm-weight-arrow" href="{crmURL p='civicrm/segmentation/start' q="cid=$campaign_id&down=$segment_id"}"><img src="{$config->resourceBase}i/arrow/down.gif" title="Move down one row" alt="Move down one row" class="order-icon"></a>&nbsp;
+          <a class="crm-weight-arrow" href="{crmURL p='civicrm/segmentation/start' q="cid=$campaign_id&bottom=$segment_id"}"><img src="{$config->resourceBase}i/arrow/last.gif" title="Move to bottom" alt="Move to bottom" class="order-icon"></a>
       </td>
       <td>
         <span>
