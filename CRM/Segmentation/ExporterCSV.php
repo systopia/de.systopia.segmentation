@@ -47,8 +47,6 @@ class CRM_Segmentation_ExporterCSV extends CRM_Segmentation_Exporter {
         }
       }
 
-      error_log(json_encode($data));
-
       // write row
       fputcsv($this->tmpFileHandle, $this->encodeFields($row), $this->config['delimiter']);
     }

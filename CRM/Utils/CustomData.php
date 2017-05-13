@@ -145,7 +145,7 @@ class CRM_Utils_CustomData {
          $lookup_query[$lookup_key] = $data[$lookup_key];
       }
 
-      error_log("LOOKUP {$entity_type}: " . json_encode($lookup_query));
+      // error_log("LOOKUP {$entity_type}: " . json_encode($lookup_query));
       $lookup_result = civicrm_api3($entity_type, 'get', $lookup_query);
       switch ($lookup_result['count']) {
          case 0:
@@ -175,7 +175,7 @@ class CRM_Utils_CustomData {
       }
 
       // then run query
-      error_log("CREATE {$entity_type}: " . json_encode($data));
+      // error_log("CREATE {$entity_type}: " . json_encode($data));
       return civicrm_api3($entity_type, 'create', $data);
    }
 
@@ -210,7 +210,7 @@ class CRM_Utils_CustomData {
             }
          }
 
-         error_log("UPDATE {$entity_type}: " . json_encode($update_query));
+         // error_log("UPDATE {$entity_type}: " . json_encode($update_query));
          return civicrm_api3($entity_type, 'create', $update_query);
       } else {
          return NULL;
