@@ -102,12 +102,12 @@ class CRM_Segmentation_Configuration {
       datetime      AS datetime,
       campaign_id   AS campaign_id,
       segment_id    AS segment_id,
+      name          AS segment_name,
       test_group    AS test_group,
       membership_id AS membership_id
      FROM civicrm_segmentation
+     LEFT JOIN civicrm_segmentation_index ON civicrm_segmentation_index.id = civicrm_segmentation.segment_id
      WHERE campaign_id = {$_campaign_id}
      {$segment_condition}";
-
-
   }
 }

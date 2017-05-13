@@ -25,10 +25,13 @@ abstract class CRM_Segmentation_Exporter {
   protected $chunk_size = SEGMENTATION_EXPORT_CHUNK_SIZE;
   protected $tmpFileHandle = NULL;
   protected $tmpFileName   = NULL;
+  protected $filename      = NULL;
 
   // cached entities
-  protected $_contact = NULL;
-  protected $_campaign = NULL;
+  protected $_contact      = NULL;
+  protected $_campaign     = NULL;
+  protected $_phone_phone  = NULL;
+  protected $_phone_mobile = NULL;
 
   /**
    * constructor is protected -> use CRM_Segmentation_Exporter::getExporter() (below)
@@ -64,7 +67,11 @@ abstract class CRM_Segmentation_Exporter {
    * should be overwritten by the implementation
    */
   protected function getFileName() {
-    return "Export.{$this->config['type']}";
+    if (!empty($this->filename)) {
+      return $this->filename;
+    } else {
+      return $this->config['name'] . '.' . strtolower($this->config['type']);
+    }
   }
 
 
@@ -90,6 +97,7 @@ abstract class CRM_Segmentation_Exporter {
           'datetime'      => $main_query->datetime,
           'campaign_id'   => $main_query->campaign_id,
           'segment_id'    => $main_query->segment_id,
+          'segment_name'  => $main_query->segment_name,
           'test_group'    => $main_query->test_group,
           'membership_id' => $main_query->membership_id);
         if (count($segment_chunk) >= $this->chunk_size) {
@@ -215,9 +223,14 @@ abstract class CRM_Segmentation_Exporter {
     $data = array();
     foreach ($this->config['rules'] as $rule) {
       switch ($rule['action']) {
-        // RULE COPY
+        // RULE: COPY
         case 'copy':
           $data[$rule['to']] = $this->getValue($rule['from'], $line, $data);
+          break;
+
+        // RULE: SET FILE NAME
+        case 'setfilename':
+          $this->filename = $this->getValue($rule['from'], $line, $data);
           break;
 
         default:
@@ -232,9 +245,11 @@ abstract class CRM_Segmentation_Exporter {
    *  1) a simple variable name in $data
    *  2) access to the connected entities, e.g. contact.first_name.
    *     The following entities are supported:
-   *     contact    - the contact linked the segment
-   *     campaign   - the contact linked the segment
-   *     segment    - the segment itself
+   *     contact       - the contact linked the segment
+   *     campaign      - the contact linked the segment
+   *     segment       - the segment itself
+   *     phone_phone   - the contact's phone of type 'Phone' (1)
+   *     phone_mobile  - the contact's phone of type 'Mobile' (1)
    *     [TODO] membership - the membership linked the segment
    *  CAUTION: if a variable like 'contact.first_name' exists in $data
    *            it takes preference
@@ -282,9 +297,41 @@ abstract class CRM_Segmentation_Exporter {
         }
         return $this->_campaign;
 
+      case 'phone_phone':
+        if ($this->_phone_phone == NULL || $this->_phone_phone['contact_id'] != $line['contact_id']) {
+          $this->_phone_phone = $this->findDetailEntity($line, 'Phone', array('phone_type_id' => 1));
+        }
+        return $this->_phone_phone;
+
+      case 'phone_mobile':
+        if ($this->_phone_mobile == NULL || $this->_phone_mobile['contact_id'] != $line['contact_id']) {
+          $this->_phone_mobile = $this->findDetailEntity($line, 'Phone', array('phone_type_id' => 2));
+        }
+        return $this->_phone_mobile;
+
       default:
         throw new Exception("Unkown entity '{$entity_name}' requested", 1);
     }
   }
 
+  /**
+   * used to find and return detail entities (Phone, Email, etc.)
+   */
+  protected function findDetailEntity($line, $type, $search_params, $preferred = 'is_primary') {
+    $search_params['option.limit'] = 0;
+    $search_params['contact_id'] = $line['contact_id'];
+    $query = civicrm_api3($type, 'get', $search_params);
+
+    // find an entity
+    $entity = array('contact_id' => $line['contact_id']); // fallback
+    foreach ($query['values'] as $entity_candidate) {
+      if (!empty($preferred) && !empty($entity_candidate[$preferred])) {
+        // that's the one!
+        return $entity_candidate;
+      } else {
+        $entity = $entity_candidate;
+      }
+    }
+    return $entity;
+  }
 }
