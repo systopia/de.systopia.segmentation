@@ -76,4 +76,38 @@ class CRM_Segmentation_Configuration {
     return self::$option_group_id;
   }
 
+  /**
+   * get a SQL query to list all the segment lines for the given
+   * campaign (and a list of selected segments if given)
+   *
+   * @param $campaign_id  id of campaign
+   * @param $segment_list  array of segment IDs
+   */
+  public static function getSegmentQuery($campaign_id, $segment_list = NULL) {
+    $_campaign_id = (int) $campaign_id;
+    if (!$_campaign_id) {
+      throw new Exception("Illegal campaign_id '{$campaign_id}'", 1);
+    }
+
+    if (empty($segment_list)) {
+      $segment_condition = '';
+    } else {
+      $segment_list_string = implode(',', $segment_list);
+      $segment_condition = "AND segment_id IN ({$segment_list_string})";
+    }
+
+    return "
+     SELECT
+      entity_id     AS contact_id,
+      datetime      AS datetime,
+      campaign_id   AS campaign_id,
+      segment_id    AS segment_id,
+      test_group    AS test_group,
+      membership_id AS membership_id
+     FROM civicrm_segmentation
+     WHERE campaign_id = {$_campaign_id}
+     {$segment_condition}";
+
+
+  }
 }

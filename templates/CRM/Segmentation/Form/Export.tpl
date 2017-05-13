@@ -13,6 +13,8 @@
 | written permission from the original author(s).        |
 +-------------------------------------------------------*}
 
+{$form.campaign_id.html}
+
 <div class="crm-section">
   <div class="label">{$form.exporter_id.label}</div>
   <div class="content">
@@ -27,5 +29,7 @@
   <div class="content">{$form.segments.html}</div>
   <div class="clear"></div>
 </div>
+
+
 
 {include file="CRM/common/formButtons.tpl" location="bottom"}

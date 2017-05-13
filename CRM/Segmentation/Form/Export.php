@@ -22,9 +22,8 @@
 class CRM_Segmentation_Form_Export extends CRM_Core_Form {
 
   public function buildQuickForm() {
-
     // first: load campaign
-    $campaign_id = CRM_Utils_Request::retrieve('cid', 'Integer');
+    $campaign_id = $this->getCampaignID();
     if (!$campaign_id) {
       CRM_Core_Session::setStatus(ts("No campaign ID (cid) given"), ts("Error"), "error");
       $error_url = CRM_Utils_System::url('civicrm/dashboard');
@@ -69,18 +68,45 @@ class CRM_Segmentation_Form_Export extends CRM_Core_Form {
       ),
     ));
 
-
-    // assigne values
-    $this -> assign('campaign', $campaign);
-    $this -> assign('segment_list', $segment_list);
-
     parent::buildQuickForm();
+  }
+
+  /**
+   * set the default (=current) values in the form
+   */
+  public function setDefaultValues() {
+    $values = $this->exportValues();
+    return array(
+      'campaign_id' => $this->getCampaignID(),
+      'segments'    => CRM_Utils_Array::value('segments', $values),
+      'exporter_id' => CRM_Utils_Array::value('exporter_id', $values),
+      );
   }
 
 
   public function postProcess() {
+    parent::postProcess();
     $values = $this->exportValues();
-    $exporter = new CRM_Segmentation_Exporter($values['exporter_id']);
-    $exporter->export($values['campaign_id'], $values['segments']);
+    $exporter = CRM_Segmentation_Exporter::getExporter($values['exporter_id']);
+    $exporter->generateFile($values['campaign_id'], $values['segments']);
+    $exporter->exportFile();
+  }
+
+  /**
+   * get the campaign ID
+   */
+  private function getCampaignID() {
+    $values = $this->exportValues();
+    if (!empty($values['campaign_id'])) {
+      return $values['campaign_id'];
+    } else {
+      $campaign_id = CRM_Utils_Request::retrieve('cid', 'Integer');
+      if ($campaign_id) {
+        return $campaign_id;
+      } else {
+        // seriously, wtf, how does it get in here and not the values?
+        return CRM_Utils_Request::retrieve('campaign_id', 'Integer');
+      }
+    }
   }
 }
