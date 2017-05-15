@@ -28,16 +28,18 @@ abstract class CRM_Segmentation_Exporter {
   protected $filename      = NULL;
 
   // cached entities
-  protected $_contact      = NULL;
   protected $_campaign     = NULL;
-  protected $_phone_phone  = NULL;
-  protected $_phone_mobile = NULL;
+  protected $_contacts     = NULL; // array contact_id => $contact
+  protected $_memberships  = NULL; // array membership_id => $membership
+  protected $_details      = NULL; // array contact_id => array(email/phone/...)
 
   /**
    * constructor is protected -> use CRM_Segmentation_Exporter::getExporter() (below)
    */
   protected function __construct($config) {
     $this->config = $config;
+    $this->_contacts = array();
+    $this->_details = array();
   }
 
 
@@ -105,7 +107,9 @@ abstract class CRM_Segmentation_Exporter {
           break;
         }
       }
+      $this->preCache($segment_chunk);
       $this->exportChunk($segment_chunk);
+      $this->flushCache($segment_chunk);
     }
 
     $this->exportFooter();
@@ -283,31 +287,35 @@ abstract class CRM_Segmentation_Exporter {
   protected function getEntity($entity_name, $line) {
     switch (strtolower($entity_name)) {
       case 'contact':
-        if ($this->_contact == NULL || $this->_contact['id'] != $line['contact_id']) {
-          $this->_contact = civicrm_api3('Contact', 'getsingle', array('id' => $line['contact_id']));
+        if (!isset($this->_contacts[$line['contact_id']])) {
+          error_log("CACHE MISS: Contact.{$line['contact_id']}");
+          $this->_contacts[$line['contact_id']] = civicrm_api3('Contact', 'getsingle', array('id' => $line['contact_id']));
         }
-        return $this->_contact;
+        return $this->_contacts[$line['contact_id']];
 
       case 'segment':
         return $line;
 
       case 'campaign':
         if ($this->_campaign == NULL || $this->_campaign['id'] != $line['campaign_id']) {
+          error_log("CACHE MISS: Campaign.{$line['campaign_id']}");
           $this->_campaign = civicrm_api3('Campaign', 'getsingle', array('id' => $line['campaign_id']));
         }
         return $this->_campaign;
 
       case 'phone_phone':
-        if ($this->_phone_phone == NULL || $this->_phone_phone['contact_id'] != $line['contact_id']) {
-          $this->_phone_phone = $this->findDetailEntity($line, 'Phone', array('phone_type_id' => 1));
-        }
-        return $this->_phone_phone;
+        return $this->getDetailEntity($line, 'Phone', array('phone_type_id' => 1));
+        // if (!$phone) {
+        //   $phone = $this->loadDetailEntity($line, 'Phone', array('phone_type_id' => 1));
+        // }
+        // return $phone;
 
       case 'phone_mobile':
-        if ($this->_phone_mobile == NULL || $this->_phone_mobile['contact_id'] != $line['contact_id']) {
-          $this->_phone_mobile = $this->findDetailEntity($line, 'Phone', array('phone_type_id' => 2));
-        }
-        return $this->_phone_mobile;
+        return $this->getDetailEntity($line, 'Phone', array('phone_type_id' => 2));
+        // if (!$phone) {
+        //   $phone = $this->loadDetailEntity($line, 'Phone', array('phone_type_id' => 2));
+        // }
+        // return $phone;
 
       default:
         throw new Exception("Unkown entity '{$entity_name}' requested", 1);
@@ -315,23 +323,166 @@ abstract class CRM_Segmentation_Exporter {
   }
 
   /**
-   * used to find and return detail entities (Phone, Email, etc.)
+   * get a detail entity (Phone, Email, etc.) from the cache
    */
-  protected function findDetailEntity($line, $type, $search_params, $preferred = 'is_primary') {
-    $search_params['option.limit'] = 0;
-    $search_params['contact_id'] = $line['contact_id'];
-    $query = civicrm_api3($type, 'get', $search_params);
+  protected function getDetailEntity($line, $type, $search_params, $preferred = 'is_primary') {
+    $contact_id = $line['contact_id'];
+    $type_index = strtolower($type);
+    $entity = array(); // fallback
 
-    // find an entity
-    $entity = array('contact_id' => $line['contact_id']); // fallback
-    foreach ($query['values'] as $entity_candidate) {
-      if (!empty($preferred) && !empty($entity_candidate[$preferred])) {
-        // that's the one!
-        return $entity_candidate;
-      } else {
-        $entity = $entity_candidate;
+    if (isset($this->_details[$contact_id][$type_index])) {
+      foreach ($this->_details[$contact_id][$type_index] as $entity_candidate) {
+        // test if entity matches search params
+        foreach ($search_params as $key => $value) {
+          if ($entity_candidate[$key] != $value) {
+            // this is not the entity you're looking for
+            continue 2;
+          }
+        }
+
+        // check if this is a preferred entity
+        if (!empty($preferred) && !empty($entity_candidate[$preferred])) {
+          // that's the one!
+          return $entity_candidate;
+        } else {
+          $entity = $entity_candidate;
+        }
+      }
+      return $entity;
+
+    } else {
+      // cache entry not set -> details not loaded yet
+      $this->_details[$contact_id][$type_index] = array();
+      $query = civicrm_api3($type, 'get', array(
+        'contact_id'   => $contact_id,
+        'option.limit' => 0));
+
+      foreach ($query['values'] as $entity) {
+        $this->_details[$contact_id][$type_index][] = $entity;
+      }
+
+      return $this->getDetailEntity($line, $type, $search_params, $preferred);
+    }
+  }
+
+  // /**
+  //  * load and return detail entities (Phone, Email, etc.)
+  //  */
+  // protected function loadDetailEntity($line, $type, $search_params, $preferred = 'is_primary') {
+  //   error_log("CACHE MISS: {$type}.{$line['contact_id']}");
+  //   $type_index = strtolower($type);
+  //   $search_params['option.limit'] = 0;
+  //   $search_params['contact_id'] = $line['contact_id'];
+  //   $query = civicrm_api3($type, 'get', $search_params);
+
+  //   // find an entity
+  //   foreach ($query['values'] as $entity) {
+  //     $this->_details[$line['contact_id']][$type_index][] = $entity;
+  //   }
+
+  //   return $this->getDetailEntity($line, $type, $search_params, $preferred);
+  // }
+
+
+
+  /*************************************************
+   **                CACHING                      **
+   *************************************************/
+
+  /**
+   * fill the internal cache with all data for that chunk,
+   * based on the rules
+   */
+  protected function preCache($chunk) {
+    // gather IDs
+    $contact_ids    = array();
+    $membership_ids = array();
+    foreach ($chunk as $segment) {
+      $contact_ids[] = $segment['contact_id'];
+      if (!empty($segment['membership_id'])) {
+        $membership_ids[] = $segment['membership_id'];
       }
     }
-    return $entity;
+
+    // gather fields
+    $contact_fields = array();
+    $membership_fields = array();
+    // TODO: $email_types = array();
+    $phone_types = array();
+    // TODO: $address_types = array();
+    foreach ($this->config['rules'] as $rule) {
+      if (preg_match('#^(?P<entity>\w+)[.](?P<attribute>\w+)$#', $rule['from'], $entity_source)) {
+        switch (strtolower($entity_source['entity'])) {
+          case 'contact':
+            $contact_fields[$entity_source['attribute']] = 1;
+            break;
+
+          case 'membership':
+            $membership_fields[$entity_source['attribute']] = 1;
+            break;
+
+          case 'phone_phone':
+            $phone_types['1'] = 1; # normal phone
+            break;
+
+          case 'phone_mobile':
+            $phone_types['2'] = 1; # mobile phone
+            break;
+
+          default:
+            break;
+        }
+      }
+    }
+
+    // load contact data
+    if (!empty($contact_fields)) {
+      $contact_query = civicrm_api3('Contact', 'get', array(
+        'id'           => array('IN' => $contact_ids),
+        'option.limit' => 0,
+        'return'       => implode(',', array_keys($contact_fields))
+        ));
+      foreach ($contact_query['values'] as $contact) {
+        $this->_contacts[$contact['id']] = $contact;
+      }
+    }
+
+    // load membership data
+    if (!empty($membership_fields)) {
+      $membership_query = civicrm_api3('Membership', 'get', array(
+        'id'           => array('IN' => $membership_ids),
+        'option.limit' => 0,
+        'return'       => implode(',', array_keys($membership_fields))
+        ));
+      foreach ($membership_query['values'] as $membership) {
+        $this->_memberships[$membership['id']] = $membership;
+      }
+    }
+
+    // load phone data
+    if (!empty($phone_types)) {
+      // create array
+      foreach ($contact_ids as $contact_id) {
+        $this->_details[$contact_id]['phone'] = array();
+      }
+      $phone_query = civicrm_api3('Phone', 'get', array(
+        'contact_id'    => array('IN' => $contact_ids),
+        'option.limit'  => 0,
+        'phone_type_id' => array('IN' => array_keys($phone_types)),
+        ));
+      foreach ($phone_query['values'] as $phone) {
+        $this->_details[$phone['contact_id']]['phone'][] = $phone;
+      }
+    }
+
+    // TODO: email/address/etc data
+  }
+
+  /**
+   * flush the cache
+   */
+  protected function flushCache($chunk) {
+    $this->_contacts = array();
+    $this->_details = array();
   }
 }
