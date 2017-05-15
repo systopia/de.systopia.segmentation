@@ -29,11 +29,10 @@ cj("#campaign_id").change(function() {
 
   // reload segment list:
   var current_value = cj("#segment_id").val();
-  var new_value = '0';
 
   // reset list
   cj("#segment_list option").remove();
-  cj("#segment_list").append('<option value="0">any</option>');
+  // cj("#segment_list").append('<option value="0">any</option>');
 
   // then: look up the specific ones and add
   CRM.api3('Segmentation', 'segmentlist', {
@@ -41,13 +40,9 @@ cj("#campaign_id").change(function() {
   }).done(function(result) {
     for (var segment_id in result.values) {
       cj("#segment_list").append('<option value="' + segment_id + '">' + result.values[segment_id] + '</option>');
-      if (segment_id == current_value) {
-        // this value still exits
-        new_value = current_value;
-      }
     }
-    cj('#segment_list').select2('val', new_value);
-    cj("#segment_id").val(new_value);
+    cj('#segment_list').select2('val', current_value.split(","));
+    cj("#segment_id").val(current_value);
   });
 });
 
