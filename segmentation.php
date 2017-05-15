@@ -118,7 +118,7 @@ function segmentation_civicrm_campaignKpis ($campaign_id, &$kpi_array, $tree_lev
   foreach ($segment_counts as $segment_id => $segment_count) {
     if ($segment_count > 0) {
       $segmentation_data[] = array(
-        'label' => $segment_titles[$segment_id],
+        'label' => $segment_titles[$segment_id] . " ({$segment_count})",
         'value' => ((float) $segment_count) / (float) $total_count);
     }
   }
