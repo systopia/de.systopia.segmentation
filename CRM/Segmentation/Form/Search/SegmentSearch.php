@@ -65,7 +65,7 @@ class CRM_Segmentation_Form_Search_SegmentSearch extends CRM_Contact_Form_Search
                       'segment_list',
                       ts('Segment', array('domain' => 'de.systopia.segmentation')),
                       array(),
-                      array('class' => 'crm-select2 huge'));
+                      array('multiple' => 'multiple', 'class' => 'crm-select2 huge'));
 
     // hidden field for value
     $form->addElement('text', // hidden doesn't work...
@@ -106,6 +106,7 @@ class CRM_Segmentation_Form_Search_SegmentSearch extends CRM_Contact_Form_Search
       ts('Segment')      => 'segment',
       // ts('Campaign ID')  => 'campaign_id',
       ts('Campaign')     => 'campaign_name',
+      ts('Assignment')   => 'datetime',
     );
     return $columns;
   }
@@ -135,6 +136,7 @@ class CRM_Segmentation_Form_Search_SegmentSearch extends CRM_Contact_Form_Search
       contact_a.id                    AS civicrm_contact_id,
       contact_a.display_name          AS contact_name,
       civicrm_segmentation_index.name AS segment,
+      civicrm_segmentation.datetime   AS datetime,
       civicrm_segmentation.entity_id  AS contact_id,
       civicrm_campaign.id             AS campaign_id,
       civicrm_campaign.title          AS campaign_name
@@ -176,8 +178,8 @@ class CRM_Segmentation_Form_Search_SegmentSearch extends CRM_Contact_Form_Search
 
     // restrict to segment
     if (!empty($this->_formValues['segment_id'])) {
-      $segment_id = (int) $this->_formValues['segment_id'];
-      $clauses[] = "civicrm_segmentation.segment_id = {$segment_id}";
+      $segment_ids = $this->_formValues['segment_id'];
+      $clauses[] = "civicrm_segmentation.segment_id IN ({$segment_ids})";
     }
 
     return '(' . implode(') AND (', $clauses) . ')';
