@@ -33,8 +33,9 @@
         "to": "nachname"
       },
       {
-        "action": "copy",
+        "action": "date",
         "from": "contact.birth_date",
+        "format": "d.m.Y",
         "to": "geburtsdatum"
       },
       {
@@ -194,9 +195,8 @@
         "to": "bic_empfaenger"
       },
       {
-        "TODO": "calculate",
-        "action": "copy",
-        "from": "contact.unknownsource",
+        "action": "mod97",
+        "from": "kundennummer",
         "to": "pruefziffer"
       },
       {

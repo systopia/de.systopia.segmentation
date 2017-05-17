@@ -257,6 +257,19 @@ abstract class CRM_Segmentation_Exporter {
           $data[$rule['to']] .= $appended_string;
           break;
 
+        // RULE: MOD97
+       case 'mod97':
+          $string_to_check = $this->getValue($rule['from'], $line, $data);
+          // strip all non-digits
+          $string_to_check = preg_replace('#[^0-9]#', '', $string_to_check);
+          // append empty checksum '00'
+          $string_to_check .= '00';
+          // calculate checksum
+          $result = 98 - ($string_to_check % 97);
+          // format result with two digits
+          $data[$rule['to']] .= sprintf('%2d', $result);
+          break;
+
         // RULE: SET FILE NAME
         case 'setfilename':
           $this->filename = $this->getValue($rule['from'], $line, $data);
