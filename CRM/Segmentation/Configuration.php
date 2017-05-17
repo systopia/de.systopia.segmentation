@@ -83,7 +83,7 @@ class CRM_Segmentation_Configuration {
    * @param $campaign_id  id of campaign
    * @param $segment_list  array of segment IDs
    */
-  public static function getSegmentQuery($campaign_id, $segment_list = NULL) {
+  public static function getSegmentQuery($campaign_id, $segment_list = NULL, $exclude_deleted_contacts = TRUE) {
     $_campaign_id = (int) $campaign_id;
     if (!$_campaign_id) {
       throw new Exception("Illegal campaign_id '{$campaign_id}'", 1);
@@ -94,6 +94,12 @@ class CRM_Segmentation_Configuration {
     } else {
       $segment_list_string = implode(',', $segment_list);
       $segment_condition = "AND segment_id IN ({$segment_list_string})";
+    }
+
+    if ($exclude_deleted_contacts) {
+      $contact_status_check = "AND civicrm_contact.is_deleted = 0";
+    } else {
+      $contact_status_check = "";
     }
 
     return "
@@ -107,7 +113,9 @@ class CRM_Segmentation_Configuration {
       membership_id AS membership_id
      FROM civicrm_segmentation
      LEFT JOIN civicrm_segmentation_index ON civicrm_segmentation_index.id = civicrm_segmentation.segment_id
+     LEFT JOIN civicrm_contact ON civicrm_contact.id = civicrm_segmentation.entity_id
      WHERE campaign_id = {$_campaign_id}
+     {$contact_status_check}
      {$segment_condition}";
   }
 }

@@ -232,6 +232,31 @@ abstract class CRM_Segmentation_Exporter {
           $data[$rule['to']] = $this->getValue($rule['from'], $line, $data);
           break;
 
+        // RULE: SET
+        case 'set':
+          $data[$rule['to']] = CRM_Utils_Array::value('value', $rule, '');
+          break;
+
+        // RULE: SPRINTF
+        case 'sprintf':
+          $format = CRM_Utils_Array::value('format', $rule, '');
+          $data[$rule['to']] = sprintf($format, $this->getValue($rule['from'], $line, $data));
+          break;
+
+        // RULE: DATE
+        case 'date':
+          $format = CRM_Utils_Array::value('format', $rule, '');
+          $data[$rule['to']] = date($format, strtotime($this->getValue($rule['from'], $line, $data)));
+          break;
+
+
+        // RULE: APPEND
+        case 'append':
+          $appended_string = CRM_Utils_Array::value('separator', $rule, '');
+          $appended_string .= $this->getValue($rule['from'], $line, $data);
+          $data[$rule['to']] .= $appended_string;
+          break;
+
         // RULE: SET FILE NAME
         case 'setfilename':
           $this->filename = $this->getValue($rule['from'], $line, $data);
@@ -411,7 +436,7 @@ abstract class CRM_Segmentation_Exporter {
     $phone_types = array();
     // TODO: $address_types = array();
     foreach ($this->config['rules'] as $rule) {
-      if (preg_match('#^(?P<entity>\w+)[.](?P<attribute>\w+)$#', $rule['from'], $entity_source)) {
+      if (isset($rule['from']) && preg_match('#^(?P<entity>\w+)[.](?P<attribute>\w+)$#', $rule['from'], $entity_source)) {
         switch (strtolower($entity_source['entity'])) {
           case 'contact':
             $contact_fields[$entity_source['attribute']] = 1;

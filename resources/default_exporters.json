@@ -5,7 +5,7 @@
     "type": "CSV",
     "encoding": "UTF8",
     "delimiter": ";",
-    "columns": ["perid", "titel", "anrede", "vorname", "nachname", "geburtsdatum", "strasse", "hausnummer", "plz", "ort", "land", "zielgruppe", "telefon", "mobilnr", "email"],
+    "columns": ["perid", "titel", "anrede", "vorname", "nachname", "geburtsdatum", "strasse", "plz", "ort", "land", "zielgruppe ID", "zielgruppe", "telefon", "mobilnr", "email"],
     "rules": [
       {
         "action": "copy",
@@ -43,12 +43,6 @@
         "to": "strasse"
       },
       {
-        "TODO": "relevant?",
-        "action": "copy",
-        "from": "contact.hausnummer",
-        "to": "hausnummer"
-      },
-      {
         "action": "copy",
         "from": "contact.postal_code",
         "to": "plz"
@@ -66,6 +60,11 @@
       {
         "action": "copy",
         "from": "segment.segment_id",
+        "to": "zielgruppe ID"
+      },
+      {
+        "action": "copy",
+        "from": "segment.segment_name",
         "to": "zielgruppe"
       },
       {
@@ -88,23 +87,17 @@
 
 
   {
-    "name": "ACT Mit Begleitbrief (CSV)",
+    "name": "Lettershopformat (CSV)",
     "id": 3,
     "type": "CSV",
     "encoding": "UTF8",
     "delimiter": ";",
-    "columns": ["id", "landesverband", "titel", "anrede", "vorname", "nachname", "co", "strasse", "hausnummer", "plz", "ort", "postfach", "land", "zielgruppe", "textbaustein", "paket", "kundennummer", "sepa_belegart", "iban_empfaenger", "bic_empfaenger", "pruefziffer"],
+    "columns": ["id", "titel", "anrede", "vorname", "nachname", "co", "strasse", "plz", "ort", "postfach", "land", "zielgruppe ID", "zielgruppe", "paket", "kundennummer", "sepa_belegart", "iban_empfaenger", "bic_empfaenger", "pruefziffer"],
     "rules": [
       {
         "action": "copy",
         "from": "contact.id",
         "to": "id"
-      },
-      {
-        "TODO": "source?",
-        "action": "copy",
-        "from": "contact.unknownsource",
-        "to": "landesverband"
       },
       {
         "action": "copy",
@@ -127,21 +120,14 @@
         "to": "nachname"
       },
       {
-        "TODO": "source?",
         "action": "copy",
-        "from": "contact.unknownsource",
+        "from": "contact.supplemental_address_1",
         "to": "co"
       },
       {
         "action": "copy",
         "from": "contact.street_address",
         "to": "strasse"
-      },
-      {
-        "TODO": "relevant?",
-        "action": "copy",
-        "from": "contact.hausnummer",
-        "to": "hausnummer"
       },
       {
         "action": "copy",
@@ -161,14 +147,12 @@
       {
         "action": "copy",
         "from": "segment.segment_id",
-        "to": "zielgruppe"
+        "to": "zielgruppe ID"
       },
-
       {
-        "TODO": "source?",
         "action": "copy",
-        "from": "contact.unknownsource",
-        "to": "textbaustein"
+        "from": "segment.segment_name",
+        "to": "zielgruppe"
       },
       {
         "TODO": "source?",
@@ -177,34 +161,71 @@
         "to": "paket"
       },
       {
-        "TODO": "source?",
-        "action": "copy",
-        "from": "contact.unknownsource",
+        "action": "sprintf",
+        "from": "campaign.id",
+        "format": "%04d",
         "to": "kundennummer"
       },
       {
-        "TODO": "source?",
-        "action": "copy",
-        "from": "contact.unknownsource",
+        "action": "sprintf",
+        "from": "contact.id",
+        "format": "%08d",
+        "to": "kundennummer_contact"
+      },
+      {
+        "action": "append",
+        "from": "kundennummer_contact",
+        "separator": "",
+        "to": "kundennummer"
+      },
+      {
+        "action": "set",
+        "value": "32+",
         "to": "sepa_belegart"
       },
       {
-        "TODO": "source?",
-        "action": "copy",
-        "from": "contact.unknownsource",
+        "action": "set",
+        "value": "IBANPLACEHOLDER",
         "to": "iban_empfaenger"
       },
       {
-        "TODO": "source?",
-        "action": "copy",
-        "from": "contact.unknownsource",
+        "action": "set",
+        "value": "GIBAATWWXXX",
         "to": "bic_empfaenger"
       },
       {
-        "TODO": "source?",
+        "TODO": "calculate",
         "action": "copy",
         "from": "contact.unknownsource",
         "to": "pruefziffer"
+      },
+      {
+        "comment": "calculate file name",
+        "action": "set",
+        "value": "now",
+        "to": "file_date"
+      },
+      {
+        "action": "date",
+        "from": "file_date",
+        "format": "d.m.Y",
+        "to": "file_date"
+      },
+      {
+        "action": "append",
+        "from": "campaign.title",
+        "separator": "+",
+        "to": "file_date"
+      },
+      {
+        "action": "sprintf",
+        "from": "file_date",
+        "format": "%s.csv",
+        "to": "file_date"
+      },
+      {
+        "action": "setfilename",
+        "from": "file_date"
       }
     ]
   },
