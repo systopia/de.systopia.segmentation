@@ -12,4 +12,10 @@
     <title>Export Campaign</title>
     <access_arguments>access CiviCRM</access_arguments>
   </item>
+  <item>
+    <path>civicrm/segmentation/contacts</path>
+    <page_callback>CRM_Segmentation_Page_ContactList</page_callback>
+    <title>Contact List</title>
+    <access_arguments>access CiviCRM</access_arguments>
+  </item>
 </menu>

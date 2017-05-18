@@ -50,7 +50,7 @@
       </td>
       <td>
         <span>
-          <a target="_blank" href="{crmURL p='civicrm/segmentation/contacts' q="cid=$campaign_id&sid=$segment_id"}" alt="{ts}View in Popup{/ts}" title="{ts}View in Popup{/ts}">
+          <a name="contact_list" href="{crmURL p='civicrm/segmentation/contacts' q="snippet=1&cid=$campaign_id&sid=$segment_id"}" alt="{ts}View in Popup{/ts}" title="{ts}View in Popup{/ts}">
             <div><span class="ui-icon ui-icon-zoomout" title="{ts}View Contact List{/ts}"></span></div>
           </a>
         </span>
@@ -64,7 +64,19 @@
   <a href="{crmURL p='civicrm/segmentation/start' q="cid=$campaign_id&start=now"}" class="button"><span>{ts}Start Campaign{/ts}</span></a>
 </div>
 
+
+
+
 <script type="text/javascript">
 // reset the URL
 window.history.replaceState("", "", "{$baseurl}");
+
+{literal}
+// popup function
+cj("a[name=contact_list]").click(function() {
+  var url = cj(this).attr('href');
+  window.open(url, null, "height=400,width=400,status=no,toolbar=no,menubar=no,location=no,scrollbars=yes");
+  return false; // stop processing event
+});
+{/literal}
 </script>
