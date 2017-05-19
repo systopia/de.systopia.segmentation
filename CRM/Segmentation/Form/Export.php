@@ -87,9 +87,10 @@ class CRM_Segmentation_Form_Export extends CRM_Core_Form {
   public function postProcess() {
     parent::postProcess();
     $values = $this->exportValues();
-    $exporter = CRM_Segmentation_Exporter::getExporter($values['exporter_id']);
-    $exporter->generateFile($values['campaign_id'], $values['segments']);
-    $exporter->exportFile();
+    // $exporter = CRM_Segmentation_Exporter::getExporter($values['exporter_id']);
+    // $exporter->generateFile($values['campaign_id'], $values['segments']);
+    // $exporter->exportFile();
+    CRM_Segmentation_ExportJob::launchExportRunner($values['campaign_id'], $values['segments'], $values['exporter_id']);
   }
 
   /**

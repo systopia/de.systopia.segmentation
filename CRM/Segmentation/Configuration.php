@@ -83,7 +83,57 @@ class CRM_Segmentation_Configuration {
    * @param $campaign_id  id of campaign
    * @param $segment_list  array of segment IDs
    */
-  public static function getSegmentQuery($campaign_id, $segment_list = NULL, $exclude_deleted_contacts = TRUE) {
+  public static function getSegmentQuery($campaign_id, $segment_list = NULL, $exclude_deleted_contacts = TRUE, $offset = 0, $limit = 0) {
+    $_campaign_id = (int) $campaign_id;
+    if (!$_campaign_id) {
+      throw new Exception("Illegal campaign_id '{$campaign_id}'", 1);
+    }
+
+    if (empty($segment_list)) {
+      $segment_condition = '';
+    } else {
+      $segment_list_string = implode(',', $segment_list);
+      $segment_condition = "AND segment_id IN ({$segment_list_string})";
+    }
+
+    if ($exclude_deleted_contacts) {
+      $contact_status_check = "AND civicrm_contact.is_deleted = 0";
+    } else {
+      $contact_status_check = "";
+    }
+
+    if ($limit > 0 || $offset > 0) {
+      $limit_clause = "LIMIT {$limit} OFFSET {$offset}";
+    } else {
+      $limit_clause = '';
+    }
+
+    return "
+     SELECT
+      entity_id     AS contact_id,
+      datetime      AS datetime,
+      campaign_id   AS campaign_id,
+      segment_id    AS segment_id,
+      name          AS segment_name,
+      test_group    AS test_group,
+      membership_id AS membership_id
+     FROM civicrm_segmentation
+     LEFT JOIN civicrm_segmentation_index ON civicrm_segmentation_index.id = civicrm_segmentation.segment_id
+     LEFT JOIN civicrm_contact ON civicrm_contact.id = civicrm_segmentation.entity_id
+     WHERE campaign_id = {$_campaign_id}
+     {$contact_status_check}
+     {$segment_condition}
+     {$limit_clause}";
+  }
+
+  /**
+   * get a SQL query to list all the segment lines for the given
+   * campaign (and a list of selected segments if given)
+   *
+   * @param $campaign_id  id of campaign
+   * @param $segment_list  array of segment IDs
+   */
+  public static function getSegmentCount($campaign_id, $segment_list = NULL, $exclude_deleted_contacts = TRUE) {
     $_campaign_id = (int) $campaign_id;
     if (!$_campaign_id) {
       throw new Exception("Illegal campaign_id '{$campaign_id}'", 1);
@@ -103,14 +153,7 @@ class CRM_Segmentation_Configuration {
     }
 
     return "
-     SELECT
-      entity_id     AS contact_id,
-      datetime      AS datetime,
-      campaign_id   AS campaign_id,
-      segment_id    AS segment_id,
-      name          AS segment_name,
-      test_group    AS test_group,
-      membership_id AS membership_id
+     SELECT COUNT(entity_id) AS contact_count
      FROM civicrm_segmentation
      LEFT JOIN civicrm_segmentation_index ON civicrm_segmentation_index.id = civicrm_segmentation.segment_id
      LEFT JOIN civicrm_contact ON civicrm_contact.id = civicrm_segmentation.entity_id

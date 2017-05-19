@@ -18,4 +18,10 @@
     <title>Contact List</title>
     <access_arguments>access CiviCRM</access_arguments>
   </item>
+  <item>
+    <path>civicrm/segmentation/download</path>
+    <page_callback>CRM_Segmentation_Page_Download</page_callback>
+    <title>Download</title>
+    <access_arguments>access CiviCRM</access_arguments>
+  </item>
 </menu>

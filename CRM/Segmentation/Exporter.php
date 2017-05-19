@@ -68,7 +68,7 @@ abstract class CRM_Segmentation_Exporter {
    * provides the file name for download
    * should be overwritten by the implementation
    */
-  protected function getFileName() {
+  public function getFileName() {
     if (!empty($this->filename)) {
       return $this->filename;
     } else {
@@ -76,16 +76,18 @@ abstract class CRM_Segmentation_Exporter {
     }
   }
 
-
   /**
    * export the given campaig and segments
    */
-  public function generateFile($campaign_id, $segment_list = NULL) {
-    // TODO: dispatch, different export types, etc.
-    // this is just a POC
+  public function generateFile($campaign_id, $segment_list = NULL, $offset = 0, $count = 0, $is_last = TRUE, $exclude_deleted_contacts = TRUE) {
+    // create a tmp file (if not yet exists)
     $this->createTmpFile();
-    $this->exportHeader();
-    $query_sql = CRM_Segmentation_Configuration::getSegmentQuery($campaign_id, $segment_list);
+
+    if ($offset == 0) {
+      $this->exportHeader();
+    }
+
+    $query_sql = CRM_Segmentation_Configuration::getSegmentQuery($campaign_id, $segment_list, $exclude_deleted_contacts, $offset, $count);
     $main_query = CRM_Core_DAO::executeQuery($query_sql);
 
     $more_data = TRUE;
@@ -112,9 +114,14 @@ abstract class CRM_Segmentation_Exporter {
       $this->flushCache($segment_chunk);
     }
 
-    $this->exportFooter();
+    if ($is_last) {
+      $this->exportFooter();
+    }
+
+    // close the tmpfile
     $this->closeTmpFile();
   }
+
 
   /**
    * offer the result for export
@@ -137,8 +144,18 @@ abstract class CRM_Segmentation_Exporter {
    * create a new tmp file
    */
   protected function createTmpFile() {
-    $this->tmpFileName = tempnam(sys_get_temp_dir(), 'prefix');
-    $this->tmpFileHandle = fopen($this->tmpFileName, 'w');
+    if ($this->tmpFileHandle == NULL) {
+      $this->tmpFileName = tempnam(sys_get_temp_dir(), 'prefix');
+      $this->tmpFileHandle = fopen($this->tmpFileName, 'w');
+    }
+  }
+
+  /**
+   * resume with an existing file path
+   */
+  public function resumeTmpFile($filepath) {
+    $this->tmpFileName = $filepath;
+    $this->tmpFileHandle = fopen($this->tmpFileName, 'a');
   }
 
   /**
