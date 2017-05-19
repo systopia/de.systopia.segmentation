@@ -15,6 +15,6 @@ CREATE TABLE IF NOT EXISTS `civicrm_segmentation_order`(
   `order_number` int unsigned  COMMENT 'Order index from 1..n (highest to lowest)',
   PRIMARY KEY ( `id` ),
   UNIQUE INDEX `segment_order` (campaign_id,segment_id),
-  INDEX `order_number` (order_number)
+  INDEX `order_number` (order_number),
   INDEX `campaign_id` (campaign_id)
 ) ENGINE=InnoDB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
