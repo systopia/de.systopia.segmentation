@@ -86,6 +86,9 @@ class CRM_Segmentation_Form_Task_AssignMembership extends CRM_Member_Form_Task {
             2 => array($segment['id'],         'Integer'),
           )
         );
+
+      // add segement to order
+      CRM_Segmentation_Logic::addSegmentToCampaign($segment['id'], $values['campaign_id']);
     }
   }
 }

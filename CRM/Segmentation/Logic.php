@@ -24,6 +24,89 @@ class CRM_Segmentation_Logic {
   private static $all_campaigns = NULL;
 
   /**
+   * get the current order for the given campaign
+   *
+   * @param $campaign_id   int   campaign ID
+   * @return array with segment_ids
+   */
+  public static function getSegmentOrder($campaign_id) {
+    $campaign_id = (int) $campaign_id;
+    $segment_order = array();
+    $query = CRM_Core_DAO::executeQuery("
+            SELECT segment_id
+            FROM civicrm_segmentation_order
+            WHERE campaign_id = {$campaign_id}
+            ORDER BY order_number ASC, id ASC");
+    while ($query->fetch()) {
+      $segment_order[] = $query->segment_id;
+    }
+
+    if (empty($segment_order)) {
+      // maybe it wasn't stored yet, or somebody deleted it...
+      $query = CRM_Core_DAO::executeQuery("
+            SELECT DISTINCT(segment_id) AS segment_id
+            FROM civicrm_segmentation
+            WHERE campaign_id = {$campaign_id}");
+      while ($query->fetch()) {
+        $segment_order[] = $query->segment_id;
+      }
+      self::setSegmentOrder($campaign_id, $segment_order, TRUE);
+    }
+
+    return $segment_order;
+  }
+
+  /**
+   * Set a new segment order for the given campaign
+   *
+   * @param $campaign_id   int   campaign ID
+   * @param $segment_order array with segment_ids
+   * @param $force update even if the current value is the same
+   */
+  public static function setSegmentOrder($campaign_id, $segment_order, $force = FALSE) {
+    $campaign_id = (int) $campaign_id;
+    if ($force) {
+      $current_segment_order = NULL; //doesn't matter
+    } else {
+      $current_segment_order = self::getSegmentOrder($campaign_id);
+    }
+
+    if ($force || $segment_order != $current_segment_order) {
+      // first: delete old segment order
+      CRM_Core_DAO::executeQuery("DELETE FROM civicrm_segmentation_order WHERE campaign_id = %1",
+        array(1 => array($campaign_id, 'Integer')));
+
+      // check if there is data
+      if (empty($segment_order)) {
+        return;
+      }
+
+      // then: generate new segment data
+      $index = 1;
+      $values = array();
+      foreach ($segment_order as $segment_id) {
+        $segment_id = (int) $segment_id;
+        $values[] = "({$campaign_id}, {$segment_id}, {$index})";
+        $index += 1;
+      }
+      $value_list = implode(',', $values);
+
+      // finally: store it
+      CRM_Core_DAO::executeQuery("INSERT INTO civicrm_segmentation_order (campaign_id,segment_id,order_number) VALUES {$value_list}");
+    }
+  }
+
+  /**
+   * add the given segment to the campaign (if not already there)
+   */
+  public static function addSegmentToCampaign($segment_id, $campaign_id, $order_number = 1) {
+    $segment_id = (int) $segment_id;
+    $campaign_id = (int) $campaign_id;
+    $order_number = (int) $order_number;
+    CRM_Core_DAO::executeQuery("INSERT IGNORE INTO civicrm_segmentation_order (campaign_id,segment_id,order_number) VALUES ($segment_id, $campaign_id, $order_number)");
+  }
+
+  /**
    * will do the following:
    *   - Set the status to 'In Progress'
    *   - If the campaign's start date is in the past, it will be set to now
@@ -36,6 +119,7 @@ class CRM_Segmentation_Logic {
     }
 
     // call another function to consolidate
+    self::setSegmentOrder($campaign_id, $segment_order);
     self::consolidateSegments($campaign_id, $segment_order);
 
     // finally: update campaign
@@ -50,9 +134,9 @@ class CRM_Segmentation_Logic {
   }
 
   /**
-   * delete all inferior (according to the given order) entries for contacts
+   * delete all inferior (according to the currently given order) entries for contacts
    */
-  public static function consolidateSegments($campaign_id, $segment_order) {
+  protected static function consolidateSegments($campaign_id, $segment_order) {
     $segments_settled = array();
     foreach ($segment_order as $segment_id) {
       if (!empty($segments_settled)) {
@@ -99,22 +183,27 @@ class CRM_Segmentation_Logic {
    * @todo optimise into one query?
    * @todo move to another class
    */
-  public static function getSegmentCounts($campaign_id, $segment_order) {
+  public static function getSegmentCounts($campaign_id) {
+    $campaign_id = (int) $campaign_id;
     $segment_counts = array();
-    $segments_to_exclude = array(0);
-    foreach ($segment_order as $segment_id) {
-      $exclude_list = implode(',', $segments_to_exclude);
-      $segment_count = CRM_Core_DAO::singleValueQuery("
-        SELECT COUNT(DISTINCT(positive.entity_id))
-        FROM civicrm_segmentation positive
-        LEFT JOIN civicrm_segmentation negative ON positive.entity_id = negative.entity_id
-                                               AND negative.campaign_id = {$campaign_id}
-                                               AND negative.segment_id IN ({$exclude_list})
-        WHERE positive.segment_id = {$segment_id}
-          AND positive.campaign_id = {$campaign_id}
-          AND negative.segment_id IS NULL");
-      $segment_counts[$segment_id] = $segment_count;
-      $segments_to_exclude[] = $segment_id;
+
+    $query = CRM_Core_DAO::executeQuery("
+      SELECT
+        tmp.segment_id                  AS segment_id,
+        COUNT(DISTINCT(tmp.contact_id)) AS contact_count
+      FROM (
+        SELECT
+          civicrm_segmentation.entity_id               AS contact_id,
+          civicrm_segmentation.segment_id              AS segment_id,
+          MIN(civicrm_segmentation_order.order_number) AS segment_order
+        FROM civicrm_segmentation
+        LEFT JOIN civicrm_segmentation_order ON civicrm_segmentation_order.campaign_id = civicrm_segmentation.campaign_id
+                                            AND civicrm_segmentation_order.segment_id = civicrm_segmentation.segment_id
+        WHERE civicrm_segmentation.campaign_id = {$campaign_id}
+        GROUP BY civicrm_segmentation.entity_id) tmp
+      GROUP BY tmp.segment_id");
+    while ($query->fetch()) {
+      $segment_counts[$query->segment_id] = $query->contact_count;
     }
     return $segment_counts;
   }
@@ -140,28 +229,6 @@ class CRM_Segmentation_Logic {
       $segment_titles[$query->segment_id] = $query->segment_title;
     }
     return $segment_titles;
-  }
-
-  /**
-   * get a list segment_id -> contact_count for the given campaign
-   *
-   * @todo move to another class
-   */
-  public static function getCampaignSegments($campaign_id) {
-    $query = CRM_Core_DAO::executeQuery("
-      SELECT
-        segment_id                 AS segment_id,
-        COUNT(DISTINCT(entity_id)) AS contact_count
-      FROM civicrm_segmentation
-      WHERE segment_id IS NOT NULL
-        AND campaign_id = %1
-      GROUP BY segment_id", array(1 => array($campaign_id, 'Integer')));
-
-    $result = array();
-    while ($query->fetch()) {
-      $result[$query->segment_id] = $query->contact_count;
-    }
-    return $result;
   }
 
   /**

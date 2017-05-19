@@ -111,9 +111,8 @@ function segmentation_civicrm_campaignKpis ($campaign_id, &$kpi_array, $tree_lev
   // TODO: make more performant
   // calculate segmentation data
   $segmentation_data = array();
-  $used_segments  = array_keys(CRM_Segmentation_Logic::getCampaignSegments($campaign_id));
-  $segment_titles = CRM_Segmentation_Logic::getSegmentTitles($used_segments);
-  $segment_counts = CRM_Segmentation_Logic::getSegmentCounts($campaign_id, $used_segments);
+  $segment_counts = CRM_Segmentation_Logic::getSegmentCounts($campaign_id);
+  $segment_titles = CRM_Segmentation_Logic::getSegmentTitles(array_keys($segment_counts));
   $total_count    = array_sum($segment_counts);
   foreach ($segment_counts as $segment_id => $segment_count) {
     if ($segment_count > 0) {

@@ -34,29 +34,10 @@ class CRM_Segmentation_Page_Start extends CRM_Core_Page {
     // load campaign
     $campaign = civicrm_api3('Campaign', 'getsingle', array('id' => $campaign_id));
 
-    // load segments
-    $used_segments  = CRM_Segmentation_Logic::getCampaignSegments($campaign_id);
-
-    // get segment order
-    $session = CRM_Core_Session::singleton();
-    $segment_order = $session->get("segmentation_order_{$campaign_id}");
-    if (empty($segment_order)) {
-      // default is simply all segments in random order
-      $segment_order = array_keys($used_segments);
-    } else {
-      // make sure all segments are in
-      foreach ($used_segments as $segment_id => $value) {
-        if (!in_array($segment_id, $segment_order)) {
-          $segment_order[] = $segment_id;
-        }
-      }
-    }
-
-    // process commands to change order
+    // get segment order, process, store
+    $segment_order  = CRM_Segmentation_Logic::getSegmentOrder($campaign_id);
     $segment_order = $this->processOrderCommands($segment_order);
-
-    // store in session to keep alive
-    $session->set("segmentation_order_{$campaign_id}", $segment_order);
+    CRM_Segmentation_Logic::setSegmentOrder($campaign_id, $segment_order);
 
     // start the campaign if requested
     $start = CRM_Utils_Request::retrieve('start', 'String');
@@ -68,7 +49,7 @@ class CRM_Segmentation_Page_Start extends CRM_Core_Page {
 
 
     // finally: calculate counts based on order, and render page
-    $segment_counts = CRM_Segmentation_Logic::getSegmentCounts($campaign_id, $segment_order);
+    $segment_counts = CRM_Segmentation_Logic::getSegmentCounts($campaign_id);
     $segment_titles = CRM_Segmentation_Logic::getSegmentTitles($segment_order);
     $this->assign('segment_order',  $segment_order);
     $this->assign('segment_counts', $segment_counts);

@@ -32,7 +32,7 @@ class CRM_Segmentation_Form_Export extends CRM_Core_Form {
 
     // load campaign and data
     $campaign       = civicrm_api3('Campaign', 'getsingle', array('id' => $campaign_id));
-    $segment_counts = CRM_Segmentation_Logic::getCampaignSegments($campaign_id);
+    $segment_counts = CRM_Segmentation_Logic::getSegmentCounts($campaign_id);
     $segment_titles = CRM_Segmentation_Logic::getSegmentTitles(array_keys($segment_counts));
 
     $segment_list = array();
