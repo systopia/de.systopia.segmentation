@@ -154,9 +154,8 @@
         "to": "zielgruppe"
       },
       {
-        "TODO": "source?",
         "action": "copy",
-        "from": "contact.unknownsource",
+        "from": "segment.test_group",
         "to": "paket"
       },
       {
