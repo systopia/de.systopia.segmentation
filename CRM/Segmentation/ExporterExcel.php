@@ -71,7 +71,8 @@ class CRM_Segmentation_ExporterExcel extends CRM_Segmentation_Exporter {
       // then: encode
       $values[] = mb_convert_encoding($value, 'CP1252');
     }
-    error_log(implode(';', $values));
+
+    // write to file
     fwrite($this->tmpFileHandle, implode(';', $values));
     fwrite($this->tmpFileHandle, "\r\n");
   }
