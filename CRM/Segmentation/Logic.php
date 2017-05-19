@@ -137,6 +137,7 @@ class CRM_Segmentation_Logic {
    * delete all inferior (according to the currently given order) entries for contacts
    */
   protected static function consolidateSegments($campaign_id, $segment_order) {
+    $timestamp = microtime(TRUE);
     $segments_settled = array();
     foreach ($segment_order as $segment_id) {
       if (!empty($segments_settled)) {
@@ -173,24 +174,27 @@ class CRM_Segmentation_Logic {
       $segment_counts[$segment_id] = $segment_count;
       $segments_to_exclude[] = $segment_id;
     }
+    $runtime = microtime(TRUE) - $timestamp;
+    error_log("Segmentation::consolidateSegments took {$runtime}s");
     return $segment_counts;
-
   }
 
   /**
    * get a list segment_id -> contact_count for the given campaign
    *
-   * @todo optimise into one query?
-   * @todo move to another class
    */
-  public static function getSegmentCounts($campaign_id) {
+  public static function getSegmentCounts($campaign_id, $segment_order = array()) {
+    $timestamp = microtime(TRUE);
     $campaign_id = (int) $campaign_id;
     $segment_counts = array();
+    foreach ($segment_order as $segment_id) {
+      $segment_counts[$segment_id] = 0;
+    }
 
     $query = CRM_Core_DAO::executeQuery("
       SELECT
-        tmp.segment_id                  AS segment_id,
-        COUNT(DISTINCT(tmp.contact_id)) AS contact_count
+        civicrm_segmentation_order.segment_id AS segment_id,
+        COUNT(DISTINCT(tmp.contact_id))       AS contact_count
       FROM (
         SELECT
           civicrm_segmentation.entity_id               AS contact_id,
@@ -201,10 +205,15 @@ class CRM_Segmentation_Logic {
                                             AND civicrm_segmentation_order.segment_id = civicrm_segmentation.segment_id
         WHERE civicrm_segmentation.campaign_id = {$campaign_id}
         GROUP BY civicrm_segmentation.entity_id) tmp
-      GROUP BY tmp.segment_id");
+      LEFT JOIN civicrm_segmentation_order ON civicrm_segmentation_order.order_number = tmp.segment_order AND civicrm_segmentation_order.campaign_id = {$campaign_id}
+      GROUP BY tmp.segment_order");
     while ($query->fetch()) {
       $segment_counts[$query->segment_id] = $query->contact_count;
     }
+
+    $runtime = microtime(TRUE) - $timestamp;
+    error_log("Segmentation::getSegmentCounts took {$runtime}s");
+
     return $segment_counts;
   }
 

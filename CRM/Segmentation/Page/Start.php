@@ -49,7 +49,7 @@ class CRM_Segmentation_Page_Start extends CRM_Core_Page {
 
 
     // finally: calculate counts based on order, and render page
-    $segment_counts = CRM_Segmentation_Logic::getSegmentCounts($campaign_id);
+    $segment_counts = CRM_Segmentation_Logic::getSegmentCounts($campaign_id, $segment_order);
     $segment_titles = CRM_Segmentation_Logic::getSegmentTitles($segment_order);
     $this->assign('segment_order',  $segment_order);
     $this->assign('segment_counts', $segment_counts);
