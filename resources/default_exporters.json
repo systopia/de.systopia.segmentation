@@ -88,11 +88,9 @@
 
 
   {
-    "name": "Lettershopformat (CSV)",
+    "name": "Lettershopformat (Excel)",
     "id": 3,
-    "type": "CSV",
-    "encoding": "UTF8",
-    "delimiter": ";",
+    "type": "Excel",
     "columns": ["id", "titel", "anrede", "vorname", "nachname", "co", "strasse", "plz", "ort", "postfach", "land", "zielgruppe ID", "zielgruppe", "paket", "kundennummer", "sepa_belegart", "iban_empfaenger", "bic_empfaenger", "pruefziffer"],
     "rules": [
       {
@@ -170,7 +168,7 @@
       {
         "action": "sprintf",
         "from": "contact.id",
-        "format": "%08d",
+        "format": "C%09d",
         "to": "kundennummer_contact"
       },
       {
@@ -208,13 +206,19 @@
       {
         "action": "date",
         "from": "file_date",
-        "format": "d.m.Y",
+        "format": "Ymd_His",
         "to": "file_date"
       },
       {
         "action": "append",
         "from": "campaign.title",
-        "separator": "+",
+        "separator": "_",
+        "to": "file_date"
+      },
+      {
+        "action": "append",
+        "from": "campaign.id",
+        "separator": "_",
         "to": "file_date"
       },
       {

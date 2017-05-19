@@ -267,7 +267,7 @@ abstract class CRM_Segmentation_Exporter {
           // calculate checksum
           $result = 98 - ($string_to_check % 97);
           // format result with two digits
-          $data[$rule['to']] .= sprintf('%2d', $result);
+          $data[$rule['to']] = sprintf('%02d', $result);
           break;
 
         // RULE: SET FILE NAME
