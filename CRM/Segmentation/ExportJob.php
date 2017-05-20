@@ -14,7 +14,7 @@
 | written permission from the original author(s).        |
 +--------------------------------------------------------*/
 
-define('SEGMENTATION_EXPORT_JOB_SIZE', 1000);
+define('SEGMENTATION_EXPORT_JOB_SIZE', 500);
 
 /**
  * QueueJob for segmentation export
@@ -78,16 +78,18 @@ class CRM_Segmentation_ExportJob {
     $campaign = civicrm_api3('Campaign', 'getsingle', array('id' => $campaign_id));
 
     // get total count
-    $total_count_sql = CRM_Segmentation_Configuration::getSegmentCount($campaign_id, $segment_list);
+    $total_count_sql = CRM_Segmentation_Configuration::getContactCount($campaign_id, $segment_list);
     $total_count = CRM_Core_DAO::singleValueQuery($total_count_sql);
+    error_log("Count is: $total_count");
 
     // generate tmpfile
     $tmp_file = tempnam(sys_get_temp_dir(), "segmentation_export_{$campaign_id}_" . substr(sha1(rand()), 0, 8) . '_');
+    error_log("Writing to file: {$tmp_file}");
 
     // create a queue
     $queue = CRM_Queue_Service::singleton()->create(array(
       'type'  => 'Sql',
-      'name'  => 'sdd_update',
+      'name'  => 'segmentation_export',
       'reset' => TRUE,
     ));
 

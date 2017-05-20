@@ -133,7 +133,7 @@ class CRM_Segmentation_Configuration {
    * @param $campaign_id  id of campaign
    * @param $segment_list  array of segment IDs
    */
-  public static function getSegmentCount($campaign_id, $segment_list = NULL, $exclude_deleted_contacts = TRUE) {
+  public static function getContactCount($campaign_id, $segment_list = NULL, $exclude_deleted_contacts = TRUE) {
     $_campaign_id = (int) $campaign_id;
     if (!$_campaign_id) {
       throw new Exception("Illegal campaign_id '{$campaign_id}'", 1);
