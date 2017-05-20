@@ -14,7 +14,7 @@
 | written permission from the original author(s).        |
 +--------------------------------------------------------*/
 
-define('SEGMENTATION_EXPORT_JOB_SIZE', 500);
+define('SEGMENTATION_EXPORT_JOB_SIZE', 1000);
 
 /**
  * QueueJob for segmentation export
@@ -113,7 +113,7 @@ class CRM_Segmentation_ExportJob {
 
     // create a runner and launch it
     $runner = new CRM_Queue_Runner(array(
-      'title'     => ts("Export Campaign '%1'", array(1 => $campaign['title'], 'domain' => 'org.project60.sepa')),
+      'title'     => ts("Exportig Campaign '%1'", array(1 => $campaign['title'], 'domain' => 'org.project60.sepa')),
       'queue'     => $queue,
       'errorMode' => CRM_Queue_Runner::ERROR_ABORT,
       'onEndUrl'  => $download_url,
