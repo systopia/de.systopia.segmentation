@@ -180,10 +180,25 @@ class CRM_Segmentation_Logic {
   }
 
   /**
+   * In some cases (e.g. migration, loss, etc, the campaign might not have a
+   * segmentation order yet - which breaks some functions
+   *
+   * This method will make sure that in this case a segment order is generated
+   */
+  public static function verifySegmentOrder($campaign_id) {
+    $campaign_id = (int) $campaign_id;
+    $test = CRM_Core_DAO::singleValueQuery("SELECT count(segment_id) FROM civicrm_segmentation_order WHERE campaign_id = {$campaign_id}");
+    if (!$test) {
+      self::getSegmentOrder($campaign_id);
+    }
+  }
+
+  /**
    * get a list segment_id -> contact_count for the given campaign
    *
    */
   public static function getSegmentCounts($campaign_id, $segment_order = array()) {
+    self::verifySegmentOrder($campaign_id);
     $timestamp = microtime(TRUE);
     $campaign_id = (int) $campaign_id;
     $segment_counts = array();
@@ -223,9 +238,9 @@ class CRM_Segmentation_Logic {
    * @todo move to another class
    */
   public static function getSegmentTitles($segment_ids) {
-    if (empty($segment_ids)) return array();
-
     $segment_id_list = implode(',', $segment_ids);
+    if (empty($segment_id_list)) return array();
+
     $query = CRM_Core_DAO::executeQuery("
       SELECT
         id    AS segment_id,
