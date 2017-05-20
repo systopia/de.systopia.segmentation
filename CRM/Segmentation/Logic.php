@@ -274,6 +274,35 @@ class CRM_Segmentation_Logic {
   }
 
   /**
+   * Take the given $campaign_ids and extend it by all it's subcampaigns
+   */
+  public static function includeSubcampaigns($campaign_ids) {
+    $new_id_count = count($campaign_ids);
+    $id_heap = array();
+    foreach ($campaign_ids as $campaign_id) {
+      $id_heap[$campaign_id] = 1;
+    }
+
+    while ($new_id_count > 0) {
+      $new_id_count = 0;
+      $id_list = implode(',', array_keys($id_heap));
+      $query_sql = "SELECT DISTINCT(id) AS campaign_id
+                    FROM civicrm_campaign
+                    WHERE parent_id IN ({$id_list})
+                      AND id NOT IN ({$id_list})";
+      $query = CRM_Core_DAO::executeQuery($query_sql);
+      while ($query->fetch()) {
+        if (!isset($id_heap[$query->campaign_id])) {
+          $id_heap[$query->campaign_id] = 1;
+          $new_id_count += 1;
+        }
+      }
+    }
+
+    return array_keys($id_heap);
+  }
+
+  /**
    * Get a list of all campaigns
    */
   public static function getAllSegments() {

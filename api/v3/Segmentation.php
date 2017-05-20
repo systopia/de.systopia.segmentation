@@ -77,6 +77,12 @@ function civicrm_api3_segmentation_segmentlist($params) {
     $where_params[$index] = array($params['campaign_id'], 'Integer');
   }
 
+  if (!empty($params['campaign_ids']) && is_array($params['campaign_ids'])) {
+    $campaign_id_list = implode(',', $params['campaign_ids']);
+    $where_clauses[] = "campaign_id IN ({$campaign_id_list})";
+    $where_params[$index] = array($params['campaign_id'], 'Integer');
+  }
+
   if (!empty($params['membership_id'])) {
     $index = count($where_clauses) + 1;
     $where_clauses[] = "membership_id = %{$index}";
@@ -122,6 +128,7 @@ function civicrm_api3_segmentation_segmentlist($params) {
 function _civicrm_api3_segmentation_segmentlist_spec(&$params) {
   $params['contact_id']['title'] = "Contact ID";
   $params['campaign_id']['title'] = "Campaign ID";
+  $params['campaign_ids']['title'] = "Campaign IDs";
   $params['membership_id']['title'] = "Membership ID";
   $params['test_group']['title'] = "Test Subgroup";
 }

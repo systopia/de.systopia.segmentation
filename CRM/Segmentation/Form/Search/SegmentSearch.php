@@ -58,7 +58,7 @@ class CRM_Segmentation_Form_Search_SegmentSearch extends CRM_Contact_Form_Search
                       'campaign_id',
                       ts('Campaign', array('domain' => 'de.systopia.segmentation')),
                       CRM_Segmentation_Logic::getAllCampaigns(),
-                      array('class' => 'crm-select2 huge'));
+                      array('multiple' => 'multiple', 'class' => 'crm-select2 huge'));
 
     // segment options
     $form->addElement('select',
@@ -66,6 +66,15 @@ class CRM_Segmentation_Form_Search_SegmentSearch extends CRM_Contact_Form_Search
                       ts('Segment', array('domain' => 'de.systopia.segmentation')),
                       array(),
                       array('multiple' => 'multiple', 'class' => 'crm-select2 huge'));
+
+    // segment options
+    $form->addElement('select',
+                      'subcampaigns',
+                      ts('Include Subcampaigns', array('domain' => 'de.systopia.segmentation')),
+                      array(
+                        0 => ts('No',  array('domain' => 'de.systopia.segmentation')),
+                        1 => ts('Yes', array('domain' => 'de.systopia.segmentation'))),
+                      array());
 
     // hidden field for value
     $form->addElement('text', // hidden doesn't work...
@@ -76,7 +85,7 @@ class CRM_Segmentation_Form_Search_SegmentSearch extends CRM_Contact_Form_Search
      * if you are using the standard template, this array tells the template what elements
      * are part of the search criteria
      */
-    $form->assign('elements', array('campaign_id', 'segment_list', 'segment_id'));
+    $form->assign('elements', array('campaign_id', 'segment_list', 'subcampaigns', 'segment_id'));
   }
 
   /**
@@ -172,8 +181,18 @@ class CRM_Segmentation_Form_Search_SegmentSearch extends CRM_Contact_Form_Search
 
     // restrict to campaign
     if (!empty($this->_formValues['campaign_id'])) {
-      $campaign_id = (int) $this->_formValues['campaign_id'];
-      $clauses[] = "civicrm_campaign.id = {$campaign_id}";
+      $campaign_ids = $this->_formValues['campaign_id'];
+      if (!is_array($campaign_ids)) {
+        $campaign_ids = array($campaign_ids);
+      }
+
+      // inlude subcampaigns
+      if (!empty($this->_formValues['subcampaigns'])) {
+        $campaign_ids = CRM_Segmentation_Logic::includeSubcampaigns($campaign_ids);
+      }
+
+      $campaign_id_list = implode(',', $campaign_ids);
+      $clauses[] = "civicrm_campaign.id IN ({$campaign_id_list})";
     }
 
     // restrict to segment

@@ -22,8 +22,8 @@
  *   campaign changed handler  *
  ******************************/
 cj("#campaign_id").change(function() {
-  var campaign_id = cj("#campaign_id").val();
-  if (!campaign_id.length) {
+  var campaign_ids = cj("#campaign_id").val();
+  if (!campaign_ids.length) {
     return;
   }
 
@@ -36,7 +36,7 @@ cj("#campaign_id").change(function() {
 
   // then: look up the specific ones and add
   CRM.api3('Segmentation', 'segmentlist', {
-    "campaign_id": campaign_id,
+    "campaign_ids": campaign_ids,
   }).done(function(result) {
     for (var segment_id in result.values) {
       cj("#segment_list").append('<option value="' + segment_id + '">' + result.values[segment_id] + '</option>');
