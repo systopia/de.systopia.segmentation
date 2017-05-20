@@ -491,7 +491,7 @@ abstract class CRM_Segmentation_Exporter {
     }
 
     // load contact data
-    if (!empty($contact_fields)) {
+    if (!empty($contact_fields) && !empty($contact_ids)) {
       $contact_query = civicrm_api3('Contact', 'get', array(
         'id'           => array('IN' => $contact_ids),
         'option.limit' => 0,
@@ -503,7 +503,7 @@ abstract class CRM_Segmentation_Exporter {
     }
 
     // load membership data
-    if (!empty($membership_fields)) {
+    if (!empty($membership_fields) && !empty($membership_ids)) {
       $membership_query = civicrm_api3('Membership', 'get', array(
         'id'           => array('IN' => $membership_ids),
         'option.limit' => 0,
@@ -515,7 +515,7 @@ abstract class CRM_Segmentation_Exporter {
     }
 
     // load phone data
-    if (!empty($phone_types)) {
+    if (!empty($phone_types) && !empty($contact_ids)) {
       // create array
       foreach ($contact_ids as $contact_id) {
         $this->_details[$contact_id]['phone'] = array();
