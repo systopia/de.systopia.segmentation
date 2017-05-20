@@ -83,7 +83,6 @@ class CRM_Segmentation_ExportJob {
 
     // generate tmpfile
     $tmp_file = tempnam(sys_get_temp_dir(), "segmentation_export_{$campaign_id}_" . substr(sha1(rand()), 0, 8) . '_');
-    error_log($tmp_file);
 
     // create a queue
     $queue = CRM_Queue_Service::singleton()->create(array(
@@ -107,7 +106,8 @@ class CRM_Segmentation_ExportJob {
 
     // generate donwload URL
     $tmp_file_name = basename($tmp_file);
-    $download_url = CRM_Utils_System::url('civicrm/segmentation/download', "file={$tmp_file_name}");
+    $download_url = CRM_Utils_System::url('civicrm/segmentation/download', "file={$tmp_file_name}&cid={$campaign_id}");
+    $download_url = str_replace('&amp;', '&', $download_url); // why does this happen?
 
     // create a runner and launch it
     $runner = new CRM_Queue_Runner(array(
