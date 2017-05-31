@@ -260,6 +260,13 @@ abstract class CRM_Segmentation_Exporter {
           $data[$rule['to']] = sprintf($format, $this->getValue($rule['from'], $line, $data));
           break;
 
+        // RULE: REGEX REPLACE
+        case 'preg_replace':
+          $pattern = CRM_Utils_Array::value('search', $rule, '##');
+          $replace = CRM_Utils_Array::value('replace', $rule, '');
+          $data[$rule['to']] = preg_replace($pattern, $replace, $this->getValue($rule['from'], $line, $data));
+          break;
+
         // RULE: DATE
         case 'date':
           $format = CRM_Utils_Array::value('format', $rule, '');

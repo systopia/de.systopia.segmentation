@@ -28,6 +28,18 @@ class CRM_Segmentation_ExporterExcel extends CRM_Segmentation_Exporter {
   }
 
   /**
+   * provides the file name for download
+   * should be overwritten by the implementation
+   */
+  public function getFileName() {
+    // calculate filename
+    $filename = parent::getFileName();
+
+    // prevent .execl default suffix
+    return preg_replace('#excel$#', 'csv', $filename);
+  }
+
+  /**
    * write the data to the stream ($this->tmpFileHandle)
    *
    * @param $chunk a number of segmentation lines to

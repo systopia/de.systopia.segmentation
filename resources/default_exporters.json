@@ -1,8 +1,8 @@
 [
   {
-    "name": "Selektion (CSV)",
+    "name": "Selektion (Excel)",
     "id": 2,
-    "type": "CSV",
+    "type": "Excel",
     "encoding": "UTF8",
     "delimiter": ";",
     "columns": ["perid", "titel", "anrede", "vorname", "nachname", "geburtsdatum", "strasse", "plz", "ort", "land", "zielgruppe ID", "zielgruppe", "telefon", "mobilnr", "email"],
@@ -20,6 +20,13 @@
       {
         "action": "copy",
         "from": "contact.individual_prefix",
+        "to": "anrede"
+      },
+      {
+        "action": "preg_replace",
+        "from": "anrede",
+        "search": "#^$#",
+        "replace": "An",
         "to": "anrede"
       },
       {
@@ -106,6 +113,13 @@
       {
         "action": "copy",
         "from": "contact.individual_prefix",
+        "to": "anrede"
+      },
+      {
+        "action": "preg_replace",
+        "from": "anrede",
+        "search": "#^$#",
+        "replace": "An",
         "to": "anrede"
       },
       {
@@ -197,6 +211,12 @@
         "to": "pruefziffer"
       },
       {
+        "action": "sprintf",
+        "from": "pruefziffer",
+        "format": "%s11",
+        "to": "pruefziffer"
+      },
+      {
         "comment": "calculate file name",
         "action": "set",
         "value": "now",
@@ -229,33 +249,6 @@
       {
         "action": "setfilename",
         "from": "file_date"
-      }
-    ]
-  },
-
-
-  {
-    "name": "Testkonfiguration (CSV)",
-    "id": 1,
-    "type": "CSV",
-    "encoding": "UTF8",
-    "delimiter": ",",
-    "columns": ["Contact ID", "Contact Name", "Campaign ID"],
-    "rules": [
-      {
-        "action": "copy",
-        "from": "contact.id",
-        "to": "Contact ID"
-      },
-      {
-        "action": "copy",
-        "from": "contact.display_name",
-        "to": "Contact Name"
-      },
-      {
-        "action": "copy",
-        "from": "campaign.id",
-        "to": "Campaign ID"
       }
     ]
   }
