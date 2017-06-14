@@ -285,5 +285,118 @@
         "from": "file_date"
       }
     ]
+  },
+
+
+
+  {
+    "name": "TM Stammdaten (Excel)",
+    "id": 4,
+    "type": "Excel",
+    "columns": ["Spendernummer","Anrede","Titel","Vorname","Nachname","Strasse","Hausnummer","PLZ","Ort","Land","Email","Geburtsdatum","Firma","Spendertyp","Kundennummer","Ablaufdatum","Adressefalsch","Selektionshistoryid","Zielgruppeid","Zielgruppenname"],
+    "rules": [
+      {
+        "action": "copy",
+        "from": "contact.id",
+        "to": "Spendernummer"
+      },
+      {
+        "action": "copy",
+        "from": "contact.individual_prefix",
+        "to": "Anrede"
+      },
+      {
+        "action": "preg_replace",
+        "from": "Anrede",
+        "search": "#^$#",
+        "replace": "An",
+        "to": "Anrede"
+      },
+      {
+        "action": "copy",
+        "from": "contact.formal_title",
+        "to": "Titel"
+      },
+      {
+        "action": "copy",
+        "from": "contact.first_name",
+        "to": "Vorname"
+      },
+      {
+        "action": "copy",
+        "from": "contact.last_name",
+        "to": "Nachname"
+      },
+      {
+        "action": "copy",
+        "from": "contact.street_address",
+        "to": "Strasse"
+      },
+      {
+        "action": "copy",
+        "from": "contact.postal_code",
+        "to": "PLZ"
+      },
+      {
+        "action": "copy",
+        "from": "contact.city",
+        "to": "Ort"
+      },
+      {
+        "action": "copy",
+        "from": "contact.country",
+        "to": "Land"
+      },
+      {
+        "action": "copy",
+        "from": "contact.email",
+        "to": "Email"
+      },
+      {
+        "action": "date",
+        "from": "contact.birth_date",
+        "format": "Y-m-d",
+        "to": "Geburtsdatum"
+      },
+      {
+        "action": "sprintf",
+        "from": "campaign.id",
+        "format": "%04d",
+        "to": "Kundennummer"
+      },
+      {
+        "action": "sprintf",
+        "from": "contact.id",
+        "format": "C%09d",
+        "to": "Kundennummer_contact"
+      },
+      {
+        "action": "append",
+        "from": "Kundennummer_contact",
+        "separator": "",
+        "to": "Kundennummer"
+      },
+      {
+        "action": "copy",
+        "from": "segment.segment_id",
+        "to": "Zielgruppeid"
+      },
+      {
+        "action": "copy",
+        "from": "segment.segment_name",
+        "to": "Zielgruppenname"
+      },
+      {
+        "comment": "calculate file name",
+        "action": "sprintf",
+        "from": "campaign.id",
+        "format": "Stammdaten_Upgrading_Aktion_%s_Nachlieferung.csv",
+        "to": "file_date"
+      },
+      {
+        "action": "setfilename",
+        "from": "file_date"
+      }
+    ]
   }
 ]
