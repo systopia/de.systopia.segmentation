@@ -89,6 +89,40 @@
         "action": "copy",
         "from": "contact.email",
         "to": "email"
+      },
+      {
+        "comment": "calculate file name",
+        "action": "set",
+        "value": "now",
+        "to": "file_date"
+      },
+      {
+        "action": "date",
+        "from": "file_date",
+        "format": "Ymd_His",
+        "to": "file_date"
+      },
+      {
+        "action": "append",
+        "from": "campaign.title",
+        "separator": "_",
+        "to": "file_date"
+      },
+      {
+        "action": "append",
+        "from": "campaign.id",
+        "separator": "_",
+        "to": "file_date"
+      },
+      {
+        "action": "sprintf",
+        "from": "file_date",
+        "format": "%s.csv",
+        "to": "file_date"
+      },
+      {
+        "action": "setfilename",
+        "from": "file_date"
       }
     ]
   },
