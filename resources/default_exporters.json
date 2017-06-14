@@ -398,5 +398,31 @@
         "from": "file_date"
       }
     ]
+  },
+
+
+  {
+    "name": "TM Spendendaten (Excel)",
+    "id": 5,
+    "type": "Excel",
+    "columns": ["Spendernummer","Spendendatum","Spendenbetrag","Aktionscode","Aktionsbezeichnung"],
+    "rules": [
+      {
+        "action": "copy",
+        "from": "contact.id",
+        "to": "Spendernummer"
+      },
+      {
+        "comment": "calculate file name",
+        "action": "sprintf",
+        "from": "campaign.id",
+        "format": "Spendendaten_Upgrading_Aktion_%s_Nachlieferung.csv",
+        "to": "file_date"
+      },
+      {
+        "action": "setfilename",
+        "from": "file_date"
+      }
+    ]
   }
 ]
