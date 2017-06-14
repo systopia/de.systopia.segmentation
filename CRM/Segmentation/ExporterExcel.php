@@ -42,31 +42,21 @@ class CRM_Segmentation_ExporterExcel extends CRM_Segmentation_Exporter {
   /**
    * write the data to the stream ($this->tmpFileHandle)
    *
-   * @param $chunk a number of segmentation lines to
+   * @param $data one line to be exported
    */
-  public function exportChunk($chunk) {
-    foreach ($chunk as $segmentation_line) {
-      // execute rules to get all data
-      $data = $this->executeRules($segmentation_line);
-
-      // check if this line should be skipped
-      if ($this->shouldSkipRow($data)) {
-        continue;
+  public function exportLine($data) {
+    // compile a row
+    $row = array();
+    foreach ($this->config['columns'] as $column_name) {
+      if (isset($data[$column_name])) {
+        $row[] = $data[$column_name];
+      } else {
+        $row[] = '';
       }
-
-      // compile a row
-      $row = array();
-      foreach ($this->config['columns'] as $column_name) {
-        if (isset($data[$column_name])) {
-          $row[] = $data[$column_name];
-        } else {
-          $row[] = '';
-        }
-      }
-
-      // write row
-      $this->writeExcelLine($row);
     }
+
+    // write row
+    $this->writeExcelLine($row);
   }
 
   /**

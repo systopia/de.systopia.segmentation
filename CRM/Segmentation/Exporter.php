@@ -32,6 +32,7 @@ abstract class CRM_Segmentation_Exporter {
   protected $_contacts     = NULL; // array contact_id => $contact
   protected $_memberships  = NULL; // array membership_id => $membership
   protected $_details      = NULL; // array contact_id => array(email/phone/...)
+  protected $_loadCache    = NULL; // cache for loadEntity
 
   /**
    * constructor is protected -> use CRM_Segmentation_Exporter::getExporter() (below)
@@ -40,6 +41,7 @@ abstract class CRM_Segmentation_Exporter {
     $this->config = $config;
     $this->_contacts = array();
     $this->_details = array();
+    $this->_loadCache = array();
   }
 
 
@@ -55,9 +57,9 @@ abstract class CRM_Segmentation_Exporter {
   /**
    * write the data to the stream ($this->tmpFileHandle)
    *
-   * @param $chunk a number of segmentation lines to
+   * @param $data one line to be exported
    */
-  public abstract function exportChunk($chunk);
+  public abstract function exportLine($data);
 
   /**
    * write the end/wrapuo data to the stream ($this->tmpFileHandle)
@@ -138,6 +140,28 @@ abstract class CRM_Segmentation_Exporter {
     $buffer    = file_get_contents($this->tmpFileName);
     $this->deleteTmpFile();
     CRM_Utils_System::download($this->getFileName(), $mime_type, $buffer);
+  }
+
+  /**
+   * write the data to the stream ($this->tmpFileHandle)
+   *
+   * @param $chunk a number of segmentation lines to
+   */
+  public function exportChunk($chunk) {
+    foreach ($chunk as $segmentation_line) {
+      $data = array();
+      while ($this->loopNext($data, $segmentation_line)) {
+        // execute rules to get all data
+         $this->executeRules($segmentation_line, $data);
+
+        // check if this line should be skipped
+        if ($this->shouldSkipRow($data)) {
+          continue;
+        }
+
+        $this->exportLine($data);
+      }
+    }
   }
 
   /**
@@ -249,8 +273,7 @@ abstract class CRM_Segmentation_Exporter {
    * and generate an array of data for this segementation line
    * for the exporter to write out.
    */
-  protected function executeRules($line) {
-    $data = array();
+  protected function executeRules($line, &$data) {
     foreach ($this->config['rules'] as $rule) {
       switch ($rule['action']) {
         // RULE: COPY
@@ -310,6 +333,18 @@ abstract class CRM_Segmentation_Exporter {
           $data[$rule['to']] .= $appended_string;
           break;
 
+        // RULE: LOAD (entity)
+        case 'load':
+          if (!empty($rule['type'])) {
+            $data[$rule['to']] = $this->loadEntity(
+              CRM_Utils_Array::value('type', $rule, ''),
+              CRM_Utils_Array::value('params', $rule, array()),
+              $line,
+              $data,
+              CRM_Utils_Array::value('cached', $rule, FALSE));
+          }
+          break;
+
         // RULE: MOD97
        case 'mod97':
           $string_to_check = $this->getValue($rule['from'], $line, $data);
@@ -332,7 +367,6 @@ abstract class CRM_Segmentation_Exporter {
           throw new Exception("Unknown rule action '{$rule['action']}' in exporter configuration", 1);
       }
     }
-    return $data;
   }
 
   /**
@@ -361,7 +395,7 @@ abstract class CRM_Segmentation_Exporter {
 
     // check if it's an entity source
     if (preg_match('#^(?P<entity>\w+)[.](?P<attribute>\w+)$#', $source, $entity_source)) {
-      $entity = $this->getEntity($entity_source['entity'], $line);
+      $entity = $this->getEntity($entity_source['entity'], $line, $data);
       if (isset($entity[$entity_source['attribute']])) {
         return $entity[$entity_source['attribute']];
       } else {
@@ -376,7 +410,7 @@ abstract class CRM_Segmentation_Exporter {
   /**
    * get entity related to this line, see documentation for ::executeRules
    */
-  protected function getEntity($entity_name, $line) {
+  protected function getEntity($entity_name, $line, $data) {
     switch (strtolower($entity_name)) {
       case 'contact':
         if (!isset($this->_contacts[$line['contact_id']])) {
@@ -405,7 +439,12 @@ abstract class CRM_Segmentation_Exporter {
         return $this->getDetailEntity($line, 'Phone', array('phone_type_id' => 2));
 
       default:
-        throw new Exception("Unkown entity '{$entity_name}' requested", 1);
+        // maybe it's in the data
+        if (isset($data[$entity_name]) && is_array($data[$entity_name])) {
+          return $data[$entity_name];
+        } else {
+          throw new Exception("Unkown entity '{$entity_name}' requested", 1);
+        }
     }
   }
 
@@ -452,6 +491,36 @@ abstract class CRM_Segmentation_Exporter {
     }
   }
 
+  /**
+   * load an arbitrary entity
+   */
+  protected function loadEntity($entity_type, $spec, $line, &$data, $cached) {
+    $params = $this->getQueryParams($spec, $data, $line);
+    $params['option.limit'] = 2;
+    $cache_key = NULL;
+
+    if ($cached) {
+      $cache_key = sha1($entity_type . json_encode($params));
+      if (isset($this->_loadCache[$cache_key])) {
+        return $this->_loadCache[$cache_key];
+      }
+    }
+
+    $result = civicrm_api3($entity_type, 'get', $params);
+    if ($result['count'] == 1) {
+      // found
+      $entity = reset($result['values']);
+    } else {
+      // not found / not unique
+      $entity = array();
+    }
+
+    if ($cached) {
+      $this->_loadCache[$cache_key] = $entity;
+    }
+    return $entity;
+  }
+
   // /**
   //  * load and return detail entities (Phone, Email, etc.)
   //  */
@@ -470,6 +539,140 @@ abstract class CRM_Segmentation_Exporter {
   //   return $this->getDetailEntity($line, $type, $search_params, $preferred);
   // }
 
+
+  /*************************************************
+   **                LOOPING                      **
+   *************************************************/
+
+  protected $loop_status = NULL;
+  protected $loop_stack  = array();
+
+  /**
+   * this allows you to loop over certain entities
+   *
+   * the first time around, this will initialise
+   *
+   */
+  protected function loopNext(&$data, $line) {
+    if (empty($this->config['loop'])) {
+      // THERE IS NO LOOP -> just do it once:
+      if ($this->loop_status === NULL) {
+        // FIRST TIME
+        $this->loop_status = TRUE;
+        return TRUE;
+      } else {
+        // SECOND TIME
+        $this->loop_status = NULL;
+        return FALSE;
+      }
+
+    } else {
+      // THERE IS A LOOP!
+      try {
+        if ($this->loop_status === NULL) {
+          // init
+          $this->loop_status = array();
+          $this->loop_stack  = array();
+          $this->pushStack($data, $line);
+          return TRUE;
+        } else {
+          return $this->getNextStack($data, $line);
+        }
+      } catch (Exception $e) {
+        // something went wrong...
+        $this->loop_stack = array();
+        $this->loop_status = NULL;
+        error_log($e->getMessage());
+        return FALSE;
+      }
+    }
+  }
+
+  /**
+   * get the next stack status
+   */
+  protected function getNextStack(&$data, $line) {
+    // if we're out of stack, that's it
+    if (empty($this->loop_stack)) {
+      $this->loop_status = NULL;
+      return FALSE;
+    }
+
+    // let's look at the current status
+    $current_loop  = end($this->loop_stack);
+    $current_index = end($this->loop_status);
+    $current_depth = count($this->loop_stack);
+    $current_spec  = $this->config['loop'][$current_depth-1];
+
+    // try to get next item
+    $current_index += 1;
+    if ($current_index >= count($current_loop)) {
+      // out of items -> go back on level
+      array_pop($this->loop_stack);
+      array_pop($this->loop_status);
+
+      // then try again one level below
+      return $this->getNextStack($data, $line);
+
+    } else {
+      // item still available
+      $data[$current_spec['name']] = $current_loop[$current_index];
+
+      // mark the new status
+      array_pop($this->loop_status);
+      $this->loop_status[] = $current_index;
+
+      // populate rest of the stack (if not leaf)
+      $this->pushStack($data, $line);
+
+      // that's it
+      return TRUE;
+    }
+  }
+
+  /**
+   * push the next item on the stack
+   */
+  protected function pushStack(&$data, $line) {
+    $current_level = count($this->loop_stack);
+    if ($current_level >= count($this->config['loop'])) {
+      return;
+    }
+
+    $loop_spec = $this->config['loop'][$current_level];
+
+    // load data
+    $query_params = $this->getQueryParams($loop_spec['params'], $data, $line);
+    $query_params['sequential'] = 1;
+    $query_params['option.limit'] = 0;
+    $query_result = civicrm_api3($loop_spec['type'], 'get', $query_params);
+
+    // push to stack
+    $this->loop_status[] = 0;
+    $this->loop_stack[]  = $query_result['values'];
+
+    // mark in data
+    $data[$loop_spec['name']] = $query_result['count'] ? $query_result['values'][0] : array();
+
+    // push all the way to the end
+    if (count($this->loop_stack) < count($this->config['loop'])) {
+      $this->pushStack($data, $line);
+    }
+  }
+
+  /**
+   * get the API parameters from the query spec
+   */
+  protected function getQueryParams($spec, $data, $line) {
+    $parameters = array();
+    foreach ($spec as $key => $value) {
+      if (substr($value, 0, 4) == 'var:') {
+        $value = $this->getValue(substr($value, 4), $line, $data);
+      }
+      $parameters[$key] = $value;
+    }
+    return $parameters;
+  }
 
 
   /*************************************************

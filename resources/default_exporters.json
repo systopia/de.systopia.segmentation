@@ -406,11 +406,60 @@
     "id": 5,
     "type": "Excel",
     "columns": ["Spendernummer","Spendendatum","Spendenbetrag","Aktionscode","Aktionsbezeichnung"],
+    "loop": [
+      {
+        "type": "Contribution",
+        "name": "contribution",
+        "params": {
+          "contribution_status_id": "1",
+          "is_test": "0",
+          "return": "receive_date,total_amount,contribution_campaign_id",
+          "contact_id": "var:contact.id"
+        }
+      }
+    ],
     "rules": [
       {
         "action": "copy",
         "from": "contact.id",
         "to": "Spendernummer"
+      },
+      {
+        "action": "date",
+        "from": "contribution.receive_date",
+        "format": "Y-m-d",
+        "to": "Spendendatum"
+      },
+      {
+        "action": "copy",
+        "from": "contribution.total_amount",
+        "to": "Spendenbetrag"
+      },
+      {
+        "commend": "skip/suppress line if no contribution found",
+        "action": "skip",
+        "from": "Spendenbetrag",
+        "matches": "#^$#"
+      },
+      {
+        "action": "load",
+        "to": "contribution_campaign",
+        "type": "Campaign",
+        "cached": true,
+        "params": {
+          "id": "var:contribution.contribution_campaign_id",
+          "return": "external_identifier,title"
+        }
+      },
+      {
+        "action": "copy",
+        "from": "contribution_campaign.external_identifier",
+        "to": "Aktionscode"
+      },
+      {
+        "action": "copy",
+        "from": "contribution_campaign.title",
+        "to": "Aktionsbezeichnung"
       },
       {
         "comment": "calculate file name",
