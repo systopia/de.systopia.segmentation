@@ -424,5 +424,91 @@
         "from": "file_date"
       }
     ]
+  },
+
+
+  {
+    "name": "TM Telefondaten (Excel)",
+    "id": 6,
+    "type": "Excel",
+    "columns": ["Telefonid","Tel","Mob","Spendernummer","Landvorwahl","Ortvorwahl","Telefonnummer","Durchwahl"],
+    "rules": [
+      {
+        "action": "copy",
+        "from": "phone_primary.id",
+        "to": "Telefonid"
+      },
+      {
+        "action": "copy",
+        "from": "phone_primary.phone_type_id",
+        "to": "Tel"
+      },
+      {
+        "action": "preg_replace",
+        "from": "Tel",
+        "search": "#^1$#",
+        "replace": "x",
+        "to": "Tel"
+      },
+      {
+        "action": "preg_replace",
+        "from": "Tel",
+        "search": "#^[0-9]+$#",
+        "replace": "",
+        "to": "Tel"
+      },
+      {
+        "action": "copy",
+        "from": "phone_primary.phone_type_id",
+        "to": "Mob"
+      },
+      {
+        "action": "preg_replace",
+        "from": "Mob",
+        "search": "#^2$#",
+        "replace": "x",
+        "to": "Mob"
+      },
+      {
+        "action": "preg_replace",
+        "from": "Mob",
+        "search": "#^[0-9]+$#",
+        "replace": "",
+        "to": "Mob"
+      },
+      {
+        "action": "copy",
+        "from": "contact.id",
+        "to": "Spendernummer"
+      },
+      {
+        "action": "copy",
+        "from": "phone_primary.phone",
+        "to": "Telefonnummer"
+      },
+      {
+        "comment": "parse phone number",
+        "action": "preg_parse",
+        "pattern": "#^[+](?P<Landvorwahl>[0-9]{1,3}) +(?P<Ortvorwahl>[0-9]+) +(?P<Telefonnummer>[0-9 ]+)$#",
+        "from": "phone_primary.phone"
+      },
+      {
+        "commend": "skip/suppress line if Telefonnummer is empty",
+        "action": "skip",
+        "from": "Telefonnummer",
+        "matches": "#^$#"
+      },
+      {
+        "comment": "calculate file name",
+        "action": "sprintf",
+        "from": "campaign.id",
+        "format": "Telefondaten_%s_Nachlieferung.csv",
+        "to": "file_date"
+      },
+      {
+        "action": "setfilename",
+        "from": "file_date"
+      }
+    ]
   }
 ]

@@ -35,7 +35,7 @@ class CRM_Segmentation_ExporterExcel extends CRM_Segmentation_Exporter {
     // calculate filename
     $filename = parent::getFileName();
 
-    // prevent .execl default suffix
+    // prevent .excel default suffix
     return preg_replace('#excel$#', 'csv', $filename);
   }
 
@@ -48,6 +48,11 @@ class CRM_Segmentation_ExporterExcel extends CRM_Segmentation_Exporter {
     foreach ($chunk as $segmentation_line) {
       // execute rules to get all data
       $data = $this->executeRules($segmentation_line);
+
+      // check if this line should be skipped
+      if ($this->shouldSkipRow($data)) {
+        continue;
+      }
 
       // compile a row
       $row = array();

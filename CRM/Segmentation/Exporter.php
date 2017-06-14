@@ -141,6 +141,15 @@ abstract class CRM_Segmentation_Exporter {
   }
 
   /**
+   * Check if the row (represented by the data)
+   * should be skipped, which is currently represented
+   * by the __skip__ field
+   */
+  protected function shouldSkipRow($data) {
+    return !empty($data['__skip__']);
+  }
+
+  /**
    * create a new tmp file
    */
   protected function createTmpFile() {
@@ -267,12 +276,32 @@ abstract class CRM_Segmentation_Exporter {
           $data[$rule['to']] = preg_replace($pattern, $replace, $this->getValue($rule['from'], $line, $data));
           break;
 
+        // RULE: REGEX PARSE (stores parse data in to named groups)
+        case 'preg_parse':
+          $pattern = CRM_Utils_Array::value('pattern', $rule, '##');
+          $value = $this->getValue($rule['from'], $line, $data);
+          if (preg_match($pattern, $value, $matches)) {
+            foreach ($matches as $name => $string) {
+              if (!is_numeric($name)) {
+                $data[$name] = $string;
+              }
+            }
+          }
+          break;
+
+        // RULE: SKIP
+        case 'skip':
+          $pattern = CRM_Utils_Array::value('matches', $rule, '');
+          if (preg_match($pattern, $this->getValue($rule['from'], $line, $data))) {
+            $data['__skip__'] = TRUE;
+          }
+          break;
+
         // RULE: DATE
         case 'date':
           $format = CRM_Utils_Array::value('format', $rule, '');
           $data[$rule['to']] = date($format, strtotime($this->getValue($rule['from'], $line, $data)));
           break;
-
 
         // RULE: APPEND
         case 'append':
@@ -314,6 +343,7 @@ abstract class CRM_Segmentation_Exporter {
    *     contact       - the contact linked the segment
    *     campaign      - the contact linked the segment
    *     segment       - the segment itself
+   *     phone_primary - the contact's main phone
    *     phone_phone   - the contact's phone of type 'Phone' (1)
    *     phone_mobile  - the contact's phone of type 'Mobile' (1)
    *     [TODO] membership - the membership linked the segment
@@ -365,19 +395,14 @@ abstract class CRM_Segmentation_Exporter {
         }
         return $this->_campaign;
 
+      case 'phone_primary':
+        return $this->getDetailEntity($line, 'Phone', array('is_primary' => 1));
+
       case 'phone_phone':
         return $this->getDetailEntity($line, 'Phone', array('phone_type_id' => 1));
-        // if (!$phone) {
-        //   $phone = $this->loadDetailEntity($line, 'Phone', array('phone_type_id' => 1));
-        // }
-        // return $phone;
 
       case 'phone_mobile':
         return $this->getDetailEntity($line, 'Phone', array('phone_type_id' => 2));
-        // if (!$phone) {
-        //   $phone = $this->loadDetailEntity($line, 'Phone', array('phone_type_id' => 2));
-        // }
-        // return $phone;
 
       default:
         throw new Exception("Unkown entity '{$entity_name}' requested", 1);
@@ -483,6 +508,10 @@ abstract class CRM_Segmentation_Exporter {
             $membership_fields[$entity_source['attribute']] = 1;
             break;
 
+          case 'phone_primary':
+            $phone_types['P'] = 1; # normal phone
+            break;
+
           case 'phone_phone':
             $phone_types['1'] = 1; # normal phone
             break;
@@ -530,8 +559,11 @@ abstract class CRM_Segmentation_Exporter {
       $phone_query = civicrm_api3('Phone', 'get', array(
         'contact_id'    => array('IN' => $contact_ids),
         'option.limit'  => 0,
-        'phone_type_id' => array('IN' => array_keys($phone_types)),
         ));
+      // if specific phone types (not primary) are requested, restrict to those
+      if (!in_array('P', $phone_types)) {
+        $phone_query['phone_type_id'] = array('IN' => array_keys($phone_types));
+      }
       foreach ($phone_query['values'] as $phone) {
         $this->_details[$phone['contact_id']]['phone'][] = $phone;
       }

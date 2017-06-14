@@ -37,6 +37,11 @@ class CRM_Segmentation_ExporterCSV extends CRM_Segmentation_Exporter {
       // execute rules to get all data
       $data = $this->executeRules($segmentation_line);
 
+      // check if this line should be skipped
+      if ($this->shouldSkipRow($data)) {
+        continue;
+      }
+
       // compile a row
       $row = array();
       foreach ($this->config['columns'] as $column_name) {
