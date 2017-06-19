@@ -453,7 +453,7 @@
       },
       {
         "action": "copy",
-        "from": "contribution_campaign.external_identifier",
+        "from": "contribution_campaign.custom_campaign_objective.campaign_code",
         "to": "Aktionscode"
       },
       {
@@ -552,6 +552,162 @@
         "action": "sprintf",
         "from": "campaign.id",
         "format": "Telefondaten_%s_Nachlieferung.csv",
+        "to": "file_date"
+      },
+      {
+        "action": "setfilename",
+        "from": "file_date"
+      }
+    ]
+  },
+
+
+  {
+    "name": "TM Vertragsdaten (Excel)",
+    "id": 7,
+    "type": "Excel",
+    "columns": ["Spendernummer","Vertragsnummer","Anlagedatum","Jahresbeitrag","Buchungsinterval","Vertragsbeginn","Kontonummer","Bankleitzahl","Bic","Iban","Bankinstitut","Kontoinhaber","Buchungnext","Vertragstyp","Stornodatum","Stornogrund"],
+    "rules": [
+      {
+        "action": "copy",
+        "from": "contact.id",
+        "to": "Spendernummer"
+      },
+      {
+        "action": "copy",
+        "from": "membership.id",
+        "to": "Vertragsnummer"
+      },
+      {
+        "action": "copy",
+        "from": "membership.membership_name",
+        "to": "Vertragstyp"
+      },
+      {
+        "action": "copy",
+        "from": "membership.start_date",
+        "to": "Anlagedatum"
+      },
+      {
+        "action": "copy",
+        "from": "membership.custom_membership_payment.membership_annual",
+        "to": "Jahresbeitrag"
+      },
+      {
+        "action": "copy",
+        "from": "membership.custom_membership_payment.membership_frequency",
+        "to": "Buchungsinterval"
+      },
+      {
+        "action": "copy",
+        "from": "membership.custom_membership_payment.membership_frequency",
+        "to": "Buchungsinterval"
+      },
+      {
+        "action": "preg_replace",
+        "from": "Buchungsinterval",
+        "search": "#^$#",
+        "replace": "keine/unbekannt",
+        "to": "Buchungsinterval"
+      },
+      {
+        "action": "preg_replace",
+        "from": "Buchungsinterval",
+        "search": "#^1$#",
+        "replace": "jährlich",
+        "to": "Buchungsinterval"
+      },
+      {
+        "action": "preg_replace",
+        "from": "Buchungsinterval",
+        "search": "#^2$#",
+        "replace": "halbjährlich",
+        "to": "Buchungsinterval"
+      },
+      {
+        "action": "preg_replace",
+        "from": "Buchungsinterval",
+        "search": "#^3$#",
+        "replace": "quartalsweise",
+        "to": "Buchungsinterval"
+      },
+      {
+        "action": "preg_replace",
+        "from": "Buchungsinterval",
+        "search": "#^4$#",
+        "replace": "trimestral",
+        "to": "Buchungsinterval"
+      },
+      {
+        "action": "preg_replace",
+        "from": "Buchungsinterval",
+        "search": "#^6$#",
+        "replace": "zweimonatlich",
+        "to": "Buchungsinterval"
+      },
+      {
+        "action": "preg_replace",
+        "from": "Buchungsinterval",
+        "search": "#^12$#",
+        "replace": "monatlich",
+        "to": "Buchungsinterval"
+      },
+      {
+        "action": "copy",
+        "from": "membership.start_date",
+        "to": "Vertragsbeginn"
+      },
+      {
+        "action": "copy",
+        "from": "membership.start_date",
+        "to": "Vertragsbeginn"
+      },
+      {
+        "action": "copy",
+        "from": "membership.custom_membership_cancellation.membership_cancel_date",
+        "to": "Stornodatum"
+      },
+      {
+        "action": "copy",
+        "from": "membership.custom_membership_cancellation.membership_cancel_reason",
+        "to": "Stornogrund"
+      },
+      {
+        "action": "load",
+        "to": "membership_rcur",
+        "type": "ContributionRecur",
+        "cached": false,
+        "params": {
+          "id": "var:membership.custom_membership_payment.membership_recurring_contribution",
+          "return": "id"
+        }
+      },
+      {
+        "action": "load",
+        "to": "membership_mandate",
+        "type": "SepeMandate",
+        "cached": false,
+        "params": {
+          "entity_id": "var:membership_rcur.id",
+          "entity_table": "civicrm_contribution_recur",
+          "return": "iban,bic"
+        }
+      },
+      {
+        "action": "copy",
+        "from": "membership_mandate.iban",
+        "to": "Iban"
+      },
+      {
+        "action": "copy",
+        "from": "membership_mandate.bic",
+        "to": "Bic"
+      },
+      {
+        "comment": "calculate file name",
+        "action": "sprintf",
+        "from": "campaign.id",
+        "format": "Vertragsdaten_%s_Nachlieferung.csv",
         "to": "file_date"
       },
       {
