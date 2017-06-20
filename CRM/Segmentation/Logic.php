@@ -29,7 +29,7 @@ class CRM_Segmentation_Logic {
    * @param $campaign_id   int   campaign ID
    * @return array with segment_ids
    */
-  public static function getSegmentOrder($campaign_id) {
+  public static function getSegmentOrder($campaign_id, $force_rebuild = FALSE) {
     $campaign_id = (int) $campaign_id;
     $segment_order = array();
     $query = CRM_Core_DAO::executeQuery("
@@ -41,7 +41,7 @@ class CRM_Segmentation_Logic {
       $segment_order[] = $query->segment_id;
     }
 
-    if (empty($segment_order)) {
+    if (empty($segment_order) || $force_rebuild) {
       // maybe it wasn't stored yet, or somebody deleted it...
       $query = CRM_Core_DAO::executeQuery("
             SELECT DISTINCT(segment_id) AS segment_id
@@ -92,7 +92,7 @@ class CRM_Segmentation_Logic {
       $value_list = implode(',', $values);
 
       // finally: store it
-      CRM_Core_DAO::executeQuery("INSERT INTO civicrm_segmentation_order (campaign_id,segment_id,order_number) VALUES {$value_list}");
+      CRM_Core_DAO::executeQuery("INSERT IGNORE INTO civicrm_segmentation_order (campaign_id,segment_id,order_number) VALUES {$value_list}");
     }
   }
 
@@ -187,9 +187,19 @@ class CRM_Segmentation_Logic {
    */
   public static function verifySegmentOrder($campaign_id) {
     $campaign_id = (int) $campaign_id;
-    $test = CRM_Core_DAO::singleValueQuery("SELECT count(segment_id) FROM civicrm_segmentation_order WHERE campaign_id = {$campaign_id}");
-    if (!$test) {
-      self::getSegmentOrder($campaign_id);
+    // not good enough (GP-737):
+    //    "SELECT count(segment_id) FROM civicrm_segmentation_order WHERE campaign_id = {$campaign_id}"
+    // better:
+    $test = CRM_Core_DAO::singleValueQuery("
+      SELECT civicrm_segmentation.entity_id
+      FROM civicrm_segmentation
+      LEFT JOIN civicrm_segmentation_order ON civicrm_segmentation_order.campaign_id = civicrm_segmentation.campaign_id
+                                          AND civicrm_segmentation_order.segment_id = civicrm_segmentation.segment_id
+      WHERE civicrm_segmentation.campaign_id = {$campaign_id}
+        AND civicrm_segmentation_order.order_number IS NULL
+      LIMIT 1");
+    if ($test) {
+      self::getSegmentOrder($campaign_id, TRUE);
     }
   }
 
