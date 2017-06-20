@@ -33,6 +33,7 @@ abstract class CRM_Segmentation_Exporter {
   protected $_memberships  = NULL; // array membership_id => $membership
   protected $_details      = NULL; // array contact_id => array(email/phone/...)
   protected $_loadCache    = NULL; // cache for loadEntity
+  protected $_fieldCache   = NULL; // cache for resolveCustomField
 
   /**
    * constructor is protected -> use CRM_Segmentation_Exporter::getExporter() (below)
@@ -42,6 +43,7 @@ abstract class CRM_Segmentation_Exporter {
     $this->_contacts = array();
     $this->_details = array();
     $this->_loadCache = array();
+    $this->_fieldCache = array();
   }
 
 
@@ -339,6 +341,7 @@ abstract class CRM_Segmentation_Exporter {
             $data[$rule['to']] = $this->loadEntity(
               CRM_Utils_Array::value('type', $rule, ''),
               CRM_Utils_Array::value('params', $rule, array()),
+              CRM_Utils_Array::value('required', $rule, array()),
               $line,
               $data,
               CRM_Utils_Array::value('cached', $rule, FALSE));
@@ -394,10 +397,11 @@ abstract class CRM_Segmentation_Exporter {
     }
 
     // check if it's an entity source
-    if (preg_match('#^(?P<entity>\w+)[.](?P<attribute>\w+)$#', $source, $entity_source)) {
+    if (preg_match('#^(?P<entity>\w+)[.](?P<attribute>[\w.]+)$#', $source, $entity_source)) {
       $entity = $this->getEntity($entity_source['entity'], $line, $data);
-      if (isset($entity[$entity_source['attribute']])) {
-        return $entity[$entity_source['attribute']];
+      $attribute_name = $this->resolveCustomField($entity_source['attribute']);
+      if (isset($entity[$attribute_name])) {
+        return $entity[$attribute_name];
       } else {
         return '';
       }
@@ -405,6 +409,55 @@ abstract class CRM_Segmentation_Exporter {
 
     // it doesn't exist yet and is not entity source -> return empty string
     return '';
+  }
+
+  /**
+   * if the given field_name is a custom field, but
+   * NOT the custom_\d+ format (e.g. custom_42),
+   * it will try to look up the custom field ID,
+   * accepting the following formats:
+   *  1) custom_<CustomField.name>
+   *  2) custom_<CustomGroup.name>.<CustomField.name>
+   *
+   * @return the currected (resolved) custom field name
+   */
+  protected function resolveCustomField($field_name) {
+    $prefix = substr($field_name, 0, 7);
+    if ($prefix == 'custom_') {
+      $suffix = substr($field_name, 7);
+      if (!is_numeric($suffix)) {
+        $path = split("\\.", $suffix);
+        $field = NULL;
+        if (count($path) == 1) {
+          $field = $this->getField($field_name, array('name' => $path[0]));
+        } else {
+          $field = $this->getField($field_name, array('name' => $path[1], 'custom_group_id' => $path[0]));
+        }
+        if ($field['id']) {
+          // custom field found
+          $field_name = 'custom_' . $field['id'];
+        }
+      }
+    }
+    return $field_name;
+  }
+
+  /**
+   * will load a custom field
+   */
+  protected function getField($key, $parameters) {
+    if (!isset($this->_fieldCache[$key])) {
+      // not found -> load
+      $parameters['return'] = 'name,id';
+      try {
+        $field = civicrm_api3('CustomField', 'getsingle', $parameters);
+      } catch (Exception $e) {
+        // field not found
+        $field = array('id' => 0, 'name' => 'not found');
+      }
+      $this->_fieldCache[$key] = $field;
+    }
+    return $this->_fieldCache[$key];
   }
 
   /**
@@ -421,6 +474,18 @@ abstract class CRM_Segmentation_Exporter {
 
       case 'segment':
         return $line;
+
+      case 'membership':
+        if (!empty($line['membership_id'])) {
+          if (!isset($this->_memberships[$line['membership_id']])) {
+            error_log("CACHE MISS: Membership.{$line['membership_id']}");
+            $this->_memberships[$line['membership_id']] = civicrm_api3('Membership', 'getsingle', array('id' => $line['membership_id']));
+          }
+          return $this->_memberships[$line['membership_id']];
+        } else {
+          // no membership added
+          return NULL;
+        }
 
       case 'campaign':
         if ($this->_campaign == NULL || $this->_campaign['id'] != $line['campaign_id']) {
@@ -494,10 +559,19 @@ abstract class CRM_Segmentation_Exporter {
   /**
    * load an arbitrary entity
    */
-  protected function loadEntity($entity_type, $spec, $line, &$data, $cached) {
-    $params = $this->getQueryParams($spec, $data, $line);
+  protected function loadEntity($entity_type, $parameter_specs, $required_parameters, $line, &$data, $cached) {
+    // get parameters
+    $params = $this->getQueryParams($parameter_specs, $data, $line);
     $params['option.limit'] = 2;
     $cache_key = NULL;
+
+    // check if required params are present
+    foreach ($required_parameters as $required_parameter) {
+      if (!isset($params[$required_parameter]) || $params[$required_parameter]=='') {
+        // required parameter not set
+        return array();
+      }
+    }
 
     if ($cached) {
       $cache_key = sha1($entity_type . json_encode($params));
@@ -701,14 +775,15 @@ abstract class CRM_Segmentation_Exporter {
     $phone_types = array();
     // TODO: $address_types = array();
     foreach ($this->config['rules'] as $rule) {
-      if (isset($rule['from']) && preg_match('#^(?P<entity>\w+)[.](?P<attribute>\w+)$#', $rule['from'], $entity_source)) {
+      if (isset($rule['from']) && preg_match('#^(?P<entity>\w+)[.](?P<attribute>[\w.]+)$#', $rule['from'], $entity_source)) {
+        $attribute_name = $this->resolveCustomField($entity_source['attribute']);
         switch (strtolower($entity_source['entity'])) {
           case 'contact':
-            $contact_fields[$entity_source['attribute']] = 1;
+            $contact_fields[$attribute_name] = 1;
             break;
 
           case 'membership':
-            $membership_fields[$entity_source['attribute']] = 1;
+            $membership_fields[$attribute_name] = 1;
             break;
 
           case 'phone_primary':

@@ -677,6 +677,7 @@
         "to": "membership_rcur",
         "type": "ContributionRecur",
         "cached": false,
+        "required": ["id"],
         "params": {
           "id": "var:membership.custom_membership_payment.membership_recurring_contribution",
           "return": "id"
@@ -685,8 +686,9 @@
       {
         "action": "load",
         "to": "membership_mandate",
-        "type": "SepeMandate",
+        "type": "SepaMandate",
         "cached": false,
+        "required": ["entity_id","entity_table"],
         "params": {
           "entity_id": "var:membership_rcur.id",
           "entity_table": "civicrm_contribution_recur",
