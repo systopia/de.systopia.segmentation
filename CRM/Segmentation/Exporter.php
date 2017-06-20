@@ -821,7 +821,8 @@ abstract class CRM_Segmentation_Exporter {
       $membership_query = civicrm_api3('Membership', 'get', array(
         'id'           => array('IN' => $membership_ids),
         'option.limit' => 0,
-        'return'       => implode(',', array_keys($membership_fields))
+        // FIXME: this doesn't really work:
+        // 'return'       => implode(',', array_keys($membership_fields))
         ));
       foreach ($membership_query['values'] as $membership) {
         $this->_memberships[$membership['id']] = $membership;

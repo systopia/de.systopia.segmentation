@@ -575,6 +575,11 @@
       },
       {
         "action": "copy",
+        "from": "contact.display_name",
+        "to": "Kontoinhaber"
+      },
+      {
+        "action": "copy",
         "from": "membership.id",
         "to": "Vertragsnummer"
       },
@@ -592,11 +597,6 @@
         "action": "copy",
         "from": "membership.custom_membership_payment.membership_annual",
         "to": "Jahresbeitrag"
-      },
-      {
-        "action": "copy",
-        "from": "membership.custom_membership_payment.membership_frequency",
-        "to": "Buchungsinterval"
       },
       {
         "action": "copy",
@@ -670,6 +670,13 @@
       {
         "action": "copy",
         "from": "membership.custom_membership_cancellation.membership_cancel_reason",
+        "to": "Stornogrund"
+      },
+      {
+        "action": "preg_replace",
+        "from": "Stornogrund",
+        "search": "#^$#",
+        "replace": "k.A.",
         "to": "Stornogrund"
       },
       {
