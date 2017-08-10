@@ -167,6 +167,16 @@
         "to": "nachname"
       },
       {
+        "action": "append",
+        "from": "contact.household_name",
+        "to": "nachname"
+      },
+      {
+        "action": "append",
+        "from": "contact.organization_name",
+        "to": "nachname"
+      },
+      {
         "action": "copy",
         "from": "contact.supplemental_address_1",
         "to": "co"
