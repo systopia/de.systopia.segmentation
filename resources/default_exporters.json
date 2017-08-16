@@ -40,6 +40,16 @@
         "to": "nachname"
       },
       {
+        "action": "append",
+        "from": "contact.household_name",
+        "to": "nachname"
+      },
+      {
+        "action": "append",
+        "from": "contact.organization_name",
+        "to": "nachname"
+      },
+      {
         "action": "date",
         "from": "contact.birth_date",
         "format": "d.m.Y",
@@ -335,6 +345,16 @@
       {
         "action": "copy",
         "from": "contact.last_name",
+        "to": "Nachname"
+      },
+      {
+        "action": "append",
+        "from": "contact.household_name",
+        "to": "Nachname"
+      },
+      {
+        "action": "append",
+        "from": "contact.organization_name",
         "to": "Nachname"
       },
       {
