@@ -27,7 +27,7 @@ class CRM_Segmentation_Form_Task_Detach extends CRM_Contact_Form_Task {
    * Compile task form
    */
   function buildQuickForm() {
-    CRM_Utils_System::setTitle(ts('Assign %1 Contacts', array(
+    CRM_Utils_System::setTitle(ts('Detach %1 Contacts', array(
       'domain' => 'de.systopia.segmentation',
       1        => count($this->_contactIds))));
 
@@ -40,89 +40,46 @@ class CRM_Segmentation_Form_Task_Detach extends CRM_Contact_Form_Task {
     $this->addRule('campaign_id', ts('You have to select a campaign', array('domain' => 'de.systopia.segmentation')), 'required');
 
     // segment options
-    $segment_choice  = array();
-    $segment_counts  = CRM_Segmentation_Logic::getSegmentCounts();
-    $segments_titles = CRM_Segmentation_Logic::getSegmentTitles(array_keys($segment_counts));
-    foreach ($segments_titles as $segment_id => $title) {
-      $segment_choice[$segment_id] = "{$title} ({$segment_choice[$segment_id]} contacts)";
-    }
     $this->addElement('select',
                       'segment_list',
                       ts('Segment', array('domain' => 'de.systopia.segmentation')),
-                      $segment_choice,
-                      array('class' => 'crm-select2 huge'));
+                      array('' => 'all'), // will be filled via AJAX
+                      array('class' => 'huge'));
 
-    // add segments URL
-    $group_id = CRM_Segmentation_Configuration::segmentsGroupID();
-    $this->assign('segments_url', CRM_Utils_System::url('civicrm/admin/options', "reset=1&gid={$group_id}"));
-
-    CRM_Core_Form::addDefaultButtons("Assign");
+    CRM_Core_Form::addDefaultButtons("Detach");
   }
 
   /**
-   * get all active segments
+   * process results
    */
-  public static function getGenericSegments() {
-    $segments = array();
-
-    // then: add the other segments used in this campaign
-    $query = civicrm_api3('OptionValue', 'get', array(
-      'option_group_id' => 'segments',
-      'is_active'       => '1',
-      'option.limit'    => 0,
-      'return'          => 'label'));
-    foreach ($query['values'] as $value) {
-      $segments[] = $value['label'];
-    }
-
-    return $segments;
-  }
-
-  /**
-   * get all active campaigns
-   */
-  public static function getCampaigns() {
-    $campaign_selection = array();
-    $campaign_query = civicrm_api3('Campaign', 'get', array(
-      'is_active'    => 1,
-      'option.limit' => 0,
-      'status_id'    => 1, // only planned campaigns
-      'return'       => 'id,title'
-      ));
-    foreach ($campaign_query['values'] as $campaign) {
-      $campaign_selection[$campaign['id']] = $campaign['title'];
-    }
-
-    return $campaign_selection;
-  }
-
   function postProcess() {
     $values = $this->exportValues();
 
-    // TODO: use API?
-    if (!empty($this->_contactIds)) {
-      // look up segment ID
-      $segment = civicrm_api3('Segmentation', 'getsegmentid', array(
-        'name' => $values['segment']));
-
+    if (!empty($this->_contactIds) && !empty($values['campaign_id'])) {
       $contact_id_list = implode(',', $this->_contactIds);
-      CRM_Core_DAO::executeQuery("
-          INSERT IGNORE INTO `civicrm_segmentation` (entity_id,datetime,campaign_id,segment_id,test_group,membership_id)
-          SELECT civicrm_contact.id AS entity_id,
-                 NOW()              AS datetime,
-                 %1                 AS campaign_id,
-                 %2                 AS segment_id,
-                 NULL               AS test_group,
-                 NULL               AS membership_id
-          FROM civicrm_contact WHERE civicrm_contact.id IN ({$contact_id_list})",
-          array(
-            1 => array($values['campaign_id'], 'Integer'),
-            2 => array($segment['id'],         'Integer'),
-          )
-        );
+      $campaign = civicrm_api3('Campaign', 'getsingle', array(
+        'id' => $values['campaign_id'],
+        'return' => 'id,title'));
 
-      // add segement to order
-      CRM_Segmentation_Logic::addSegmentToCampaign($segment['id'], $values['campaign_id']);
+      if (empty($values['segment_list'])) {
+        $segment_clause = 'TRUE';
+      } else {
+        $segment_id = (int) $values['segment_list'];
+        $segment_clause = "segment_id = {$segment_id}";
+      }
+
+      // execute the delete
+      CRM_Core_DAO::executeQuery("
+        DELETE FROM `civicrm_segmentation`
+        WHERE `entity_id` IN ({$contact_id_list})
+          AND `campaign_id` = {$campaign['id']}
+          AND {$segment_clause}");
+
+      // create notice
+      $variables = array(
+        1 => count($this->_contactIds),
+        2 => $campaign['title']);
+      CRM_Core_Session::setStatus(ts("Detached %1 contacts from campaign '%2'", $variables), ts("Success"), "info");
     }
   }
 }

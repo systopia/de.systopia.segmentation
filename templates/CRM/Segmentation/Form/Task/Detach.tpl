@@ -27,40 +27,26 @@
 
 {include file="CRM/common/formButtons.tpl" location="bottom"}
 
-<script type="text/javascript">
-var generic_segments = {$generic_segments};
 {literal}
+<script type="text/javascript">
 
 /*******************************
  *   campaign changed handler  *
  ******************************/
 cj("#campaign_id").change(function() {
-  // rebuild segment list
-
-  // first: remove all
+  // rebuild segment list:
+  // first remove all
   cj("#segment_list option").remove();
-  cj("#segment").val('');
-
-  // then: add default ones
-  for (var i = 0; i < generic_segments.length; i++) {
-    cj("#segment_list").append('<option value="' + generic_segments[i] + '">' + generic_segments[i] + '(generic) </option>');
-  }
+  cj("#segment_list").append('<option value="">all</option>');
 
   // then: look up the specific ones and add
   CRM.api3('Segmentation', 'segmentlist', {
     "campaign_id": cj("#campaign_id").val(),
   }).done(function(result) {
-    for (var i = 0; i < result.values.length; i++) {
-      cj("#segment_list").append('<option value="' + result.values[i] + '">' + result.values[i] + '</option>');
+    for (var segment_id in result.values) {
+      cj("#segment_list").append('<option value="' + segment_id + '">' + result.values[segment_id] + '</option>');
     }
   });
-});
-
-/*******************************
- *    segemnt list handler     *
- ******************************/
-cj("#segment_list").change(function() {
-  cj("#segment").val(cj("#segment_list").val());
 });
 
 // fire off event once
