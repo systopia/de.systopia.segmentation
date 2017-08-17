@@ -5,12 +5,12 @@
     "type": "Excel",
     "encoding": "UTF8",
     "delimiter": ";",
-    "columns": ["perid", "titel", "anrede", "vorname", "nachname", "geburtsdatum", "strasse", "plz", "ort", "land", "zielgruppe ID", "zielgruppe", "telefon", "mobilnr", "email"],
+    "columns": ["contact_id", "titel", "anrede", "vorname", "nachname", "geburtsdatum", "strasse", "plz", "ort", "land", "zielgruppe ID", "zielgruppe", "telefon", "mobilnr", "email"],
     "rules": [
       {
         "action": "copy",
         "from": "contact.id",
-        "to": "perid"
+        "to": "contact_id"
       },
       {
         "action": "copy",
