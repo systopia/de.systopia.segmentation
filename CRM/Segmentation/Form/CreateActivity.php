@@ -162,7 +162,10 @@ class CRM_Segmentation_Form_CreateActivity extends CRM_Core_Form {
       CRM_Core_DAO::executeQuery($query);
     }
 
-    CRM_Core_Session::setStatus(ts("New activity created for %1 contacts", array(1 => $this->total_count)), ts("Success"), "info");
+    // create popup
+    $activity_edit_url = CRM_Utils_System::url('civicrm/activity/add', "atype=1&action=update&reset=1&id={$activity['id']}");
+    CRM_Core_Session::setStatus(ts("New activity created for %1 contacts (<a href='%2'>edit</a>).",
+      array(1 => $this->total_count, 2 => $activity_edit_url)), ts("Success"), "info");
 
     parent::postProcess();
 
