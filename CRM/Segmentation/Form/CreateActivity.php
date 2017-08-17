@@ -21,6 +21,7 @@ class CRM_Segmentation_Form_CreateActivity extends CRM_Core_Form {
 
   /** will store the campaign in question */
   protected $campaign = NULL;
+  protected $total_count = NULL;
 
   /**
    * Build the create activity form
@@ -36,17 +37,15 @@ class CRM_Segmentation_Form_CreateActivity extends CRM_Core_Form {
 
     // load some stats
     $total_count_sql = CRM_Segmentation_Configuration::getContactCount($cid);
-    $total_count = CRM_Core_DAO::singleValueQuery($total_count_sql);
-    CRM_Utils_System::setTitle(ts("Create mass activity for %1 contacts", array(1 => $total_count)));
-    if (!$total_count) {
+    $this->total_count = CRM_Core_DAO::singleValueQuery($total_count_sql);
+    CRM_Utils_System::setTitle(ts("Create mass activity for %1 contacts", array(1 => $this->total_count)));
+    if (!$this->total_count) {
       CRM_Core_Session::setStatus(ts("No contacts assigned to this campaign!"), ts("Warning"), "warn");
     }
 
     // load campaign and data
     $this->campaign = civicrm_api3('Campaign', 'getsingle', array('id' => $cid));
     $this->addElement('hidden', 'cid', $cid);
-
-
 
     // compile form
     $this->add(
@@ -117,9 +116,12 @@ class CRM_Segmentation_Form_CreateActivity extends CRM_Core_Form {
   function setDefaults($defaultValues = null, $filter = null) {
     $defaults['subject']            = $this->campaign['title'];
     $defaults['campaign_id']        = $this->campaign['id'];
-    $defaults['activity_date_time']      = date('m/d/Y');
-    $defaults['activity_date_time_time'] = date('H:i:p');
     $defaults['status_id']          = 2; // completed
+
+    // set date default to now
+    list($defaults['activity_date_time'], $defaults['activity_date_time_time'])
+        = CRM_Utils_Date::setDateDefaults(NULL, 'activityDateTime');
+
     parent::setDefaults($defaults);
   }
 
@@ -139,16 +141,35 @@ class CRM_Segmentation_Form_CreateActivity extends CRM_Core_Form {
     }
 
     // compile the date
-    $activity_data['activity_date_time'] = date('YmdHis', strtotime("{$values['activity_date_time']} {$values['activity_date_time_time']}"));
+    $activity_data['activity_date_time'] =
+      date('YmdHis', strtotime("{$values['activity_date_time']} {$values['activity_date_time_time']}"));
 
-    // TODO: create activity + add all contacts
+    // create activity
+    $activity = civicrm_api3('Activity', 'create', $activity_data);
 
-    error_log(json_encode($activity_data));
-    // $options = $this->getColorOptions();
-    // CRM_Core_Session::setStatus(ts('You picked color "%1"', array(
-    //   1 => $options[$values['favorite_color']],
-    // )));
+    // add all contacts
+    if (!empty($values['cid']) && !empty($activity['id'])) {
+      $query = "INSERT IGNORE INTO civicrm_activity_contact
+                 (SELECT
+                    NULL               AS id,
+                    {$activity['id']}  AS activity_id,
+                    civicrm_contact.id AS contact_id,
+                    3                  AS record_type
+                  FROM civicrm_segmentation
+                  LEFT JOIN civicrm_contact ON civicrm_contact.id = civicrm_segmentation.entity_id
+                  WHERE campaign_id = {$values['cid']}
+                    AND civicrm_contact.is_deleted = 0)";
+      CRM_Core_DAO::executeQuery($query);
+    }
+
+    CRM_Core_Session::setStatus(ts("New activity created for %1 contacts", array(1 => $this->total_count)), ts("Success"), "info");
+
     parent::postProcess();
+
+    // go back to where we came from
+    // $session = CRM_Core_Session::singleton();
+    // $toUrl = $session->popUserContext();
+    // CRM_Utils_System::redirect($toUrl);
   }
 
   /**
