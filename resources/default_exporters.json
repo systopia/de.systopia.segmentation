@@ -229,7 +229,7 @@
       {
         "action": "sprintf",
         "from": "campaign.id",
-        "format": "%04d",
+        "format": "%05d",
         "to": "kundennummer"
       },
       {
