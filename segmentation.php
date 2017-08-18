@@ -68,6 +68,10 @@ function segmentation_civicrm_searchTasks($objectType, &$tasks) {
           'title' => ts('Assign Memberships to Campaign', array('domain' => 'de.systopia.segmentation')),
           'class' => 'CRM_Segmentation_Form_Task_AssignContactMembership',
           'result' => false);
+      $tasks[] = array(
+          'title' => ts('Detach from Campaign', array('domain' => 'de.systopia.segmentation')),
+          'class' => 'CRM_Segmentation_Form_Task_Detach',
+          'result' => false);
     }
 
   } elseif ($objectType == 'membership') {
