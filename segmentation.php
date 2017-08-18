@@ -27,6 +27,11 @@ function segmentation_civicrm_links($op, $objectName, $objectId, &$links, &$mask
             'title' => ts('Find Contacts'),
             'class' => 'no-popup',
           );
+    $links[] = array(
+            'name'  => ts('Activity'),
+            'url'   => CRM_Utils_System::url('civicrm/segmentation/createactivity', "cid={$objectId}"),
+            'title' => ts('Create Activity'),
+          );
 
     $campaign = civicrm_api3('Campaign', 'getsingle', array(
       'id'     => $objectId,
