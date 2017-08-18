@@ -61,7 +61,7 @@ function segmentation_civicrm_searchTasks($objectType, &$tasks) {
   if ($objectType == 'contact') {
     if (CRM_Core_Permission::check('manage campaign')) {
       $tasks[] = array(
-          'title' => ts('Assign to Campaign', array('domain' => 'de.systopia.segmentation')),
+          'title' => ts('Assign Contacts to Campaign', array('domain' => 'de.systopia.segmentation')),
           'class' => 'CRM_Segmentation_Form_Task_Assign',
           'result' => false);
       $tasks[] = array(

@@ -82,14 +82,26 @@ class CRM_Segmentation_Form_Task_AssignContactMembership extends CRM_Contact_For
   function postProcess() {
     $values = $this->exportValues();
 
-    // TODO: use API?
     if (!empty($this->_contactIds)) {
       // look up segment ID
       $segment = civicrm_api3('Segmentation', 'getsegmentid', array(
         'name' => $values['segment']));
 
-      // TODO: $membership_status_clause
-      // TODO: $membership_type_clause
+      // derive status clause
+      if (!empty($values['membership_status_id']) && is_array($values['membership_status_id'])) {
+        $status_list = implode(',', $values['membership_status_id']);
+        $membership_status_clause = "civicrm_membership.status_id IN ($status_list)";
+      } else {
+        $membership_status_clause = "TRUE";
+      }
+
+      // derive type clause
+      if (!empty($values['membership_type_id']) && is_array($values['membership_type_id'])) {
+        $type_list = implode(',', $values['membership_type_id']);
+        $membership_type_clause = "civicrm_membership.membership_type_id IN ($type_list)";
+      } else {
+        $membership_type_clause = "TRUE";
+      }
 
       $contact_id_list = implode(',', $this->_contactIds);
       CRM_Core_DAO::executeQuery("
