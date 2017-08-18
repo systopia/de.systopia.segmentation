@@ -36,6 +36,8 @@
 
 <h3>{ts}Membership Selector{/ts}</h3>
 
+<div class="help" id="count_preview"></div>
+
 <div class="crm-section">
   <div class="label">{$form.membership_type_id.label}</div>
   <div class="content">{$form.membership_type_id.html}</div>
@@ -88,5 +90,58 @@ cj("#segment_list").change(function() {
 
 // fire off event once
 cj("#campaign_id").change();
+
+
+/********************************
+ * re-calculate sample handler  *
+ ********************************/
+{/literal}
+var contact_sample          = {$contact_sample};
+var contact_sample_complete = {$contact_sample_complete};
+var contact_sample_factor   = {$contact_sample_factor};
+var contact_count           = {$contact_count};
+{literal}
+
+/**
+ * queries the predicted amount of memberships matching the
+ * selected status_id and membership_type_id, and
+ * updates the UI
+ */
+function recalculate_stats() {
+  cj("#count_preview").hide(300);
+  // compile query
+  var query = {"contact_id": {"IN":contact_sample}};
+
+  // add membership_type clause
+  var types = cj("#membership_type_id").val();
+  if (types && types.length > 0) {
+    query["membership_type_id"] = {"IN":types};
+  }
+
+  // add status clause
+  var statuses = cj("#membership_status_id").val();
+  if (statuses && statuses.length > 0) {
+    query["status_id"] = {"IN":statuses};
+  }
+
+  CRM.api3('Membership', 'getcount', query).done(function(result) {
+    var sample_count = result.result;
+    var qualifier = '';
+    var suffix = '.';
+    if (!contact_sample_complete) {
+      qualifier = '~';
+      var suffix = ', based on a sample of ' + contact_sample.length + '.';
+      sample_count = Math.round(sample_count * contact_sample_factor);
+    }
+    cj("#count_preview").html("<p>Your current selection will assign <b>" + qualifier + sample_count + "</b> memberships" + suffix + "</p>");
+    cj("#count_preview").show(300);
+  });
+}
+
+// register events and trigger once
+cj("#membership_type_id").change(recalculate_stats);
+cj("#membership_status_id").change(recalculate_stats);
+recalculate_stats();
+
 {/literal}
 </script>

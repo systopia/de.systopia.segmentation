@@ -14,6 +14,8 @@
 | written permission from the original author(s).        |
 +--------------------------------------------------------*/
 
+define('ASSIGN_MEMBERSHIP__PREVIEW_SAMPLE_SIZE', 500);
+
 require_once 'CRM/Core/Form.php';
 
 /**
@@ -71,6 +73,22 @@ class CRM_Segmentation_Form_Task_AssignContactMembership extends CRM_Contact_For
     // add segments URL
     $group_id = CRM_Segmentation_Configuration::segmentsGroupID();
     $this->assign('segments_url', CRM_Utils_System::url('civicrm/admin/options', "reset=1&gid={$group_id}"));
+
+    // create a lookup sample
+    $sample = array();
+    $count  = count($this->_contactIds);
+    if ($count > ASSIGN_MEMBERSHIP__PREVIEW_SAMPLE_SIZE) {
+      $indexes = array_rand ($this->_contactIds, ASSIGN_MEMBERSHIP__PREVIEW_SAMPLE_SIZE);
+      foreach ($indexes as $index) {
+        $sample[] = $this->_contactIds[$index];
+      }
+    } else {
+      $sample = $this->_contactIds;
+    }
+    $this->assign('contact_sample', json_encode($sample));
+    $this->assign('contact_sample_complete', (int) ($count <= ASSIGN_MEMBERSHIP__PREVIEW_SAMPLE_SIZE));
+    $this->assign('contact_sample_factor', $count / ASSIGN_MEMBERSHIP__PREVIEW_SAMPLE_SIZE);
+    $this->assign('contact_count',  $count);
 
     CRM_Core_Form::addDefaultButtons("Assign Memberships");
   }
