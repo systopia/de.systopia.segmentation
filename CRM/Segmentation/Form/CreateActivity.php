@@ -15,7 +15,7 @@
 +--------------------------------------------------------*/
 
 /** Show a warning if more the WARNING_COUNT activities should be indiviually created */
-define('WARNING_COUNT', '500');
+define('WARNING_COUNT', '250');
 
 
 /**
@@ -160,28 +160,43 @@ class CRM_Segmentation_Form_CreateActivity extends CRM_Core_Form {
     $activity_data['activity_date_time'] =
       date('YmdHis', strtotime("{$values['activity_date_time']} {$values['activity_date_time_time']}"));
 
-    // create activity
-    $activity = civicrm_api3('Activity', 'create', $activity_data);
+    if (empty($values['mass_activity'])) {
+      // create individual activities
+      $sql_query = CRM_Segmentation_Configuration::getSegmentQuery($values['cid']);
+      $query = CRM_Core_DAO::executeQuery($sql_query);
+      while ($query->fetch()) {
+        $activity_data['target_id'] = $query->contact_id;
+        $activity = civicrm_api3('Activity', 'create', $activity_data);
+      }
+      // create popup
+      CRM_Core_Session::setStatus(ts("%1 activities created.",
+        array(1 => $this->total_count)), ts("Success"), "info");
 
-    // add all contacts
-    if (!empty($values['cid']) && !empty($activity['id'])) {
-      $query = "INSERT IGNORE INTO civicrm_activity_contact
-                 (SELECT
-                    NULL               AS id,
-                    {$activity['id']}  AS activity_id,
-                    civicrm_contact.id AS contact_id,
-                    3                  AS record_type
-                  FROM civicrm_segmentation
-                  LEFT JOIN civicrm_contact ON civicrm_contact.id = civicrm_segmentation.entity_id
-                  WHERE campaign_id = {$values['cid']}
-                    AND civicrm_contact.is_deleted = 0)";
-      CRM_Core_DAO::executeQuery($query);
+    } else {
+      // create mass activity
+      // first: create activity
+      $activity = civicrm_api3('Activity', 'create', $activity_data);
+
+      // add all contacts
+      if (!empty($values['cid']) && !empty($activity['id'])) {
+        $query = "INSERT IGNORE INTO civicrm_activity_contact
+                   (SELECT
+                      NULL               AS id,
+                      {$activity['id']}  AS activity_id,
+                      civicrm_contact.id AS contact_id,
+                      3                  AS record_type
+                    FROM civicrm_segmentation
+                    LEFT JOIN civicrm_contact ON civicrm_contact.id = civicrm_segmentation.entity_id
+                    WHERE campaign_id = {$values['cid']}
+                      AND civicrm_contact.is_deleted = 0)";
+        CRM_Core_DAO::executeQuery($query);
+      }
+      // create popup
+      $activity_edit_url = CRM_Utils_System::url('civicrm/activity/add', "atype=1&action=update&reset=1&id={$activity['id']}");
+      CRM_Core_Session::setStatus(ts("New activity created for %1 contacts (<a href='%2'>edit</a>).",
+        array(1 => $this->total_count, 2 => $activity_edit_url)), ts("Success"), "info");
     }
 
-    // create popup
-    $activity_edit_url = CRM_Utils_System::url('civicrm/activity/add', "atype=1&action=update&reset=1&id={$activity['id']}");
-    CRM_Core_Session::setStatus(ts("New activity created for %1 contacts (<a href='%2'>edit</a>).",
-      array(1 => $this->total_count, 2 => $activity_edit_url)), ts("Success"), "info");
 
     parent::postProcess();
 
