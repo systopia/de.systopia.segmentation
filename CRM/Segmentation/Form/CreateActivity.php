@@ -14,6 +14,10 @@
 | written permission from the original author(s).        |
 +--------------------------------------------------------*/
 
+/** Show a warning if more the WARNING_COUNT activities should be indiviually created */
+define('WARNING_COUNT', '500');
+
+
 /**
  * Create Activity Form
  */
@@ -42,6 +46,8 @@ class CRM_Segmentation_Form_CreateActivity extends CRM_Core_Form {
     if (!$this->total_count) {
       CRM_Core_Session::setStatus(ts("No contacts assigned to this campaign!"), ts("Warning"), "warn");
     }
+    $this->assign('total_count',   $this->total_count);
+    $this->assign('warning_count', WARNING_COUNT);
 
     // load campaign and data
     $this->campaign = civicrm_api3('Campaign', 'getsingle', array('id' => $cid));
@@ -55,6 +61,16 @@ class CRM_Segmentation_Form_CreateActivity extends CRM_Core_Form {
       $this->getActivityTypes(),
       FALSE,
       array('class' => 'crm-select2')
+    );
+
+    // compile form
+    $this->add(
+      'select',
+      'mass_activity',
+      ts('Kind of Activity'),
+      $this->getActivityKinds(),
+      FALSE,
+      array('class' => 'huge')
     );
 
     $this->add(
@@ -191,12 +207,21 @@ class CRM_Segmentation_Form_CreateActivity extends CRM_Core_Form {
   }
 
   /**
+   * get options for activity kind (mass/individual)
+   */
+  protected function getActivityKinds() {
+    return array(
+      1 => ts("Mass: a single activity linked to all contacts"),
+      0 => ts("Individual: one activity per contact"));
+  }
+
+
+  /**
    * get all eligible activity Types
    */
   protected function getActivityTypes() {
     return $this->getOptionValueList('activity_type');
   }
-
   /**
    * get all eligible activity Types
    */

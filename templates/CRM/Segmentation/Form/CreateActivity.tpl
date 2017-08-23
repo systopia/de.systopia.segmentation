@@ -15,6 +15,16 @@
 
 {$form.cid.html}
 
+<div class="help" id="individual_activity_warning" style="display: none;">
+  <p>{ts}<strong>Caution!</strong> If you want to create too many individual activities you might run into a timeout, resulting in only some of the activities created.{/ts}</p>
+</div>
+
+<div class="crm-section">
+  <div class="label">{$form.mass_activity.label}</div>
+  <div class="content">{$form.mass_activity.html}</div>
+  <div class="clear"></div>
+</div>
+
 <div class="crm-section">
   <div class="label">{$form.activity_type_id.label}</div>
   <div class="content">{$form.activity_type_id.html}</div>
@@ -52,3 +62,20 @@
 </div>
 
 {include file="CRM/common/formButtons.tpl" location="bottom"}
+
+<script type="text/javascript">
+var total_count   = {$total_count};
+var warning_count = {$warning_count};
+{literal}
+if (total_count > warning_count) {
+  cj("#mass_activity").change(function() {
+    if (cj(this).val() == '0') {
+      cj("#individual_activity_warning").show(100);
+    } else {
+      cj("#individual_activity_warning").hide(100);
+    }
+  });
+  cj("#mass_activity").change();
+}
+{/literal}
+</script>
