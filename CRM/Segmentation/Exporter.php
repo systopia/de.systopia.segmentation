@@ -325,7 +325,12 @@ abstract class CRM_Segmentation_Exporter {
         // RULE: DATE
         case 'date':
           $format = CRM_Utils_Array::value('format', $rule, '');
-          $data[$rule['to']] = date($format, strtotime($this->getValue($rule['from'], $line, $data)));
+          $value = $this->getValue($rule['from'], $line, $data);
+          if (empty($value)) {
+            $data[$rule['to']] = '';
+          } else {
+           $data[$rule['to']] = date($format, strtotime($value));
+          }
           break;
 
         // RULE: APPEND
