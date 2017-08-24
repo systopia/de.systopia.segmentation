@@ -32,7 +32,7 @@
           <th>{ts}Segment Name{/ts}</th>
           <th>{ts}Contact Count{/ts}</th>
           <th>{ts}Segment Order{/ts}</th>
-          <th></th>
+          <th>{ts}Actions{/ts}</th>
       </tr>
   </thead>
   <tbody>
@@ -49,11 +49,12 @@
           <a class="crm-weight-arrow" href="{crmURL p='civicrm/segmentation/start' q="cid=$campaign_id&bottom=$segment_id"}"><img src="{$config->resourceBase}i/arrow/last.gif" title="Move to bottom" alt="Move to bottom" class="order-icon"></a>
       </td>
       <td>
-        <span>
-          <a name="contact_list" href="{crmURL p='civicrm/segmentation/contacts' q="snippet=1&cid=$campaign_id&sid=$segment_id"}" alt="{ts}View in Popup{/ts}" title="{ts}View in Popup{/ts}">
-            <div><span class="ui-icon ui-icon-zoomout" title="{ts}View Contact List{/ts}"></span></div>
-          </a>
-        </span>
+        <a name="contact_list" href="{crmURL p='civicrm/segmentation/contacts' q="snippet=1&cid=$campaign_id&sid=$segment_id"}" alt="{ts}View in Popup{/ts}" title="{ts}Show contact list in popup window{/ts}" class="crm-hover-button">
+          <div>{ts}Contact List{/ts}</div>
+        </a>
+        <a href="{crmURL p='civicrm/segmentation/start' q="cid=$campaign_id&delete=$segment_id"}" alt="{ts}Delete Segment{/ts}" title="{ts}Delete the entire segment{/ts}" class="crm-hover-button">
+          <div>{ts}Delete Segment{/ts}</div>
+        </a>
       </td>
     </tr>
   {/foreach}

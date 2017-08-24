@@ -34,6 +34,9 @@ class CRM_Segmentation_Page_Start extends CRM_Core_Page {
     // load campaign
     $campaign = civicrm_api3('Campaign', 'getsingle', array('id' => $campaign_id));
 
+    // delete segment if requested
+    $this->processDeleteCommand($campaign_id);
+
     // get segment order, process, store
     $segment_order  = CRM_Segmentation_Logic::getSegmentOrder($campaign_id);
     $segment_order = $this->processOrderCommands($segment_order);
@@ -96,5 +99,30 @@ class CRM_Segmentation_Page_Start extends CRM_Core_Page {
       }
     }
     return $segment_order;
+  }
+
+  /**
+   * Process a delete command if there is one,
+   * deleting an entire segment
+   */
+  protected function processDeleteCommand($campaign_id) {
+    if (empty($campaign_id)) return;
+
+    $segment_id = (int) CRM_Utils_Request::retrieve('delete', 'Integer');
+    if ($segment_id) {
+      // remove the segment links
+      CRM_Core_DAO::executeQuery("
+        DELETE FROM `civicrm_segmentation`
+        WHERE `campaign_id` = {$campaign_id}
+          AND `segment_id`  = {$segment_id}");
+
+      CRM_Core_DAO::executeQuery("
+        DELETE FROM `civicrm_segmentation_order`
+        WHERE `campaign_id` = {$campaign_id}
+          AND `segment_id`  = {$segment_id}");
+
+      // create notice
+      CRM_Core_Session::setStatus(ts("Segment sucessfully removed."), ts("Success"), "info");
+    }
   }
 }
