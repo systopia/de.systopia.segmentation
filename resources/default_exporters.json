@@ -142,12 +142,12 @@
     "name": "Lettershopformat (Excel)",
     "id": 3,
     "type": "Excel",
-    "columns": ["id", "titel", "anrede", "vorname", "nachname", "co", "strasse", "plz", "ort", "postfach", "land", "zielgruppe ID", "zielgruppe", "paket", "kundennummer", "sepa_belegart", "iban_empfaenger", "bic_empfaenger", "pruefziffer"],
+    "columns": ["contact_id", "titel", "anrede", "vorname", "nachname", "co", "strasse", "plz", "ort", "postfach", "land", "zielgruppe ID", "zielgruppe", "paket", "kundennummer", "sepa_belegart", "iban_empfaenger", "bic_empfaenger", "pruefziffer"],
     "rules": [
       {
         "action": "copy",
         "from": "contact.id",
-        "to": "id"
+        "to": "contact_id"
       },
       {
         "action": "copy",
@@ -313,12 +313,12 @@
     "name": "TM Stammdaten (Excel)",
     "id": 4,
     "type": "Excel",
-    "columns": ["Spendernummer","Anrede","Titel","Vorname","Nachname","Strasse","Hausnummer","PLZ","Ort","Land","Email","Geburtsdatum","Firma","Spendertyp","Kundennummer","Ablaufdatum","Adressefalsch","Selektionshistoryid","Zielgruppeid","Zielgruppenname"],
+    "columns": ["contact_id","Anrede","Titel","Vorname","Nachname","Strasse","Hausnummer","PLZ","Ort","Land","Email","Geburtsdatum","Firma","Spendertyp","Kundennummer","Ablaufdatum","Adressefalsch","Selektionshistoryid","Zielgruppeid","Zielgruppenname"],
     "rules": [
       {
         "action": "copy",
         "from": "contact.id",
-        "to": "Spendernummer"
+        "to": "contact_id"
       },
       {
         "action": "copy",
@@ -435,7 +435,7 @@
     "name": "TM Spendendaten (Excel)",
     "id": 5,
     "type": "Excel",
-    "columns": ["Spendernummer","Spendendatum","Spendenbetrag","Aktionscode","Aktionsbezeichnung"],
+    "columns": ["contact_id","Spendendatum","Spendenbetrag","Aktionscode","Aktionsbezeichnung"],
     "loop": [
       {
         "type": "Contribution",
@@ -452,7 +452,7 @@
       {
         "action": "copy",
         "from": "contact.id",
-        "to": "Spendernummer"
+        "to": "contact_id"
       },
       {
         "action": "date",
@@ -510,7 +510,7 @@
     "name": "TM Telefondaten (Excel)",
     "id": 6,
     "type": "Excel",
-    "columns": ["Telefonid","Tel","Mob","Spendernummer","Landvorwahl","Ortvorwahl","Telefonnummer","Durchwahl"],
+    "columns": ["Telefonid","Tel","Mob","contact_id","Landvorwahl","Ortvorwahl","Telefonnummer","Durchwahl"],
     "rules": [
       {
         "action": "copy",
@@ -558,7 +558,7 @@
       {
         "action": "copy",
         "from": "contact.id",
-        "to": "Spendernummer"
+        "to": "contact_id"
       },
       {
         "action": "copy",
@@ -596,12 +596,12 @@
     "name": "TM Vertragsdaten (Excel)",
     "id": 7,
     "type": "Excel",
-    "columns": ["Spendernummer","Vertragsnummer","Anlagedatum","Jahresbeitrag","Buchungsinterval","Vertragsbeginn","Kontonummer","Bankleitzahl","Bic","Iban","Bankinstitut","Kontoinhaber","Buchungnext","Vertragstyp","Stornodatum","Stornogrund"],
+    "columns": ["contact_id","Vertragsnummer","Anlagedatum","Jahresbeitrag","Buchungsinterval","Vertragsbeginn","Kontonummer","Bankleitzahl","Bic","Iban","Bankinstitut","Kontoinhaber","Buchungnext","Vertragstyp","Stornodatum","Stornogrund"],
     "rules": [
       {
         "action": "copy",
         "from": "contact.id",
-        "to": "Spendernummer"
+        "to": "contact_id"
       },
       {
         "action": "copy",
