@@ -83,16 +83,16 @@ class CRM_Segmentation_Configuration {
    * @param $campaign_id  id of campaign
    * @param $segment_list  array of segment IDs
    */
-  public static function getSegmentQuery($campaign_id, $segment_list = NULL, $exclude_deleted_contacts = TRUE, $offset = 0, $limit = 0) {
+  public static function getSegmentQuery($campaign_id, $params = array(), $exclude_deleted_contacts = TRUE, $offset = 0, $limit = 0) {
     $_campaign_id = (int) $campaign_id;
     if (!$_campaign_id) {
       throw new Exception("Illegal campaign_id '{$campaign_id}'", 1);
     }
 
-    if (empty($segment_list)) {
+    if (empty($params['segments'])) {
       $segment_condition = '';
     } else {
-      $segment_list_string = implode(',', $segment_list);
+      $segment_list_string = implode(',', $params['segments']);
       $segment_condition = "AND segment_id IN ({$segment_list_string})";
     }
 
@@ -106,6 +106,18 @@ class CRM_Segmentation_Configuration {
       $limit_clause = "LIMIT {$limit} OFFSET {$offset}";
     } else {
       $limit_clause = '';
+    }
+
+    if (empty($params['start_date'])) {
+      $assignment_start_condition = '';
+    } else {
+      $assignment_start_condition = "AND `datetime` >= '{$params['start_date']}'";
+    }
+
+    if (empty($params['end_date'])) {
+      $assignment_end_condition = '';
+    } else {
+      $assignment_end_condition = "AND `datetime` <= '{$params['end_date']}'";
     }
 
     return "
@@ -123,6 +135,8 @@ class CRM_Segmentation_Configuration {
      WHERE campaign_id = {$_campaign_id}
      {$contact_status_check}
      {$segment_condition}
+     {$assignment_start_condition}
+     {$assignment_end_condition}
      {$limit_clause}";
   }
 
@@ -133,16 +147,16 @@ class CRM_Segmentation_Configuration {
    * @param $campaign_id  id of campaign
    * @param $segment_list  array of segment IDs
    */
-  public static function getContactCount($campaign_id, $segment_list = NULL, $exclude_deleted_contacts = TRUE) {
+  public static function getContactCount($campaign_id, $params = array(), $exclude_deleted_contacts = TRUE) {
     $_campaign_id = (int) $campaign_id;
     if (!$_campaign_id) {
       throw new Exception("Illegal campaign_id '{$campaign_id}'", 1);
     }
 
-    if (empty($segment_list)) {
+    if (empty($params['segments'])) {
       $segment_condition = '';
     } else {
-      $segment_list_string = implode(',', $segment_list);
+      $segment_list_string = implode(',', $params['segments']);
       $segment_condition = "AND segment_id IN ({$segment_list_string})";
     }
 
@@ -152,6 +166,18 @@ class CRM_Segmentation_Configuration {
       $contact_status_check = "";
     }
 
+    if (empty($params['start_date'])) {
+      $assignment_start_condition = '';
+    } else {
+      $assignment_start_condition = "AND `datetime` >= '{$params['start_date']}'";
+    }
+
+    if (empty($params['end_date'])) {
+      $assignment_end_condition = '';
+    } else {
+      $assignment_end_condition = "AND `datetime` <= '{$params['end_date']}'";
+    }
+
     return "
      SELECT COUNT(entity_id) AS contact_count
      FROM civicrm_segmentation
@@ -159,7 +185,10 @@ class CRM_Segmentation_Configuration {
      LEFT JOIN civicrm_contact ON civicrm_contact.id = civicrm_segmentation.entity_id
      WHERE campaign_id = {$_campaign_id}
      {$contact_status_check}
-     {$segment_condition}";
+     {$segment_condition}
+     {$assignment_start_condition}
+     {$assignment_end_condition}
+     ";
   }
 
   /**

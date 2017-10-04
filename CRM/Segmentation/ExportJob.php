@@ -24,17 +24,17 @@ class CRM_Segmentation_ExportJob {
   public $title           = NULL;
   protected $exporter_id  = NULL;
   protected $campaign_id  = NULL;
-  protected $segment_list = NULL;
+  protected $params       = NULL;
   protected $tmp_file     = NULL;
   protected $offset       = NULL;
   protected $count        = NULL;
   protected $is_last      = NULL;
 
 
-  protected function __construct($exporter_id, $campaign_id, $segment_list, $tmp_file, $offset, $count, $is_last) {
+  protected function __construct($exporter_id, $campaign_id, $params, $tmp_file, $offset, $count, $is_last) {
     $this->exporter_id   = $exporter_id;
     $this->campaign_id   = $campaign_id;
-    $this->segment_list  = $segment_list;
+    $this->params        = $params;
     $this->tmp_file      = $tmp_file;
     $this->is_last       = $is_last;
     $this->offset        = $offset;
@@ -55,7 +55,7 @@ class CRM_Segmentation_ExportJob {
     $exporter->resumeTmpFile($this->tmp_file);
     $exporter->generateFile(
       $this->campaign_id,
-      $this->segment_list,
+      $this->params,
       $this->offset,
       $this->count,
       $this->is_last,
@@ -73,18 +73,16 @@ class CRM_Segmentation_ExportJob {
    * Use CRM_Queue_Runner to do the SDD group update
    * This doesn't return, but redirects to the runner
    */
-  public static function launchExportRunner($campaign_id, $segment_list, $exporter_id) {
+  public static function launchExportRunner($campaign_id, $exporter_id, $params) {
     // load campaign
     $campaign = civicrm_api3('Campaign', 'getsingle', array('id' => $campaign_id));
 
     // get total count
-    $total_count_sql = CRM_Segmentation_Configuration::getContactCount($campaign_id, $segment_list);
+    $total_count_sql = CRM_Segmentation_Configuration::getContactCount($campaign_id, $params);
     $total_count = CRM_Core_DAO::singleValueQuery($total_count_sql);
-    // error_log("Count is: $total_count");
 
     // generate tmpfile
     $tmp_file = tempnam(sys_get_temp_dir(), "segmentation_export_{$campaign_id}_" . substr(sha1(rand()), 0, 8) . '_');
-    // error_log("Writing to file: {$tmp_file}");
 
     // create a queue
     $queue = CRM_Queue_Service::singleton()->create(array(
@@ -94,16 +92,27 @@ class CRM_Segmentation_ExportJob {
     ));
 
     // create the items
-    for ($offset=0; $offset < $total_count; $offset += SEGMENTATION_EXPORT_JOB_SIZE) {
+    if ($total_count > 0) {
+      // break export down into jobs
+      for ($offset=0; $offset < $total_count; $offset += SEGMENTATION_EXPORT_JOB_SIZE) {
+        $queue->createItem(new CRM_Segmentation_ExportJob(
+                                          $exporter_id,
+                                          $campaign_id,
+                                          $params,
+                                          $tmp_file,
+                                          $offset,
+                                          SEGMENTATION_EXPORT_JOB_SIZE,
+                                          ($offset += SEGMENTATION_EXPORT_JOB_SIZE >= $total_count)
+                                          ));
+      }
+    } else {
+      // create a dummy job
       $queue->createItem(new CRM_Segmentation_ExportJob(
                                         $exporter_id,
                                         $campaign_id,
-                                        $segment_list,
+                                        $params,
                                         $tmp_file,
-                                        $offset,
-                                        SEGMENTATION_EXPORT_JOB_SIZE,
-                                        ($offset += SEGMENTATION_EXPORT_JOB_SIZE >= $total_count)
-                                        ));
+                                        0, SEGMENTATION_EXPORT_JOB_SIZE, TRUE));
     }
 
     // generate donwload URL

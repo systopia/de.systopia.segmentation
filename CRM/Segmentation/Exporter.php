@@ -83,7 +83,7 @@ abstract class CRM_Segmentation_Exporter {
   /**
    * export the given campaig and segments
    */
-  public function generateFile($campaign_id, $segment_list = NULL, $offset = 0, $count = 0, $is_last = TRUE, $exclude_deleted_contacts = TRUE) {
+  public function generateFile($campaign_id, $params = array(), $offset = 0, $count = 0, $is_last = TRUE, $exclude_deleted_contacts = TRUE) {
     // create a tmp file (if not yet exists)
     $this->createTmpFile();
 
@@ -91,7 +91,7 @@ abstract class CRM_Segmentation_Exporter {
       $this->exportHeader();
     }
 
-    $query_sql = CRM_Segmentation_Configuration::getSegmentQuery($campaign_id, $segment_list, $exclude_deleted_contacts, $offset, $count);
+    $query_sql = CRM_Segmentation_Configuration::getSegmentQuery($campaign_id, $params, $exclude_deleted_contacts, $offset, $count);
     $main_query = CRM_Core_DAO::executeQuery($query_sql);
 
     $more_data = TRUE;
@@ -472,7 +472,7 @@ abstract class CRM_Segmentation_Exporter {
     switch (strtolower($entity_name)) {
       case 'contact':
         if (!isset($this->_contacts[$line['contact_id']])) {
-          error_log("CACHE MISS: Contact.{$line['contact_id']}");
+          // error_log("CACHE MISS: Contact.{$line['contact_id']}");
           $this->_contacts[$line['contact_id']] = civicrm_api3('Contact', 'getsingle', array('id' => $line['contact_id']));
         }
         return $this->_contacts[$line['contact_id']];
@@ -483,7 +483,7 @@ abstract class CRM_Segmentation_Exporter {
       case 'membership':
         if (!empty($line['membership_id'])) {
           if (!isset($this->_memberships[$line['membership_id']])) {
-            error_log("CACHE MISS: Membership.{$line['membership_id']}");
+            // error_log("CACHE MISS: Membership.{$line['membership_id']}");
             $this->_memberships[$line['membership_id']] = civicrm_api3('Membership', 'getsingle', array('id' => $line['membership_id']));
           }
           return $this->_memberships[$line['membership_id']];
@@ -494,7 +494,7 @@ abstract class CRM_Segmentation_Exporter {
 
       case 'campaign':
         if ($this->_campaign == NULL || $this->_campaign['id'] != $line['campaign_id']) {
-          error_log("CACHE MISS: Campaign.{$line['campaign_id']}");
+          // error_log("CACHE MISS: Campaign.{$line['campaign_id']}");
           $this->_campaign = civicrm_api3('Campaign', 'getsingle', array('id' => $line['campaign_id']));
         }
         return $this->_campaign;

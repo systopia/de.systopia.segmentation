@@ -56,6 +56,16 @@ class CRM_Segmentation_Form_Export extends CRM_Core_Form {
                       $segment_list,
                       array('multiple' => "multiple", 'class' => 'crm-select2 huge'));
 
+    $this->addDate('assigned_start_date',
+                   ts('Assigned after', array('domain' => 'de.systopia.segmentation')),
+                   FALSE,
+                   array('formatType' => 'activityDateTime'));
+
+    $this->addDate('assigned_end_date',
+                   ts('Assigned before', array('domain' => 'de.systopia.segmentation')),
+                   FALSE,
+                   array('formatType' => 'activityDateTime'));
+
     $this->addElement('hidden',
                       'campaign_id',
                       $campaign_id);
@@ -87,10 +97,18 @@ class CRM_Segmentation_Form_Export extends CRM_Core_Form {
   public function postProcess() {
     parent::postProcess();
     $values = $this->exportValues();
-    // $exporter = CRM_Segmentation_Exporter::getExporter($values['exporter_id']);
-    // $exporter->generateFile($values['campaign_id'], $values['segments']);
-    // $exporter->exportFile();
-    CRM_Segmentation_ExportJob::launchExportRunner($values['campaign_id'], $values['segments'], $values['exporter_id']);
+
+    // compile parameters
+    $parameters = array();
+    $parameters['segments'] = $values['segments'];
+    if (!empty($values['assigned_start_date'])) {
+      $parameters['start_date'] = date('YmdHis', strtotime("{$values['assigned_start_date']} {$values['assigned_start_date_time']}"));
+    }
+    if (!empty($values['assigned_end_date'])) {
+      $parameters['end_date'] = date('YmdHis', strtotime("{$values['assigned_end_date']} {$values['assigned_end_date_time']}"));
+    }
+
+    CRM_Segmentation_ExportJob::launchExportRunner($values['campaign_id'], $values['exporter_id'], $parameters);
   }
 
   /**

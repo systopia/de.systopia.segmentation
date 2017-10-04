@@ -46,7 +46,7 @@ function segmentation_civicrm_links($op, $objectName, $objectId, &$links, &$mask
     } else {
       $links[] = array(
               'name'  => ts('Export'),
-              'url'   => CRM_Utils_System::url('civicrm/segmentation/export', "cid={$objectId}"),
+              'url'   => CRM_Utils_System::url('civicrm/segmentation/export', "cid={$objectId}&reset=1"),
               'title' => ts('Export Segments'),
               'class' => 'no-popup',
             );

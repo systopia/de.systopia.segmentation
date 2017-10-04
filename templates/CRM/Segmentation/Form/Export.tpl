@@ -30,6 +30,17 @@
   <div class="clear"></div>
 </div>
 
+<div class="crm-section">
+  <div class="label">{$form.assigned_start_date.label}</div>
+  <div class="content">{include file="CRM/common/jcalendar.tpl" elementName=assigned_start_date}</div>
+  <div class="clear"></div>
+</div>
+
+<div class="crm-section">
+  <div class="label">{$form.assigned_end_date.label}</div>
+  <div class="content">{include file="CRM/common/jcalendar.tpl" elementName=assigned_end_date}</div>
+  <div class="clear"></div>
+</div>
 
 
 {include file="CRM/common/formButtons.tpl" location="bottom"}
