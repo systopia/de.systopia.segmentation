@@ -634,53 +634,18 @@
         "to": "Buchungsinterval"
       },
       {
-        "action": "preg_replace",
+        "action": "map",
         "from": "Buchungsinterval",
-        "search": "#^$#",
-        "replace": "keine/unbekannt",
-        "to": "Buchungsinterval"
-      },
-      {
-        "action": "preg_replace",
-        "from": "Buchungsinterval",
-        "search": "#^1$#",
-        "replace": "jährlich",
-        "to": "Buchungsinterval"
-      },
-      {
-        "action": "preg_replace",
-        "from": "Buchungsinterval",
-        "search": "#^2$#",
-        "replace": "halbjährlich",
-        "to": "Buchungsinterval"
-      },
-      {
-        "action": "preg_replace",
-        "from": "Buchungsinterval",
-        "search": "#^3$#",
-        "replace": "quartalsweise",
-        "to": "Buchungsinterval"
-      },
-      {
-        "action": "preg_replace",
-        "from": "Buchungsinterval",
-        "search": "#^4$#",
-        "replace": "trimestral",
-        "to": "Buchungsinterval"
-      },
-      {
-        "action": "preg_replace",
-        "from": "Buchungsinterval",
-        "search": "#^6$#",
-        "replace": "zweimonatlich",
-        "to": "Buchungsinterval"
-      },
-      {
-        "action": "preg_replace",
-        "from": "Buchungsinterval",
-        "search": "#^12$#",
-        "replace": "monatlich",
-        "to": "Buchungsinterval"
+        "to": "Buchungsinterval",
+        "map": {
+          "": "keine/unbekannt",
+          "1": "jährlich",
+          "2": "halbjährlich",
+          "3": "trimestral",
+          "4": "quartalsweise",
+          "6": "zweimonatlich",
+          "12": "monatlich"
+        }
       },
       {
         "action": "copy",

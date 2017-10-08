@@ -288,6 +288,14 @@ abstract class CRM_Segmentation_Exporter {
           $data[$rule['to']] = CRM_Utils_Array::value('value', $rule, '');
           break;
 
+        // RULE: MAP
+        case 'map':
+          $value = $this->getValue($rule['from'], $line, $data);
+          if (isset($rule['map'][$value])) {
+            $data[$rule['to']] = $rule['map'][$value];
+          }
+          break;
+
         // RULE: SPRINTF
         case 'sprintf':
           $format = CRM_Utils_Array::value('format', $rule, '');
