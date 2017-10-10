@@ -213,7 +213,7 @@ function segmentation_civicrm_enable() {
   // create semgentation index table
   $config = CRM_Core_Config::singleton();
   $sqlfile = dirname( __FILE__ ) . '/sql/civicrm_segment_index.sql';
-  CRM_Utils_File::sourceSQLFile($config->dsn, $sqlfile, NULL, FALSE);
+  CRM_Utils_File::sourceSQLFile($config->dsn, $sqlfile, NULL, TRUE);
 
   // add custom fields
   require_once 'CRM/Utils/CustomData.php';
