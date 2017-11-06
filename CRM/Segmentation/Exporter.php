@@ -128,6 +128,27 @@ abstract class CRM_Segmentation_Exporter {
 
 
   /**
+   * offer the resulting file
+   *   generateFile has be called before this
+   *
+   * @return file path
+   */
+  public function getExportedFile() {
+    if (empty($this->tmpFileName)) {
+      throw new Exception("No file exported yet");
+    }
+    return $this->tmpFileName;
+  }
+
+  /**
+   * Get this exporter's name
+   */
+  public function getName() {
+    return $this->config['name'];
+  }
+
+
+  /**
    * offer the result for export
    * generateFile has be called before this
    *
