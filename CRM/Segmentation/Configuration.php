@@ -120,6 +120,12 @@ class CRM_Segmentation_Configuration {
       $assignment_end_condition = "AND `datetime` <= '{$params['end_date']}'";
     }
 
+    if (empty($params['group_by'])) {
+      $grouping = '';
+    } else {
+      $grouping = "GROUP BY {$params['group_by']}";
+    }
+
     return "
      SELECT
       entity_id     AS contact_id,
@@ -137,6 +143,7 @@ class CRM_Segmentation_Configuration {
      {$segment_condition}
      {$assignment_start_condition}
      {$assignment_end_condition}
+     {$grouping}
      {$limit_clause}";
   }
 

@@ -3,6 +3,7 @@
     "name": "Selektion (Excel)",
     "id": 2,
     "type": "Excel",
+    "group_by": "contact_id",
     "encoding": "UTF8",
     "delimiter": ";",
     "columns": ["contact_id", "titel", "anrede", "vorname", "nachname", "geburtsdatum", "strasse", "plz", "ort", "land", "zielgruppe ID", "zielgruppe", "telefon", "mobilnr", "email"],
@@ -142,6 +143,7 @@
     "name": "Lettershopformat (Excel)",
     "id": 3,
     "type": "Excel",
+    "group_by": "contact_id",
     "columns": ["contact_id", "titel", "anrede", "vorname", "nachname", "co", "strasse", "plz", "ort", "postfach", "land", "zielgruppe ID", "zielgruppe", "paket", "kundennummer", "sepa_belegart", "iban_empfaenger", "bic_empfaenger", "pruefziffer"],
     "rules": [
       {
@@ -313,6 +315,7 @@
     "name": "TM Stammdaten (Excel)",
     "id": 4,
     "type": "Excel",
+    "group_by": "contact_id",
     "columns": ["contact_id","Anrede","Titel","Vorname","Nachname","Strasse","Hausnummer","PLZ","Ort","Land","Email","Geburtsdatum","Firma","Spendertyp","Kundennummer","Ablaufdatum","Adressefalsch","Selektionshistoryid","Zielgruppeid","Zielgruppenname"],
     "rules": [
       {
@@ -435,6 +438,7 @@
     "name": "TM Spendendaten (Excel)",
     "id": 5,
     "type": "Excel",
+    "group_by": "contact_id",
     "columns": ["contact_id","Spendendatum","Spendenbetrag","Aktionscode","Aktionsbezeichnung"],
     "loop": [
       {
@@ -510,6 +514,7 @@
     "name": "TM Telefondaten (Excel)",
     "id": 6,
     "type": "Excel",
+    "group_by": "contact_id",
     "columns": ["Telefonid","Tel","Mob","contact_id","Landvorwahl","Ortvorwahl","Telefonnummer","Durchwahl"],
     "rules": [
       {
@@ -596,6 +601,7 @@
     "name": "TM Vertragsdaten (Excel)",
     "id": 7,
     "type": "Excel",
+    "group_by": "membership_id",
     "columns": ["contact_id","Vertragsnummer","Anlagedatum","Jahresbeitrag","Buchungsinterval","Vertragsbeginn","Kontonummer","Bankleitzahl","Bic","Iban","Bankinstitut","Kontoinhaber","Buchungnext","Vertragstyp","Stornodatum","Stornogrund"],
     "rules": [
       {

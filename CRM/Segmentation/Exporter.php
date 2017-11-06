@@ -91,6 +91,11 @@ abstract class CRM_Segmentation_Exporter {
       $this->exportHeader();
     }
 
+    // add group_by parameter from exporter config
+    if (!empty($this->config['group_by'])) {
+      $params['group_by'] = $this->config['group_by'];
+    }
+
     $query_sql = CRM_Segmentation_Configuration::getSegmentQuery($campaign_id, $params, $exclude_deleted_contacts, $offset, $count);
     $main_query = CRM_Core_DAO::executeQuery($query_sql);
 
