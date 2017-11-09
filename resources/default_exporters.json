@@ -688,7 +688,7 @@
         "required": ["id"],
         "params": {
           "id": "var:membership.custom_membership_payment.membership_recurring_contribution",
-          "return": "id"
+          "return": "id,next_sched_contribution_date"
         }
       },
       {
