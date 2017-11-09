@@ -692,6 +692,12 @@
         }
       },
       {
+        "action": "date",
+        "from": "membership_rcur.next_sched_contribution_date",
+        "format": "d.m.Y",
+        "to": "Buchungnext"
+      },
+      {
         "action": "load",
         "to": "membership_mandate",
         "type": "SepaMandate",
