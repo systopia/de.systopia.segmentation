@@ -91,9 +91,12 @@ abstract class CRM_Segmentation_Exporter {
       $this->exportHeader();
     }
 
-    // add group_by parameter from exporter config
+    // add group_by/not_null parameter from exporter config
     if (!empty($this->config['group_by'])) {
       $params['group_by'] = $this->config['group_by'];
+    }
+    if (!empty($this->config['not_null'])) {
+      $params['not_null'] = $this->config['not_null'];
     }
 
     $query_sql = CRM_Segmentation_Configuration::getSegmentQuery($campaign_id, $params, $exclude_deleted_contacts, $offset, $count);

@@ -126,6 +126,12 @@ class CRM_Segmentation_Configuration {
       $grouping = "GROUP BY {$params['group_by']}";
     }
 
+    if (empty($params['not_null'])) {
+      $not_null_clause = '';
+    } else {
+      $not_null_clause = "AND {$params['not_null']} IS NOT NULL";
+    }
+
     return "
      SELECT
       entity_id     AS contact_id,
@@ -143,6 +149,7 @@ class CRM_Segmentation_Configuration {
      {$segment_condition}
      {$assignment_start_condition}
      {$assignment_end_condition}
+     {$not_null_clause}
      {$grouping}
      {$limit_clause}";
   }
@@ -185,6 +192,18 @@ class CRM_Segmentation_Configuration {
       $assignment_end_condition = "AND `datetime` <= '{$params['end_date']}'";
     }
 
+    if (empty($params['group_by'])) {
+      $grouping = '';
+    } else {
+      $grouping = "GROUP BY {$params['group_by']}";
+    }
+
+    if (empty($params['not_null'])) {
+      $not_null_clause = '';
+    } else {
+      $not_null_clause = "AND {$params['not_null']} IS NOT NULL";
+    }
+
     return "
      SELECT COUNT(entity_id) AS contact_count
      FROM civicrm_segmentation
@@ -195,6 +214,8 @@ class CRM_Segmentation_Configuration {
      {$segment_condition}
      {$assignment_start_condition}
      {$assignment_end_condition}
+     {$not_null_clause}
+     {$grouping}
      ";
   }
 

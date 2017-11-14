@@ -602,6 +602,7 @@
     "id": 7,
     "type": "Excel",
     "group_by": "membership_id",
+    "not_null": "membership_id",
     "columns": ["contact_id","Vertragsnummer","Anlagedatum","Jahresbeitrag","Buchungsinterval","Vertragsbeginn","Kontonummer","Bankleitzahl","Bic","Iban","Bankinstitut","Kontoinhaber","Buchungnext","Vertragstyp","Stornodatum","Stornogrund"],
     "rules": [
       {
