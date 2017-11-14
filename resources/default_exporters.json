@@ -627,11 +627,6 @@
       },
       {
         "action": "copy",
-        "from": "membership.start_date",
-        "to": "Anlagedatum"
-      },
-      {
-        "action": "copy",
         "from": "membership.custom_membership_payment.membership_annual",
         "to": "Jahresbeitrag"
       },
@@ -655,18 +650,21 @@
         }
       },
       {
-        "action": "copy",
+        "action": "date",
         "from": "membership.start_date",
+        "format": "d.m.Y",
+        "to": "Anlagedatum"
+      },
+      {
+        "action": "date",
+        "from": "membership.start_date",
+        "format": "d.m.Y",
         "to": "Vertragsbeginn"
       },
       {
-        "action": "copy",
-        "from": "membership.start_date",
-        "to": "Vertragsbeginn"
-      },
-      {
-        "action": "copy",
+        "action": "date",
         "from": "membership.custom_membership_cancellation.membership_cancel_date",
+        "format": "d.m.Y",
         "to": "Stornodatum"
       },
       {
