@@ -231,13 +231,13 @@
       {
         "action": "sprintf",
         "from": "campaign.id",
-        "format": "%05d",
+        "format": "1%05d",
         "to": "kundennummer"
       },
       {
         "action": "sprintf",
         "from": "contact.id",
-        "format": "C%09d",
+        "format": "%010d",
         "to": "kundennummer_contact"
       },
       {
@@ -394,13 +394,13 @@
       {
         "action": "sprintf",
         "from": "campaign.id",
-        "format": "%05d",
+        "format": "1%05d",
         "to": "Kundennummer"
       },
       {
         "action": "sprintf",
         "from": "contact.id",
-        "format": "C%09d",
+        "format": "%010d",
         "to": "Kundennummer_contact"
       },
       {
