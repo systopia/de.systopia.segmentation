@@ -237,7 +237,7 @@
       {
         "action": "sprintf",
         "from": "contact.id",
-        "format": "%010d",
+        "format": "%09d",
         "to": "kundennummer_contact"
       },
       {
@@ -400,7 +400,7 @@
       {
         "action": "sprintf",
         "from": "contact.id",
-        "format": "%010d",
+        "format": "%09d",
         "to": "Kundennummer_contact"
       },
       {
