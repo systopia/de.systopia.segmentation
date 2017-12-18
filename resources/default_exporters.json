@@ -423,7 +423,7 @@
         "comment": "calculate file name",
         "action": "sprintf",
         "from": "campaign.id",
-        "format": "Stammdaten_Upgrading_Aktion_%s_Nachlieferung.csv",
+        "format": "Stammdaten_Aktion_C%04d.csv",
         "to": "file_date"
       },
       {
@@ -499,7 +499,7 @@
         "comment": "calculate file name",
         "action": "sprintf",
         "from": "campaign.id",
-        "format": "Spendendaten_Upgrading_Aktion_%s_Nachlieferung.csv",
+        "format": "Spendendaten_Aktion_C%04d.csv",
         "to": "file_date"
       },
       {
@@ -586,7 +586,7 @@
         "comment": "calculate file name",
         "action": "sprintf",
         "from": "campaign.id",
-        "format": "Telefondaten_%s_Nachlieferung.csv",
+        "format": "Telefondaten_Aktion_C%04d.csv",
         "to": "file_date"
       },
       {
@@ -722,7 +722,7 @@
         "comment": "calculate file name",
         "action": "sprintf",
         "from": "campaign.id",
-        "format": "Vertragsdaten_%s_Nachlieferung.csv",
+        "format": "Vertragsdaten_Aktion_C%04d.csv",
         "to": "file_date"
       },
       {
