@@ -288,6 +288,42 @@ function segmentation_civicrm_alterSettingsFolders(&$metaDataFolders = NULL) {
   _segmentation_civix_civicrm_alterSettingsFolders($metaDataFolders);
 }
 
+function segmentation_civicrm_pre($op, $objectName, $id, &$params) {
+  if ($objectName == 'Activity' && $op == 'create') {
+    if (isset($params['target_contact_id'])) {
+      // Maintain a global copy of target_contact_ids added via the Activity.
+      // If there is a universe where _pre and _post isn't called sequentially
+      // on two Activity.create API operations, this will break spectacularly.
+      $store = CRM_Segmentation_ActivityContactStore::getInstance();
+      if (is_array($params['target_contact_id'])) {
+        $store->setContacts($params['target_contact_id']);
+      }
+      else {
+        $store->setContacts([$params['target_contact_id']]);
+      }
+    }
+  }
+}
+
+
+function segmentation_civicrm_post($op, $objectName, $objectId, &$objectRef) {
+  if ($objectName == 'Activity' && $op == 'create') {
+    $store = CRM_Segmentation_ActivityContactStore::getInstance();
+    foreach ($store->popContacts() as $contact_id) {
+      CRM_Segmentation_Logic::addSegmentToActivityContact($objectId, $contact_id);
+    }
+  }
+}
+
+function segmentation_civicrm_apiWrappers(&$wrappers, $apiRequest) {
+  //&apiWrappers is an array of wrappers, you can add your(s) with the hook.
+  // You can use the apiRequest to decide if you want to add the wrapper (eg. only wrap api.Contact.create)
+  if ($apiRequest['entity'] == 'ActivityContact' && $apiRequest['action'] == 'create') {
+    $wrappers[] = new CRM_Segmentation_ActivityContactCreateAPIWrapper();
+  }
+}
+
+
 // --- Functions below this ship commented out. Uncomment as required. ---
 
 /**
