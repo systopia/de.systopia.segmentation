@@ -191,18 +191,7 @@ class CRM_Segmentation_Form_CreateActivity extends CRM_Core_Form {
                       AND civicrm_contact.is_deleted = 0)";
         CRM_Core_DAO::executeQuery($query);
 
-        // keep track of segments in activities assigned to contacts
-        // segment are consolidated when the campaign is started, so no need to
-        // handle that here
-        $query = "INSERT IGNORE INTO civicrm_activity_contact_segmentation (activity_contact_id, segment_id)
-                   (SELECT
-                      civicrm_activity_contact.id,
-                      civicrm_segmentation.segment_id
-                    FROM civicrm_segmentation
-                    INNER JOIN civicrm_activity_contact ON civicrm_segmentation.entity_id=civicrm_activity_contact.contact_id
-                    WHERE campaign_id = {$values['cid']}
-                      AND activity_id={$activity['id']})";
-        CRM_Core_DAO::executeQuery($query);
+        CRM_Segmentation_Logic::addSegmentForMassActivity($activity['id'], $values['cid']);
       }
       // create popup
       $activity_edit_url = CRM_Utils_System::url('civicrm/activity/add', "atype=1&action=update&reset=1&id={$activity['id']}");

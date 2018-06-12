@@ -325,13 +325,35 @@ class CRM_Segmentation_Logic {
   }
 
   /**
-   * Add the segment to an existing ActivityContact. Skips if a segment is
+   * Add segments for a mass activity. Only use if campaign has a consolidated
+   * segment order (@see CRM_Segmentation_Logic::consolidateSegments())
+   *
+   * @param $activity_id int
+   * @param $campaign_id int
+   */
+  public static function addSegmentForMassActivity($activity_id, $campaign_id) {
+    $query = "INSERT IGNORE INTO civicrm_activity_contact_segmentation (activity_contact_id, segment_id)
+                   (SELECT
+                      civicrm_activity_contact.id,
+                      civicrm_segmentation.segment_id
+                    FROM civicrm_segmentation
+                    INNER JOIN civicrm_activity_contact ON civicrm_segmentation.entity_id=civicrm_activity_contact.contact_id
+                    WHERE activity_id = %0
+                      AND campaign_id = %1)";
+    CRM_Core_DAO::executeQuery($query, [
+      [$activity_id, 'Integer'],
+      [$campaign_id, 'Integer'],
+    ]);
+  }
+
+  /**
+   * Add segment to an existing ActivityContact. Skips if a segment is
    * already assigned or if activity hasn't been assigned to contact at all.
    *
    * @param $activity_id int
    * @param $contact_id int
    */
-  public static function addSegmentToActivityContact($activity_id, $contact_id) {
+  public static function addSegmentForActivityContact($activity_id, $contact_id) {
     $query = "INSERT IGNORE INTO civicrm_activity_contact_segmentation (activity_contact_id, segment_id)
                    (SELECT
                       civicrm_activity_contact.id,
