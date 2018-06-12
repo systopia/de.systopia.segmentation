@@ -192,7 +192,8 @@ class CRM_Segmentation_Form_CreateActivity extends CRM_Core_Form {
         CRM_Core_DAO::executeQuery($query);
 
         // keep track of segments in activities assigned to contacts
-        // @TODO: order?
+        // segment are consolidated when the campaign is started, so no need to
+        // handle that here
         $query = "INSERT IGNORE INTO civicrm_activity_contact_segmentation (activity_contact_id, segment_id)
                    (SELECT
                       civicrm_activity_contact.id,

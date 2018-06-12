@@ -332,16 +332,20 @@ class CRM_Segmentation_Logic {
    * @param $contact_id int
    */
   public static function addSegmentToActivityContact($activity_id, $contact_id) {
-    // @TODO: order?
     $query = "INSERT IGNORE INTO civicrm_activity_contact_segmentation (activity_contact_id, segment_id)
                    (SELECT
                       civicrm_activity_contact.id,
                       civicrm_segmentation.segment_id
                     FROM civicrm_activity_contact
                     INNER JOIN civicrm_activity ON civicrm_activity.id=civicrm_activity_contact.activity_id
-                    INNER JOIN civicrm_segmentation ON civicrm_segmentation.entity_id=civicrm_activity_contact.contact_id AND civicrm_segmentation.campaign_id=civicrm_activity.campaign_id
-                    WHERE civicrm_activity_contact.activity_id=%0 AND
-                      civicrm_activity_contact.contact_id=%1)";
+                    INNER JOIN civicrm_segmentation ON civicrm_segmentation.entity_id=civicrm_activity_contact.contact_id
+                                                   AND civicrm_segmentation.campaign_id=civicrm_activity.campaign_id
+                    LEFT JOIN civicrm_segmentation_order ON civicrm_segmentation_order.segment_id=civicrm_segmentation.segment_id
+                                                        AND civicrm_segmentation_order.campaign_id=civicrm_segmentation.campaign_id
+                    WHERE civicrm_activity_contact.activity_id = %0
+                      AND civicrm_activity_contact.contact_id = %1
+                    ORDER BY order_number
+                    LIMIT 1)";
     CRM_Core_DAO::executeQuery($query, [
       [$activity_id, 'Integer'],
       [$contact_id, 'Integer'],
