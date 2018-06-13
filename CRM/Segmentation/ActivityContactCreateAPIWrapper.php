@@ -15,8 +15,10 @@ class CRM_Segmentation_ActivityContactCreateAPIWrapper implements API_Wrapper {
    * @inheritDoc
    */
   public function toApiOutput($apiRequest, $result) {
-    if (isset($result['id'])) {
-      CRM_Segmentation_Logic::addSegmentForActivityContact($result['values'][0]['activity_id'], $result['values'][0]['contact_id']);
+    if (isset($result['values'])) {
+      foreach ($result['values'] as $activity_contact) {
+        CRM_Segmentation_Logic::addSegmentForActivityContact($activity_contact['activity_id'], $activity_contact['contact_id']);
+      }
     }
     return $result;
   }
