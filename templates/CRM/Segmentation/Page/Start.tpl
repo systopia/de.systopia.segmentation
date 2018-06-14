@@ -31,28 +31,32 @@
       <tr>
           <th>{ts}Segment Name{/ts}</th>
           <th>{ts}Contact Count{/ts}</th>
+          <th>{ts}Bundle{/ts}</th>
+          <th>{ts}Text Block{/ts}</th>
           <th>{ts}Segment Order{/ts}</th>
           <th>{ts}Actions{/ts}</th>
       </tr>
   </thead>
   <tbody>
-  {foreach from=$segment_order item=segment_id}
-    <tr id="segment-{$segment_id}" class="crm-entity even-row">
+  {foreach from=$segments item=segment}
+    <tr id="SegmentationOrder-{$segment.segmentation_order_id}" data-action="create" class="crm-entity even-row">
       <td class="crm-admin-options-label" data-field="label">
-        <div class="" title="{$segment_titles.$segment_id}">{$segment_titles.$segment_id}</div>
+        <div class="" title="{$segment.name|escape}">{$segment.name|escape}</div>
       </td>
-      <td class="crm-admin-options-value">{$segment_counts.$segment_id}</td>
+      <td class="crm-admin-options-value">{$segment.count}</td>
+      <td class="crm-admin-options-value crm-editable" data-field="bundle">{$segment.bundle|escape}</td>
+      <td class="crm-admin-options-value crm-editable" data-field="text_block">{$segment.text_block|escape}</td>
       <td class="nowrap crm-admin-options-order">
-          <a class="crm-weight-arrow" href="{crmURL p='civicrm/segmentation/start' q="cid=$campaign_id&top=$segment_id"}"><img src="{$config->resourceBase}i/arrow/first.gif" title="Move to top" alt="Move to top" class="order-icon"></a>&nbsp;
-          <a class="crm-weight-arrow" href="{crmURL p='civicrm/segmentation/start' q="cid=$campaign_id&up=$segment_id"}"><img src="{$config->resourceBase}i/arrow/up.gif" title="Move up one row" alt="Move up one row" class="order-icon"></a>&nbsp;
-          <a class="crm-weight-arrow" href="{crmURL p='civicrm/segmentation/start' q="cid=$campaign_id&down=$segment_id"}"><img src="{$config->resourceBase}i/arrow/down.gif" title="Move down one row" alt="Move down one row" class="order-icon"></a>&nbsp;
-          <a class="crm-weight-arrow" href="{crmURL p='civicrm/segmentation/start' q="cid=$campaign_id&bottom=$segment_id"}"><img src="{$config->resourceBase}i/arrow/last.gif" title="Move to bottom" alt="Move to bottom" class="order-icon"></a>
+          <a class="crm-weight-arrow" href="{crmURL p='civicrm/segmentation/start' q="cid=$campaign_id&top=`$segment.segment_id`"}"><img src="{$config->resourceBase}i/arrow/first.gif" title="Move to top" alt="Move to top" class="order-icon"></a>&nbsp;
+          <a class="crm-weight-arrow" href="{crmURL p='civicrm/segmentation/start' q="cid=$campaign_id&up=`$segment.segment_id`"}"><img src="{$config->resourceBase}i/arrow/up.gif" title="Move up one row" alt="Move up one row" class="order-icon"></a>&nbsp;
+          <a class="crm-weight-arrow" href="{crmURL p='civicrm/segmentation/start' q="cid=$campaign_id&down=`$segment.segment_id`"}"><img src="{$config->resourceBase}i/arrow/down.gif" title="Move down one row" alt="Move down one row" class="order-icon"></a>&nbsp;
+          <a class="crm-weight-arrow" href="{crmURL p='civicrm/segmentation/start' q="cid=$campaign_id&bottom=`$segment.segment_id`"}"><img src="{$config->resourceBase}i/arrow/last.gif" title="Move to bottom" alt="Move to bottom" class="order-icon"></a>
       </td>
       <td>
-        <a name="contact_list" href="{crmURL p='civicrm/segmentation/contacts' q="snippet=1&cid=$campaign_id&sid=$segment_id"}" alt="{ts}View in Popup{/ts}" title="{ts}Show contact list in popup window{/ts}" class="crm-hover-button">
+        <a name="contact_list" href="{crmURL p='civicrm/segmentation/contacts' q="snippet=1&cid=$campaign_id&sid=`$segment.segment_id`"}" alt="{ts}View in Popup{/ts}" title="{ts}Show contact list in popup window{/ts}" class="crm-hover-button">
           <div>{ts}Contact List{/ts}</div>
         </a>
-        <a href="{crmURL p='civicrm/segmentation/start' q="cid=$campaign_id&delete=$segment_id"}" alt="{ts}Delete Segment{/ts}" title="{ts}Delete the entire segment{/ts}" class="crm-hover-button">
+        <a href="{crmURL p='civicrm/segmentation/start' q="cid=$campaign_id&delete=`$segment.segment_id`"}" alt="{ts}Delete Segment{/ts}" title="{ts}Delete the entire segment{/ts}" class="crm-hover-button">
           <div>{ts}Delete Segment{/ts}</div>
         </a>
       </td>

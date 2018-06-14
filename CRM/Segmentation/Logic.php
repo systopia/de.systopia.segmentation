@@ -248,7 +248,7 @@ class CRM_Segmentation_Logic {
    * @todo move to another class
    */
   public static function getSegmentTitles($segment_ids) {
-    $segment_id_list = implode(',', $segment_ids);
+    $segment_id_list = implode(',', array_map('intval', $segment_ids));
     if (empty($segment_id_list)) return array();
 
     $query = CRM_Core_DAO::executeQuery("

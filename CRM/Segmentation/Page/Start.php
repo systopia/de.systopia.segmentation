@@ -50,17 +50,19 @@ class CRM_Segmentation_Page_Start extends CRM_Core_Page {
       CRM_Utils_System::redirect($campaign_view_url);
     }
 
-
     // finally: calculate counts based on order, and render page
-    $segment_counts = CRM_Segmentation_Logic::getSegmentCounts($campaign_id, $segment_order);
-    $segment_titles = CRM_Segmentation_Logic::getSegmentTitles($segment_order);
-    $this->assign('segment_order',  $segment_order);
-    $this->assign('segment_counts', $segment_counts);
-    $this->assign('segment_titles', $segment_titles);
+    $segments = CRM_Segmentation_SegmentationOrder::getSegmentationOrderByCampaignAndSegmentList($campaign_id, $segment_order);
+    $total_count = 0;
+    foreach (CRM_Segmentation_Logic::getSegmentCounts($campaign_id, $segment_order) as $segmentId => $segmentCount) {
+      $segments[$segmentId]['count'] = $segmentCount;
+      $total_count += $segmentCount;
+    }
+    $this->assign('segments', $segments);
+    $this->assign('segment_order', $segment_order);
     $this->assign('campaign', $campaign);
     $this->assign('baseurl', $base_url);
     $this->assign('campaign_id', $campaign['id']);
-    $this->assign('total_count', array_sum($segment_counts));
+    $this->assign('total_count', $total_count);
     CRM_Utils_System::setTitle(ts("Start Campaign '%1'", array(1 => $campaign['title'])));
 
     parent::run();
