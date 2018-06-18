@@ -9,7 +9,7 @@ use CRM_Segmentation_ExtensionUtil as E;
  * @return void
  * @see http://wiki.civicrm.org/confluence/display/CRMDOC/API+Architecture+Standards
  */
-function _civicrm_api3_segmentation_order_Create_spec(&$spec) {
+function _civicrm_api3_segmentation_order_create_spec(&$spec) {
   $spec = [
     'id' => [
       'title' => 'Segmentation Order ID',
@@ -40,7 +40,7 @@ function _civicrm_api3_segmentation_order_Create_spec(&$spec) {
  * @see civicrm_api3_create_error
  * @throws API_Exception
  */
-function civicrm_api3_segmentation_order_Create($params) {
+function civicrm_api3_segmentation_order_create($params) {
   if (empty($params['id'])) {
     return civicrm_api3_create_error('Creating new SegmentationOrder entities is not supported yet.');
   }
