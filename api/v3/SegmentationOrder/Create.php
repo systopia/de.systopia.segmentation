@@ -24,7 +24,7 @@ function _civicrm_api3_segmentation_order_Create_spec(&$spec) {
       'title' => 'Bundle',
       'type' => CRM_Utils_Type::T_TEXT
     ],
-    'bundle' => [
+    'text_block' => [
       'title' => 'Text Block',
       'type' => CRM_Utils_Type::T_TEXT
     ],
@@ -45,7 +45,7 @@ function civicrm_api3_segmentation_order_Create($params) {
     return civicrm_api3_create_error('Creating new SegmentationOrder entities is not supported yet.');
   }
   return civicrm_api3_create_success(
-    CRM_Segmentation_SegmentationOrder::updateSegmentationOrder($params['id'], $params),
+    [CRM_Segmentation_SegmentationOrder::updateSegmentationOrder($params['id'], $params)],
     $params,
     'SegmentationOrder',
     'Create'

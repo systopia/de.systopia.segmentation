@@ -6,44 +6,62 @@ use Civi\Test\TransactionalInterface;
 
 /**
  * SegmentationOrder.Create API Test Case
- * This is a generic test class implemented with PHPUnit.
+ *
  * @group headless
  */
 class api_v3_SegmentationOrder_CreateTest extends \PHPUnit_Framework_TestCase implements HeadlessInterface, HookInterface, TransactionalInterface {
+  use \Civi\Test\Api3TestTrait;
 
-  /**
-   * Civi\Test has many helpers, like install(), uninstall(), sql(), and sqlFile().
-   * See: https://github.com/civicrm/org.civicrm.testapalooza/blob/master/civi-test.md
-   */
+  private $_campaignId;
+  private $_segmentId;
+
   public function setUpHeadless() {
     return \Civi\Test::headless()
       ->installMe(__DIR__)
+      ->sqlFile(__DIR__ . '/../../../../../sql/add_bundle_and_text_block.sql')
       ->apply();
   }
 
-  /**
-   * The setup() method is executed before the test is executed (optional).
-   */
   public function setUp() {
+    $this->_campaignId = $this->callApiSuccess('Campaign', 'create', [
+      'title' => 'Test Campaign',
+    ])['id'];
+
+    $this->_segmentId = $this->callApiSuccess('Segmentation', 'getsegmentid', [
+      'name' => 'Test Segment 1',
+    ])['id'];
     parent::setUp();
   }
 
-  /**
-   * The tearDown() method is executed after the test was executed (optional)
-   * This can be used for cleanup.
-   */
   public function tearDown() {
     parent::tearDown();
   }
 
-  /**
-   * Simple example test case.
-   *
-   * Note how the function name begins with the word "test".
-   */
-  public function testApiExample() {
-    $result = civicrm_api3('SegmentationOrder', 'Create', array('magicword' => 'sesame'));
-    $this->assertEquals('Twelve', $result['values'][12]['name']);
+  public function testUpdate() {
+    CRM_Segmentation_Logic::setSegmentOrder($this->_campaignId, [$this->_segmentId]);
+
+    $segmentationOrder = $this->callApiSuccess(
+      'SegmentationOrder',
+      'Create',
+      [
+        'id' => $this->_segmentId,
+        'order_number' => 2,
+        'bundle' => '1',
+        'text_block' => 'example test block',
+      ]
+    );
+
+    $this->assertEquals(
+      1,
+      CRM_Core_DAO::singleValueQuery(
+        "SELECT COUNT(*) AS count FROM civicrm_segmentation_order
+                                          WHERE segment_id=%0 AND order_number=2 AND bundle='1' AND text_block='example test block'",
+        [[$this->_segmentId, 'Integer']]
+      ),
+      'SegmentationOrder.Create should update SegmentationOrder with supplied values'
+    );
+
+    $this->assertEquals(1, $segmentationOrder['count'], 'SegmentationOrder.Create should return one SegmentationOrder');
   }
 
 }
