@@ -18,7 +18,6 @@ class api_v3_SegmentationOrder_CreateTest extends \PHPUnit_Framework_TestCase im
   public function setUpHeadless() {
     return \Civi\Test::headless()
       ->installMe(__DIR__)
-      ->sqlFile(__DIR__ . '/../../../../../sql/add_bundle_and_text_block.sql')
       ->apply();
   }
 
