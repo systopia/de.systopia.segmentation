@@ -28,14 +28,15 @@
 
 <table id="options" class="row-highlight">
   <thead>
-      <tr>
-          <th>{ts}Segment Name{/ts}</th>
-          <th>{ts}Contact Count{/ts}</th>
-          <th>{ts}Bundle{/ts}</th>
-          <th>{ts}Text Block{/ts}</th>
-          <th>{ts}Segment Order{/ts}</th>
-          <th>{ts}Actions{/ts}</th>
-      </tr>
+    <tr>
+      <th>{ts}Segment Name{/ts}</th>
+      <th>{ts}Contact Count{/ts}</th>
+      <th>{ts}Excluded{/ts}</th>
+      <th>{ts}Bundle{/ts}</th>
+      <th>{ts}Text Block{/ts}</th>
+      <th>{ts}Segment Order{/ts}</th>
+      <th>{ts}Actions{/ts}</th>
+    </tr>
   </thead>
   <tbody>
   {foreach from=$segments item=segment}
@@ -44,8 +45,9 @@
         <div class="" title="{$segment.name|escape}">{$segment.name|escape}</div>
       </td>
       <td class="crm-admin-options-value">{$segment.count}</td>
-      <td class="crm-admin-options-value crm-editable" data-field="bundle">{$segment.bundle|escape}</td>
-      <td class="crm-admin-options-value crm-editable" data-field="text_block">{$segment.text_block|escape}</td>
+      <td class="crm-admin-options-value">{$segment.excluded_count}</td>
+      <td class="crm-admin-options-value {if $segment.exclude neq 1}crm-editable{/if}" data-field="bundle">{$segment.bundle|escape}</td>
+      <td class="crm-admin-options-value {if $segment.exclude neq 1}crm-editable{/if}" data-field="text_block">{$segment.text_block|escape}</td>
       <td class="nowrap crm-admin-options-order">
           <a class="crm-weight-arrow" href="{crmURL p='civicrm/segmentation/start' q="cid=$campaign_id&top=`$segment.segment_id`"}"><img src="{$config->resourceBase}i/arrow/first.gif" title="Move to top" alt="Move to top" class="order-icon"></a>&nbsp;
           <a class="crm-weight-arrow" href="{crmURL p='civicrm/segmentation/start' q="cid=$campaign_id&up=`$segment.segment_id`"}"><img src="{$config->resourceBase}i/arrow/up.gif" title="Move up one row" alt="Move up one row" class="order-icon"></a>&nbsp;
@@ -59,6 +61,11 @@
         <a href="{crmURL p='civicrm/segmentation/start' q="cid=$campaign_id&delete=`$segment.segment_id`"}" alt="{ts}Delete Segment{/ts}" title="{ts}Delete the entire segment{/ts}" class="crm-hover-button">
           <div>{ts}Delete Segment{/ts}</div>
         </a>
+        {if $segment.exclude neq 1}
+        <a href="{crmURL p='civicrm/segmentation/split' q="cid=$campaign_id&sid=`$segment.segment_id`"}" alt="{ts}Split{/ts}" title="{ts}Split segment for A/B or exclusion tests{/ts}" class="crm-hover-button">
+          <div>{ts}Split{/ts}</div>
+        </a>
+        {/if}
       </td>
     </tr>
   {/foreach}

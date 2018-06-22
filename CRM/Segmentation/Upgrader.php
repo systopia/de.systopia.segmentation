@@ -19,4 +19,10 @@ class CRM_Segmentation_Upgrader extends CRM_Segmentation_Upgrader_Base {
     return TRUE;
   }
 
+  public function upgrade_0920() {
+    $this->ctx->log->info('Updating segmentation schema to 0.9.2');
+    $this->executeSqlFile('sql/create_segmentation_exclude.sql');
+    return TRUE;
+  }
+
 }

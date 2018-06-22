@@ -25,6 +25,7 @@ class CRM_Segmentation_LogicTest extends \PHPUnit_Framework_TestCase implements 
   public function setUp() {
     $this->_campaignId = $this->callApiSuccess('Campaign', 'create', [
       'title' => 'Test Campaign',
+      'status_id' => 1,
     ])['id'];
 
     $this->_segments[] = $this->callApiSuccess('Segmentation', 'getsegmentid', [
@@ -147,4 +148,5 @@ class CRM_Segmentation_LogicTest extends \PHPUnit_Framework_TestCase implements 
       'CRM_Segmentation_Logic::setSegmentOrder should only have stored two segmentation order entries after deleting one'
     );
   }
+
 }

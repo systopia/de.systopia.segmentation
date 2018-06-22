@@ -30,4 +30,10 @@
     <title>CreateActivity</title>
     <access_arguments>access CiviCRM</access_arguments>
   </item>
+  <item>
+    <path>civicrm/segmentation/split</path>
+    <page_callback>CRM_Segmentation_Form_Split</page_callback>
+    <title>Split</title>
+    <access_arguments>access CiviCRM</access_arguments>
+  </item>
 </menu>

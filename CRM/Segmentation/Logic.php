@@ -260,6 +260,36 @@ class CRM_Segmentation_Logic {
   }
 
   /**
+   * get a list segment_id -> contact_count for the given campaign
+   *
+   */
+  public static function getExcludedCounts($campaign_id, $segment_order = array()) {
+    self::verifySegmentOrder($campaign_id);
+    $timestamp = microtime(TRUE);
+    $campaign_id = (int) $campaign_id;
+    $segment_counts = array();
+    foreach ($segment_order as $segment_id) {
+      $segment_counts[$segment_id] = 0;
+    }
+
+    $query = CRM_Core_DAO::executeQuery("
+      SELECT
+        segment_id,
+        COUNT(DISTINCT(contact_id)) AS contact_count
+      FROM civicrm_segmentation_exclude
+      WHERE campaign_id = %0
+      GROUP BY segment_id", [[$campaign_id, 'Integer']]);
+    while ($query->fetch()) {
+      $segment_counts[$query->segment_id] = $query->contact_count;
+    }
+
+    $runtime = microtime(TRUE) - $timestamp;
+    error_log("Segmentation::getExcludedCounts took {$runtime}s");
+
+    return $segment_counts;
+  }
+
+  /**
    * get a list segment_id -> segment_title for the given segment ids
    *
    * @todo move to another class
