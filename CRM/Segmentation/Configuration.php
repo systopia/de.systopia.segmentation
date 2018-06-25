@@ -93,7 +93,7 @@ class CRM_Segmentation_Configuration {
       $segment_condition = '';
     } else {
       $segment_list_string = implode(',', $params['segments']);
-      $segment_condition = "AND segment_id IN ({$segment_list_string})";
+      $segment_condition = "AND civicrm_segmentation.segment_id IN ({$segment_list_string})";
     }
 
     if ($exclude_deleted_contacts) {
@@ -134,17 +134,21 @@ class CRM_Segmentation_Configuration {
 
     return "
      SELECT
-      entity_id     AS contact_id,
-      datetime      AS datetime,
-      campaign_id   AS campaign_id,
-      segment_id    AS segment_id,
-      name          AS segment_name,
-      test_group    AS test_group,
-      membership_id AS membership_id
+      entity_id                        AS contact_id,
+      datetime                         AS datetime,
+      civicrm_segmentation.campaign_id AS campaign_id,
+      civicrm_segmentation.segment_id  AS segment_id,
+      name                             AS segment_name,
+      test_group                       AS test_group,
+      membership_id                    AS membership_id,
+      bundle                           AS bundle,
+      text_block                       AS text_block
      FROM civicrm_segmentation
+     LEFT JOIN civicrm_segmentation_order ON civicrm_segmentation_order.campaign_id = civicrm_segmentation.campaign_id
+       AND civicrm_segmentation_order.segment_id = civicrm_segmentation.segment_id
      LEFT JOIN civicrm_segmentation_index ON civicrm_segmentation_index.id = civicrm_segmentation.segment_id
      LEFT JOIN civicrm_contact ON civicrm_contact.id = civicrm_segmentation.entity_id
-     WHERE campaign_id = {$_campaign_id}
+     WHERE civicrm_segmentation.campaign_id = {$_campaign_id}
      {$contact_status_check}
      {$segment_condition}
      {$assignment_start_condition}

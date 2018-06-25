@@ -13,6 +13,8 @@ CREATE TABLE IF NOT EXISTS `civicrm_segmentation_order`(
   `campaign_id`  int unsigned  COMMENT 'Orders are defined per campaign',
   `segment_id`   int unsigned  COMMENT 'Segement ID',
   `order_number` int unsigned  COMMENT 'Order index from 1..n (highest to lowest)',
+  `bundle` varchar(255) NULL,
+  `text_block` varchar(255) NULL,
   PRIMARY KEY ( `id` ),
   UNIQUE INDEX `segment_order` (campaign_id,segment_id),
   INDEX `order_number` (order_number),

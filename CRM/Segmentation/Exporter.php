@@ -115,7 +115,9 @@ abstract class CRM_Segmentation_Exporter {
           'segment_id'    => $main_query->segment_id,
           'segment_name'  => $main_query->segment_name,
           'test_group'    => $main_query->test_group,
-          'membership_id' => $main_query->membership_id);
+          'membership_id' => $main_query->membership_id,
+          'bundle'        => $main_query->bundle,
+          'text_block'    => $main_query->text_block);
         if (count($segment_chunk) >= $this->chunk_size) {
           $more_data = TRUE;
           break;

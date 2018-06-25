@@ -6,7 +6,7 @@
     "group_by": "contact_id",
     "encoding": "UTF8",
     "delimiter": ";",
-    "columns": ["contact_id", "titel", "anrede", "vorname", "nachname", "geburtsdatum", "strasse", "plz", "ort", "land", "zielgruppe ID", "zielgruppe", "telefon", "mobilnr", "email"],
+    "columns": ["contact_id", "titel", "anrede", "vorname", "nachname", "geburtsdatum", "strasse", "plz", "ort", "land", "zielgruppe ID", "zielgruppe", "telefon", "mobilnr", "email", "paket", "textbaustein"],
     "rules": [
       {
         "action": "copy",
@@ -134,6 +134,16 @@
       {
         "action": "setfilename",
         "from": "file_date"
+      },
+      {
+        "action": "copy",
+        "from": "segment.bundle",
+        "to": "paket"
+      },
+      {
+        "action": "copy",
+        "from": "segment.text_block",
+        "to": "textbaustein"
       }
     ]
   },
@@ -144,7 +154,7 @@
     "id": 3,
     "type": "Excel",
     "group_by": "contact_id",
-    "columns": ["contact_id", "titel", "anrede", "vorname", "nachname", "co", "strasse", "plz", "ort", "postfach", "land", "zielgruppe ID", "zielgruppe", "paket", "kundennummer", "sepa_belegart", "iban_empfaenger", "bic_empfaenger", "pruefziffer"],
+    "columns": ["contact_id", "titel", "anrede", "vorname", "nachname", "co", "strasse", "plz", "ort", "postfach", "land", "zielgruppe ID", "zielgruppe", "paket", "kundennummer", "sepa_belegart", "iban_empfaenger", "bic_empfaenger", "pruefziffer", "paket", "textbaustein"],
     "rules": [
       {
         "action": "copy",
@@ -305,6 +315,16 @@
       {
         "action": "setfilename",
         "from": "file_date"
+      },
+      {
+        "action": "copy",
+        "from": "segment.bundle",
+        "to": "paket"
+      },
+      {
+        "action": "copy",
+        "from": "segment.text_block",
+        "to": "textbaustein"
       }
     ]
   },

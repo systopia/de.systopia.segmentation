@@ -37,6 +37,7 @@ class CRM_Segmentation_Logic {
             FROM civicrm_segmentation_order
             WHERE campaign_id = {$campaign_id}
             ORDER BY order_number ASC, id ASC");
+
     while ($query->fetch()) {
       $segment_order[] = $query->segment_id;
     }
@@ -65,6 +66,9 @@ class CRM_Segmentation_Logic {
    */
   public static function setSegmentOrder($campaign_id, $segment_order, $force = FALSE) {
     $campaign_id = (int) $campaign_id;
+    // make sure we have a proper sequence
+    $segment_order = array_values($segment_order);
+
     if ($force) {
       $current_segment_order = NULL; //doesn't matter
     } else {
@@ -72,27 +76,40 @@ class CRM_Segmentation_Logic {
     }
 
     if ($force || $segment_order != $current_segment_order) {
-      // first: delete old segment order
-      CRM_Core_DAO::executeQuery("DELETE FROM civicrm_segmentation_order WHERE campaign_id = %1",
-        array(1 => array($campaign_id, 'Integer')));
-
-      // check if there is data
-      if (empty($segment_order)) {
-        return;
+      if (is_null($current_segment_order)) {
+        CRM_Core_DAO::executeQuery(
+          "DELETE FROM civicrm_segmentation_order WHERE campaign_id = %0",
+          [[$campaign_id, 'Integer']]
+        );
+        $current_segment_order = [];
       }
 
-      // then: generate new segment data
-      $index = 1;
-      $values = array();
-      foreach ($segment_order as $segment_id) {
-        $segment_id = (int) $segment_id;
-        $values[] = "({$campaign_id}, {$segment_id}, {$index})";
-        $index += 1;
+      // iterate over existing segments
+      foreach ($current_segment_order as $segment_id) {
+        if (!in_array($segment_id, $segment_order)) {
+          // segment is not in new order, delete
+          CRM_Core_DAO::executeQuery(
+            "DELETE FROM civicrm_segmentation_order WHERE campaign_id = %0 AND segment_id=%1",
+            [[$campaign_id, 'Integer'], [$segment_id, 'Integer']]
+          );
+        }
+        else {
+          // segment is in new order, update order_number to current index
+          CRM_Core_DAO::executeQuery(
+            "UPDATE civicrm_segmentation_order SET order_number=%0 WHERE campaign_id = %1 AND segment_id=%2",
+            [[array_search($segment_id, $segment_order) + 1, 'Integer'], [$campaign_id, 'Integer'], [$segment_id, 'Integer']]
+          );
+          unset($segment_order[array_search($segment_id, $segment_order)]);
+        }
       }
-      $value_list = implode(',', $values);
 
-      // finally: store it
-      CRM_Core_DAO::executeQuery("INSERT IGNORE INTO civicrm_segmentation_order (campaign_id,segment_id,order_number) VALUES {$value_list}");
+      // remaining segments did not appear in previous order, add them
+      foreach ($segment_order as $order_number => $segment_id) {
+        CRM_Core_DAO::executeQuery(
+          "INSERT IGNORE INTO civicrm_segmentation_order (campaign_id, segment_id, order_number) VALUES (%0, %1, %2)",
+          [[$campaign_id, 'Integer'], [$segment_id, 'Integer'], [$order_number + 1, 'Integer']]
+        );
+      }
     }
   }
 
@@ -248,7 +265,7 @@ class CRM_Segmentation_Logic {
    * @todo move to another class
    */
   public static function getSegmentTitles($segment_ids) {
-    $segment_id_list = implode(',', $segment_ids);
+    $segment_id_list = implode(',', array_map('intval', $segment_ids));
     if (empty($segment_id_list)) return array();
 
     $query = CRM_Core_DAO::executeQuery("
