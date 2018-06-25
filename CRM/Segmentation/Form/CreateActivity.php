@@ -190,6 +190,8 @@ class CRM_Segmentation_Form_CreateActivity extends CRM_Core_Form {
                     WHERE campaign_id = {$values['cid']}
                       AND civicrm_contact.is_deleted = 0)";
         CRM_Core_DAO::executeQuery($query);
+
+        CRM_Segmentation_Logic::addSegmentForMassActivity($activity['id'], $values['cid']);
       }
       // create popup
       $activity_edit_url = CRM_Utils_System::url('civicrm/activity/add', "atype=1&action=update&reset=1&id={$activity['id']}");
