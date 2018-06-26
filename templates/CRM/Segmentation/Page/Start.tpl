@@ -61,7 +61,7 @@
         <a href="{crmURL p='civicrm/segmentation/start' q="cid=$campaign_id&delete=`$segment.segment_id`"}" alt="{ts}Delete Segment{/ts}" title="{ts}Delete the entire segment{/ts}" class="crm-hover-button">
           <div>{ts}Delete Segment{/ts}</div>
         </a>
-        {if $segment.exclude neq 1}
+        {if $segment.exclude neq 1 && $segment.count > 0 && $segment.excluded_count == 0}
         <a href="{crmURL p='civicrm/segmentation/split' q="cid=$campaign_id&sid=`$segment.segment_id`"}" alt="{ts}Split{/ts}" title="{ts}Split segment for A/B or exclusion tests{/ts}" class="crm-hover-button">
           <div>{ts}Split{/ts}</div>
         </a>
