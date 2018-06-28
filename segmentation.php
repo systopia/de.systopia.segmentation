@@ -315,7 +315,9 @@ function segmentation_civicrm_post($op, $objectName, $objectId, &$objectRef) {
   if ($objectName == 'Activity' && $op == 'create') {
     $store = CRM_Segmentation_ActivityContactStore::getInstance();
     foreach ($store->popContacts() as $contact_id) {
-      CRM_Segmentation_Logic::addSegmentForActivityContact($objectId, $contact_id);
+      if (!empty($objectId) && !empty($contact_id)) {
+        CRM_Segmentation_Logic::addSegmentForActivityContact($objectId, $contact_id);
+      }
     }
   }
 }
