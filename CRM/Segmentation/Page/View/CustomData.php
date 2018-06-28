@@ -25,7 +25,7 @@ class CRM_Segmentation_Page_View_CustomData {
     }
 
     // compile segments data
-    $segments_query = civicrm_api3('Segmentation', 'segmentlist', array('contact_id' => $page->_contactId));
+    $segments_query = civicrm_api3('Segmentation', 'segmentlist', ['contact_id' => $page->_contactId, 'include_excluded' => true]);
     $segments_details = $segments_query['values'];
 
     // compile campaign data

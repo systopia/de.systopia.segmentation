@@ -39,11 +39,17 @@ class api_v3_SegmentationOrder_CreateTest extends \PHPUnit_Framework_TestCase im
   public function testUpdate() {
     CRM_Segmentation_Logic::setSegmentOrder($this->_campaignId, [$this->_segmentId]);
 
+    $segment_order_id = CRM_Core_DAO::singleValueQuery(
+      "SELECT id AS count FROM civicrm_segmentation_order
+                                          WHERE campaign_id=%0 AND segment_id=%1",
+      [[$this->_campaignId, 'Integer'], [$this->_segmentId, 'Integer']]
+    );
+
     $segmentationOrder = $this->callApiSuccess(
       'SegmentationOrder',
       'Create',
       [
-        'id' => $this->_segmentId,
+        'id' => $segment_order_id,
         'order_number' => 2,
         'bundle' => '1',
         'text_block' => 'example test block',

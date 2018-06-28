@@ -213,7 +213,9 @@ class CRM_Segmentation_Configuration {
      FROM civicrm_segmentation
      LEFT JOIN civicrm_segmentation_index ON civicrm_segmentation_index.id = civicrm_segmentation.segment_id
      LEFT JOIN civicrm_contact ON civicrm_contact.id = civicrm_segmentation.entity_id
-     WHERE campaign_id = {$_campaign_id}
+     LEFT JOIN civicrm_segmentation_order ON civicrm_segmentation_order.campaign_id = civicrm_segmentation.campaign_id
+       AND civicrm_segmentation_order.segment_id = civicrm_segmentation.segment_id
+     WHERE civicrm_segmentation.campaign_id = {$_campaign_id}
      {$contact_status_check}
      {$segment_condition}
      {$assignment_start_condition}

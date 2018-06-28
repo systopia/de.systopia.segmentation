@@ -57,6 +57,9 @@ class CRM_Segmentation_Page_Start extends CRM_Core_Page {
       $segments[$segmentId]['count'] = $segmentCount;
       $total_count += $segmentCount;
     }
+    foreach (CRM_Segmentation_Logic::getExcludedCounts($campaign_id, $segment_order) as $segmentId => $segmentCount) {
+      $segments[$segmentId]['excluded_count'] = $segmentCount;
+    }
     $this->assign('segments', $segments);
     $this->assign('segment_order', $segment_order);
     $this->assign('campaign', $campaign);

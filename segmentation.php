@@ -216,6 +216,10 @@ function segmentation_civicrm_enable() {
   $sqlfile = dirname( __FILE__ ) . '/sql/civicrm_segment_index.sql';
   CRM_Utils_File::sourceSQLFile($config->dsn, $sqlfile);
 
+  // create segmentation exclude table
+  $sqlfile = dirname( __FILE__ ) . '/sql/create_segmentation_exclude.sql';
+  CRM_Utils_File::sourceSQLFile($config->dsn, $sqlfile);
+
   // add custom fields
   require_once 'CRM/Utils/CustomData.php';
   $customData = new CRM_Utils_CustomData('de.systopia.segmentation');
