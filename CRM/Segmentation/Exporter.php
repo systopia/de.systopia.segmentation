@@ -84,6 +84,7 @@ abstract class CRM_Segmentation_Exporter {
    * export the given campaig and segments
    */
   public function generateFile($campaign_id, $params = array(), $offset = 0, $count = 0, $is_last = TRUE, $exclude_deleted_contacts = TRUE) {
+    $exportedRows = 0;
     // create a tmp file (if not yet exists)
     $this->createTmpFile();
 
@@ -108,6 +109,7 @@ abstract class CRM_Segmentation_Exporter {
       $segment_chunk = array();
       $more_data = FALSE; // will be set back to TRUE below
       while ($main_query->fetch()) {
+        $exportedRows++;
         $segment_chunk[] = array(
           'contact_id'    => $main_query->contact_id,
           'datetime'      => $main_query->datetime,
@@ -134,6 +136,8 @@ abstract class CRM_Segmentation_Exporter {
 
     // close the tmpfile
     $this->closeTmpFile();
+
+    return $exportedRows;
   }
 
 
