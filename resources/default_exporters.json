@@ -459,15 +459,14 @@
     "id": 5,
     "type": "Excel",
     "group_by": "contact_id",
-    "columns": ["contact_id","Spendendatum","Spendenbetrag","Aktionscode","Aktionsbezeichnung"],
+    "columns": ["contact_id","Spendendatum","Spendenbetrag","Spendenstatus","Aktionscode","Aktionsbezeichnung"],
     "loop": [
       {
         "type": "Contribution",
         "name": "contribution",
         "params": {
-          "contribution_status_id": "1",
           "is_test": "0",
-          "return": "receive_date,total_amount,contribution_campaign_id",
+          "return": "receive_date,total_amount,contribution_status_id,contribution_campaign_id",
           "contact_id": "var:contact.id"
         }
       }
@@ -494,6 +493,22 @@
         "action": "skip",
         "from": "Spendenbetrag",
         "matches": "#^$#"
+      },
+      {
+        "action": "load",
+        "to": "contribution_status",
+        "type": "OptionValue",
+        "cached": true,
+        "params": {
+          "option_group_id": "contribution_status",
+          "value": "var:contribution.contribution_status_id",
+          "return": "name"
+        }
+      },
+      {
+        "action": "copy",
+        "from": "contribution_status.name",
+        "to": "Spendenstatus"
       },
       {
         "action": "load",
