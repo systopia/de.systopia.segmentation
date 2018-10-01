@@ -18,6 +18,7 @@ class CRM_Segmentation_ActivityContactTest extends \PHPUnit_Framework_TestCase i
   private $_segmentId;
   private $_sourceContactId;
   private $_activityId;
+  private $_exclusionActivityId;
 
   public function setUpHeadless() {
     return \Civi\Test::headless()
@@ -49,6 +50,20 @@ class CRM_Segmentation_ActivityContactTest extends \PHPUnit_Framework_TestCase i
       ]
     );
 
+    CRM_Core_DAO::executeQuery("
+          INSERT IGNORE INTO `civicrm_segmentation_exclude` (contact_id, created_date, campaign_id, segment_id, membership_id)
+          SELECT civicrm_contact.id AS contact_id,
+                 NOW()              AS created_date,
+                 %0                 AS campaign_id,
+                 %1                 AS segment_id,
+                 NULL               AS membership_id
+          FROM civicrm_contact WHERE civicrm_contact.id IN (1, 2)",
+      [
+        [$this->_campaignId, 'Integer'],
+        [$this->_segmentId, 'Integer'],
+      ]
+    );
+
     $this->_sourceContactId = $this->callApiSuccess('Contact', 'create', [
       'contact_type' => 'Individual',
       'first_name' => 'Dummy source contact',
@@ -57,6 +72,12 @@ class CRM_Segmentation_ActivityContactTest extends \PHPUnit_Framework_TestCase i
     $this->_activityId = $this->callApiSuccess('Activity', 'create', [
       'campaign_id' => $this->_campaignId,
       'activity_type_id' => 1,
+      'source_contact_id' => $this->_sourceContactId,
+    ])['id'];
+
+    $this->_exclusionActivityId = $this->callApiSuccess('Activity', 'create', [
+      'campaign_id' => $this->_campaignId,
+      'activity_type_id' => 2,
       'source_contact_id' => $this->_sourceContactId,
     ])['id'];
 
@@ -129,6 +150,28 @@ class CRM_Segmentation_ActivityContactTest extends \PHPUnit_Framework_TestCase i
                              WHERE ac.activity_id = {$this->_activityId}");
     $query->fetch();
     $this->assertEquals(2, $query->count, 'CRM_Segmentation_Logic::addSegmentForMassActivity should create segmentation for two contacts');
+  }
+
+  public function testExclusionMassActivity() {
+    $query = "INSERT IGNORE INTO civicrm_activity_contact
+                   (SELECT
+                      NULL                 AS id,
+                      {$this->_exclusionActivityId} AS activity_id,
+                      civicrm_contact.id   AS contact_id,
+                      3                    AS record_type
+                    FROM civicrm_segmentation_exclude
+                    LEFT JOIN civicrm_contact ON civicrm_contact.id = civicrm_segmentation_exclude.contact_id
+                    WHERE campaign_id = {$this->_campaignId}
+                      AND civicrm_contact.is_deleted = 0)";
+    CRM_Core_DAO::executeQuery($query);
+
+    CRM_Segmentation_Logic::addExclusionSegmentForMassActivity($this->_exclusionActivityId, $this->_campaignId);
+
+    $query = CRM_Core_DAO::executeQuery("SELECT COUNT(*) AS count FROM civicrm_activity_contact_segmentation acs
+                             INNER JOIN civicrm_activity_contact ac ON ac.id = acs.activity_contact_id
+                             WHERE ac.activity_id = {$this->_exclusionActivityId}");
+    $query->fetch();
+    $this->assertEquals(2, $query->count, 'CRM_Segmentation_Logic::addExclusionSegmentForMassActivity should create exclusion segmentation for two contacts');
   }
 
 }

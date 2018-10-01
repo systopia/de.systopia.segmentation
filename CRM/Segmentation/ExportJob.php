@@ -53,13 +53,17 @@ class CRM_Segmentation_ExportJob {
     }
 
     $exporter->resumeTmpFile($this->tmp_file);
-    $exporter->generateFile(
+    $numExported = $exporter->generateFile(
       $this->campaign_id,
       $this->params,
       $this->offset,
       $this->count,
       $this->is_last,
       TRUE);
+
+    if ($numExported == 0) {
+      return FALSE;
+    }
 
     // update filename
     $filename_handle = fopen($this->tmp_file . '_filename', 'w');
@@ -122,7 +126,7 @@ class CRM_Segmentation_ExportJob {
 
     // create a runner and launch it
     $runner = new CRM_Queue_Runner(array(
-      'title'     => ts("Exportig Campaign '%1'", array(1 => $campaign['title'], 'domain' => 'org.project60.sepa')),
+      'title'     => ts("Exporting Campaign '%1'", array(1 => $campaign['title'], 'domain' => 'de.systopia.segmentation')),
       'queue'     => $queue,
       'errorMode' => CRM_Queue_Runner::ERROR_ABORT,
       'onEndUrl'  => $download_url,

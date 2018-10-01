@@ -121,6 +121,12 @@ class CRM_Segmentation_Page_Start extends CRM_Core_Page {
         WHERE `campaign_id` = {$campaign_id}
           AND `segment_id`  = {$segment_id}");
 
+      // remove exclusions
+      CRM_Core_DAO::executeQuery("
+        DELETE FROM `civicrm_segmentation_exclude`
+        WHERE `campaign_id` = {$campaign_id}
+          AND `segment_id`  = {$segment_id}");
+
       CRM_Core_DAO::executeQuery("
         DELETE FROM `civicrm_segmentation_order`
         WHERE `campaign_id` = {$campaign_id}
