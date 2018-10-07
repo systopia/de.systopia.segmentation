@@ -1,0 +1,12 @@
+{
+  "_lookup": ["name"],
+  "name": "activity_type",
+  "_values": [
+    {
+      "_lookup": ["name"],
+      "_translate": ["label"],
+      "label": "Exclusion Record",
+      "name": "Exclusion Record"
+    }
+  ]
+}

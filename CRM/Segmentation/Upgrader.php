@@ -31,4 +31,11 @@ class CRM_Segmentation_Upgrader extends CRM_Segmentation_Upgrader_Base {
     return TRUE;
   }
 
+  public function upgrade_0930() {
+    $this->ctx->log->info('Updating segmentation schema to 0.9.3');
+    $customData = new CRM_Utils_CustomData('de.systopia.segmentation');
+    $customData->syncOptionGroup(__DIR__ . '/../../resources/activity_type_option_group.json');
+    return TRUE;
+  }
+
 }

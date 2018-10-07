@@ -182,15 +182,15 @@ class CRM_Segmentation_Form_CreateActivity extends CRM_Core_Form {
         $query = "INSERT IGNORE INTO civicrm_activity_contact
                    (SELECT
                       NULL               AS id,
-                      {$activity['id']}  AS activity_id,
+                      %0                 AS activity_id,
                       civicrm_contact.id AS contact_id,
                       3                  AS record_type
                     FROM civicrm_segmentation
                     LEFT JOIN civicrm_contact ON civicrm_contact.id = civicrm_segmentation.entity_id
                     LEFT JOIN civicrm_segmentation_order ON civicrm_segmentation_order.campaign_id = civicrm_segmentation.campaign_id AND civicrm_segmentation_order.segment_id = civicrm_segmentation.segment_id
-                    WHERE civicrm_segmentation.campaign_id = {$values['cid']}
+                    WHERE civicrm_segmentation.campaign_id = %1
                       AND civicrm_contact.is_deleted = 0)";
-        CRM_Core_DAO::executeQuery($query);
+        CRM_Core_DAO::executeQuery($query, [[$activity['id'], 'Integer'], [$values['cid'], 'Integer']]);
 
         CRM_Segmentation_Logic::addSegmentForMassActivity($activity['id'], $values['cid']);
       }
@@ -200,6 +200,34 @@ class CRM_Segmentation_Form_CreateActivity extends CRM_Core_Form {
         array(1 => $this->total_count, 2 => $activity_edit_url)), ts("Success"), "info");
     }
 
+    // check if there are any excluded contacts
+    $count = CRM_Core_DAO::singleValueQuery("
+      SELECT
+        COUNT(DISTINCT(contact_id)) AS contact_count
+      FROM civicrm_segmentation_exclude
+      WHERE campaign_id = %0
+      GROUP BY segment_id", [[$values['cid'], 'Integer']]);
+    if ($count > 0) {
+      // create one mass activity for excluded contacts
+      $activity_data['activity_type_id'] = CRM_Core_PseudoConstant::getKey('CRM_Activity_BAO_Activity', 'activity_type_id', 'Exclusion Record');
+      $activity_data['subject'] = ts('Control Group - %1', [
+        1 => $activity_data['subject']
+      ]);
+      $activity = civicrm_api3('Activity', 'create', $activity_data);
+      $query = "INSERT IGNORE INTO civicrm_activity_contact
+                   (SELECT
+                      NULL               AS id,
+                      %0                 AS activity_id,
+                      civicrm_contact.id AS contact_id,
+                      3                  AS record_type
+                    FROM civicrm_segmentation_exclude
+                    LEFT JOIN civicrm_contact ON civicrm_contact.id = civicrm_segmentation_exclude.contact_id
+                    LEFT JOIN civicrm_segmentation_order ON civicrm_segmentation_order.campaign_id = civicrm_segmentation_exclude.campaign_id AND civicrm_segmentation_order.segment_id = civicrm_segmentation_exclude.segment_id
+                    WHERE civicrm_segmentation_exclude.campaign_id = %1
+                      AND civicrm_contact.is_deleted = 0)";
+      CRM_Core_DAO::executeQuery($query, [[$activity['id'], 'Integer'], [$values['cid'], 'Integer']]);
+      CRM_Segmentation_Logic::addExclusionSegmentForMassActivity($activity['id'], $values['cid']);
+    }
 
     parent::postProcess();
 
@@ -274,4 +302,5 @@ class CRM_Segmentation_Form_CreateActivity extends CRM_Core_Form {
     }
     return $value_list;
   }
+
 }
