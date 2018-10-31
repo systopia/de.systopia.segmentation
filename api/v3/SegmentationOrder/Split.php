@@ -21,7 +21,6 @@ function _civicrm_api3_segmentation_order_split_spec(&$spec) {
     'buckets' => [
       'title' => 'Buckets',
       'description' => "Array of bucket names",
-
     ],
     'exclude_total' => [
       'title' => 'Exclude Number of Contacts',
@@ -33,9 +32,20 @@ function _civicrm_api3_segmentation_order_split_spec(&$spec) {
       'description' => "Percentage of contacts to exclude. Can be capped via exclude_total.",
       'type' => CRM_Utils_Type::T_INT,
     ],
+    'test_percentage' => [
+        'title' => 'Test Percentage of Contacts',
+        'description' => "Percentage of contacts to test on. The rest will be assigned to the last (Main) group.",
+        'type' => CRM_Utils_Type::T_INT,
+    ],
   ];
 }
 
+/**
+ * Perform the BUCKET (equal) split
+ * @param $params
+ * @return array
+ * @throws CiviCRM_API3_Exception
+ */
 function _civicrm_api3_segmentation_order_split_buckets($params) {
   $query = CRM_Core_DAO::executeQuery("SELECT campaign_id, segment_id, order_number, bundle, text_block FROM civicrm_segmentation_order WHERE civicrm_segmentation_order.id=%0", [
     [
@@ -47,11 +57,11 @@ function _civicrm_api3_segmentation_order_split_buckets($params) {
     return civicrm_api3_create_error("SegmentationOrder with ID {$params['id']} not found.");
   }
 
-  $campaign_id = $query->campaign_id;
-  $segment_id = $query->segment_id;
+  $campaign_id  = $query->campaign_id;
+  $segment_id   = $query->segment_id;
   $order_number = $query->order_number;
-  $bundle = $query->bundle;
-  $text_block = $query->text_block;
+  $bundle       = $query->bundle;
+  $text_block   = $query->text_block;
 
   // are the bucket names unique?
   if (count($params['buckets']) !== count(array_unique($params['buckets']))) {
@@ -145,6 +155,126 @@ function _civicrm_api3_segmentation_order_split_buckets($params) {
   );
 }
 
+/**
+ * Performs the A/B/Main split, where only a certain percentage gets pushed in the non-Main segment
+ * @param $params
+ * @return array
+ * @throws CiviCRM_API3_Exception
+ */
+function _civicrm_api3_segmentation_order_split_test_buckets($params) {
+  $query = CRM_Core_DAO::executeQuery("SELECT campaign_id, segment_id, order_number, bundle, text_block FROM civicrm_segmentation_order WHERE civicrm_segmentation_order.id=%0", [
+      [
+          $params['id'],
+          'Integer',
+      ],
+  ]);
+  if (!$query->fetch()) {
+    return civicrm_api3_create_error("SegmentationOrder with ID {$params['id']} not found.");
+  }
+
+  $campaign_id  = $query->campaign_id;
+  $segment_id   = $query->segment_id;
+  $order_number = $query->order_number;
+  $bundle       = $query->bundle;
+  $text_block   = $query->text_block;
+
+  // are the bucket names unique?
+  if (count($params['buckets']) !== count(array_unique($params['buckets']))) {
+    return civicrm_api3_create_error("Bucket names are not unique.");
+  }
+
+  // are the bucket names already in use as segment names in this campaign?
+  foreach ($params['buckets'] as $bucket) {
+    if (!CRM_Segmentation_SegmentationOrder::isSegmentNameAvailable($campaign_id, $bucket, $segment_id)) {
+      return civicrm_api3_create_error("Segment with name {$bucket} already exists in this campaign.");
+    }
+  }
+
+  // make sure the segment order is clean
+  CRM_Segmentation_Logic::verifySegmentOrder($campaign_id);
+
+  $bucketCount = count($params['buckets']);
+
+  // make space for new segments: Move each segment with order_number > the
+  // segment being split n steps down, where n is the number of buckets to be
+  // created - 1 (since the segment being split already has the right order)
+  CRM_Core_DAO::executeQuery(
+      "UPDATE civicrm_segmentation_order
+    SET order_number = order_number + %0
+    WHERE civicrm_segmentation_order.campaign_id=%1 AND order_number > %2",
+      [
+          [$bucketCount - 1, 'Integer'],
+          [$campaign_id, 'Integer'],
+          [$order_number, 'Integer'],
+      ]
+  );
+
+  $counts = CRM_Segmentation_Logic::getSegmentCounts($campaign_id, CRM_Segmentation_Logic::getSegmentOrder($campaign_id));
+  if (array_key_exists($segment_id, $counts)) {
+    $countPerBucket = round($counts[$segment_id] * $params['test_percentage'] / 100.0 / ($bucketCount - 1));
+  }
+  else {
+    $countPerBucket = 0;
+  }
+
+  CRM_Core_DAO::executeQuery(
+      "DELETE FROM civicrm_segmentation_order WHERE id=%0",
+      [
+          [$params['id'], 'Integer'],
+      ]
+  );
+  $buckets = [];
+  $i = 0;
+  foreach ($params['buckets'] as $bucket) {
+    $segment = civicrm_api3('Segmentation', 'getsegmentid', ['name' => $bucket]);
+    $buckets[] = reset(
+        civicrm_api3(
+            'SegmentationOrder',
+            'create',
+            [
+                'campaign_id'  => $campaign_id,
+                'segment_id'   => $segment['id'],
+                'order_number' => $order_number + $i,
+                'bundle'       => (string)$bundle,
+                'text_block'   => (string)$text_block,
+            ]
+        )['values']
+    );
+
+    $limitSql = '';
+    $data = [
+        [$segment['id'], 'Integer'],
+        [$segment_id, 'Integer'],
+        [$campaign_id, 'Integer'],
+    ];
+    // set limit for everything but last bucket
+    if ($i + 1 != $bucketCount) {
+      $limitSql = 'ORDER BY RAND() LIMIT %3';
+      $data[] = [$countPerBucket, 'Integer'];
+    }
+    CRM_Core_DAO::executeQuery(
+        "UPDATE civicrm_segmentation
+      SET segment_id=%0
+      WHERE segment_id=%1 AND campaign_id=%2
+      {$limitSql}",
+        $data
+    );
+    $i++;
+  }
+
+  return civicrm_api3_create_success(
+      [$buckets],
+      $params,
+      'SegmentationOrder',
+      'Split'
+  );
+}
+
+/**
+ * Perform the exclusion of a subset
+ * @param $params
+ * @return array
+ */
 function _civicrm_api3_segmentation_order_split_exclude($params) {
   $query = CRM_Core_DAO::executeQuery("SELECT campaign_id, segment_id, order_number, name
                                       FROM civicrm_segmentation_order
@@ -226,6 +356,10 @@ function civicrm_api3_segmentation_order_split($params) {
 
   if (!empty($params['buckets']) && (!empty($params['exclude_total']) || !empty($params['exclude_percentage']))) {
     return civicrm_api3_create_error('Parameters "buckets" and "exclude" are mutually exclusive.');
+  }
+
+  if (!empty($params['buckets']) && count($params['buckets']) > 1 && !empty($params['test_percentage'])) {
+    return _civicrm_api3_segmentation_order_split_test_buckets($params);
   }
 
   if (!empty($params['buckets']) && count($params['buckets']) > 1) {

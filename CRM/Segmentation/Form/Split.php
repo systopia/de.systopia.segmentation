@@ -49,7 +49,7 @@ class CRM_Segmentation_Form_Split extends CRM_Core_Form {
     $this->addRadio(
       'split_type',
       ts('Split Type'),
-      ['A/B Test', 'Exclusion Test'],
+      ['A/B Test', 'A/B/Main Test', 'Exclusion Test'],
       [],
       NULL,
       TRUE
@@ -70,6 +70,35 @@ class CRM_Segmentation_Form_Split extends CRM_Core_Form {
       ['class' => 'huge']
     );
 
+
+    $this->add(
+        'text',
+        'test_segment[0]',
+        ts('Segment Name'),
+        ['class' => 'huge']
+    );
+
+    $this->add(
+        'text',
+        'test_segment[1]',
+        ts('Segment Name'),
+        ['class' => 'huge']
+    );
+
+    $this->add(
+        'text',
+        'test_segment[2]',
+        ts('Segment Name'),
+        ['class' => 'huge']
+    );
+
+    $this->add(
+        'text',
+        'test_percentage',
+        ts('A+B Percentage'),
+        ['class' => 'two']
+    );
+
     $this->add(
       'text',
       'exclude_contacts_total',
@@ -85,6 +114,7 @@ class CRM_Segmentation_Form_Split extends CRM_Core_Form {
     );
 
     $this->addRule("exclude_contacts_total", ts('Please enter a valid number.'), 'positiveInteger');
+    $this->addRule("test_percentage", ts('Please enter a valid number.'), 'positiveInteger');
     $this->addRule("exclude_contacts_percentage", ts('Please enter a valid number.'), 'positiveInteger');
     $this->addFormRule(array('CRM_Segmentation_Form_Split', 'formRule'));
 
@@ -124,6 +154,10 @@ class CRM_Segmentation_Form_Split extends CRM_Core_Form {
   public function setDefaults($defaultValues = NULL, $filter = NULL) {
     $defaults['segment'][0] = $this->segment['name'] . ' / A';
     $defaults['segment'][1] = $this->segment['name'] . ' / B';
+    $defaults['test_segment'][0] = 'A';
+    $defaults['test_segment'][1] = 'B';
+    $defaults['test_segment'][2] = 'Main';
+    $defaults['test_percentage'] = '10';
     $defaults['split_type'] = '0';
     $defaults['exclude_contacts_total'] = '1000';
     $defaults['exclude_contacts_percentage'] = '10';
@@ -145,16 +179,27 @@ class CRM_Segmentation_Form_Split extends CRM_Core_Form {
         $splitBuckets[] = $segment;
       }
       civicrm_api3('SegmentationOrder', 'split', [
-        'id' => $segmentOrderId,
-        'buckets' => $splitBuckets,
+          'id'      => $segmentOrderId,
+          'buckets' => $splitBuckets,
+      ]);
+    }
+    elseif ($values['split_type'] == '1') {
+      // exclusion test
+      foreach ($values['test_segment'] as $segment) {
+        $splitBuckets[] = $segment;
+      }
+      civicrm_api3('SegmentationOrder', 'split', [
+          'id'              => $segmentOrderId,
+          'buckets'         => $splitBuckets,
+          'test_percentage' => $values['test_percentage'],
       ]);
     }
     else {
       // exclusion test
       civicrm_api3('SegmentationOrder', 'split', [
-        'id' => $segmentOrderId,
-        'exclude_total' => $values['exclude_contacts_total'],
-        'exclude_percentage' => $values['exclude_contacts_percentage'],
+          'id'                 => $segmentOrderId,
+          'exclude_total'      => $values['exclude_contacts_total'],
+          'exclude_percentage' => $values['exclude_contacts_percentage'],
       ]);
     }
 

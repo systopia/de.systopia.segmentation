@@ -18,6 +18,7 @@
       {ts}You can split segments to perform A/B or exclusion tests.{/ts}
       <ol>
         <li>{ts}Use A/B tests to split a segment into two or more buckets. Useful if you want to test the performance of different copy text variants, etc.{/ts}</li>
+        <li>{ts}Use A/B/Main tests to split a segment into a number of test buckets, and one Main or remainder. Useful, if you want to perform a in situ tests, and use the winner for the main segment.{/ts}</li>
         <li>{ts}Use exclusion tests to remove a subset of contacts from a segment. Test how contacts who receive a mailing perform compared to those who do not.{/ts}</li>
       </ol>
     </p>
@@ -54,6 +55,47 @@
       </thead>
       <tbody>
       {foreach from=$form.segment item=segment}
+        <tr class="{cycle values="odd-row, even-row"}">
+          <td>
+            {counter}.
+          </td>
+          <td>
+            {$segment.html}
+          </td>
+        </tr>
+      {/foreach}
+      </tbody>
+    </table>
+  </div>
+
+  <div id="crm-segmentation-split-test-buckets">
+    <p>
+      {ts}Split segments into any number of test buckets to perform A/B tests. The last segment ist always the main one.{/ts}
+    <ul>
+      <li>{ts}You can change the names of the new segments below{/ts}</li>
+      <li>{ts}Splits are always performed randomly and all buckets will have the same number of contacts (±1 for uneven totals){/ts}</li>
+      <li>{ts}This action cannot be undone once you hit "Split" below{/ts}</li>
+    </ul>
+    </p>
+    <table class="form-layout-compressed">
+      <tr>
+        <td class="label">{$form.test_percentage.label}</td>
+        <td>{$form.test_percentage.html} %</td>
+      </tr>
+    </table>
+    <table>
+      <thead class="sticky">
+      <tr>
+        <th>
+          #
+        </th>
+        <th>
+          {ts}Segment Name{/ts}
+        </th>
+      </tr>
+      </thead>
+      <tbody>
+      {foreach from=$form.test_segment item=segment}
         <tr class="{cycle values="odd-row, even-row"}">
           <td>
             {counter}.
@@ -107,11 +149,17 @@
 {literal}
   function showSplitType() {
     if (CRM.$('input[name="split_type"]:checked').val() == '0') {
-      CRM.$('#crm-segmentation-split-buckets').show();
-      CRM.$('#crm-segmentation-split-exclusion').hide();
+        CRM.$('#crm-segmentation-split-buckets').show();
+        CRM.$('#crm-segmentation-split-test-buckets').hide();
+        CRM.$('#crm-segmentation-split-exclusion').hide();
+    } else if (CRM.$('input[name="split_type"]:checked').val() == '1') {
+        CRM.$('#crm-segmentation-split-buckets').hide();
+        CRM.$('#crm-segmentation-split-test-buckets').show();
+        CRM.$('#crm-segmentation-split-exclusion').hide();
     } else {
-      CRM.$('#crm-segmentation-split-exclusion').show();
-      CRM.$('#crm-segmentation-split-buckets').hide();
+        CRM.$('#crm-segmentation-split-exclusion').show();
+        CRM.$('#crm-segmentation-split-test-buckets').hide();
+        CRM.$('#crm-segmentation-split-buckets').hide();
     }
   }
   CRM.$('.crm-segmentation-split-type input[type="radio"]').change(showSplitType);
