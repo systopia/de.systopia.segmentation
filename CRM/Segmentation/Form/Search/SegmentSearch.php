@@ -223,4 +223,19 @@ class CRM_Segmentation_Form_Search_SegmentSearch extends CRM_Contact_Form_Search
   function alterRow(&$row) {
     // $row['sort_name'] .= ' ( altered )';
   }
+
+  /**
+   * Safeguard against bad $sort requests
+   *
+   * @see https://github.com/systopia/de.systopia.segmentation/issues/14
+   */
+  public function addSortOffset(&$sql, $offset, $rowcount, $sort) {
+    if ($sort && !is_object($sort)) {
+      // check if sort is in the sql, otherwise drop it
+      if (strstr($sql, $sort) === FALSE) {
+        $sort = NULL;
+      }
+    }
+    return parent::addSortOffset($sql, $offset, $rowcount, $sort);
+  }
 }
