@@ -132,6 +132,7 @@ class CRM_Segmentation_Form_Search_SegmentSearch extends CRM_Contact_Form_Search
    */
   function all($offset = 0, $rowcount = 0, $sort = NULL, $includeContactIDs = FALSE, $justIDs = FALSE) {
     // delegate to $this->sql(), $this->select(), $this->from(), $this->where(), etc.
+    //return $this->sql($this->select(), $offset, $rowcount, NULL, $includeContactIDs, NULL);
     return $this->sql($this->select(), $offset, $rowcount, $sort, $includeContactIDs, NULL);
   }
 
