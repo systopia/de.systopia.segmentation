@@ -16,27 +16,34 @@ var table_wrapper = cj("#custom-SEGMENT_GROUP_ID-table-wrapper");
 var panel = table_wrapper.parent();
 
 // remove the "Add Segments Record" button
-panel.find("a.button[accesskey='N']")
+panel.find(".action-link")
      .hide();
 
-// blank the 6th column (actions) completely
-panel.find("td:nth-child(6)").html('');
+var observer = new MutationObserver(function() {
+  // blank the 6th column (actions) completely
+  panel.find("td:nth-child(6)").html('');
 
-// replace segment / campaign / membership labels
-panel.find("td[class^='crmf-custom_" + segments_field_id + "']").each(function() {
-  cj(this).html(segments_details[cj(this).html()]);
+  // replace segment / campaign / membership labels
+  panel.find("td[class^='crmf-custom_" + segments_field_id + "']")
+    .each(function () {
+      cj(this).html(segments_details[cj(this).html()]);
+    });
+
+  panel.find("td[class^='crmf-custom_" + campaign_field_id + "']")
+    .each(function () {
+      if (campaign_status[cj(this).html()] == '1') {
+        cj(this).closest("tr").addClass("segmentation-planned");
+      }
+      cj(this).html(campaign_details[cj(this).html()]);
+    });
+
+  panel.find("td[class^='crmf-custom_" + membership_field_id + "']")
+    .each(function () {
+      cj(this).html(membership_details[cj(this).html()]);
+    });
 });
 
-panel.find("td[class^='crmf-custom_" + campaign_field_id + "']").each(function() {
-  if (campaign_status[cj(this).html()] == '1') {
-    cj(this).closest("tr").addClass("segmentation-planned");
-  }
-  cj(this).html(campaign_details[cj(this).html()]);
-});
-
-panel.find("td[class^='crmf-custom_" + membership_field_id + "']").each(function() {
-  cj(this).html(membership_details[cj(this).html()]);
-});
+observer.observe(table_wrapper.find('table')[0], { childList: true, subtree: true });
 
 // sort table by first column (date)
 var dt_hooked = false;
