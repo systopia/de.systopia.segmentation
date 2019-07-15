@@ -175,7 +175,7 @@ class CRM_Segmentation_Configuration {
       $segment_condition = '';
     } else {
       $segment_list_string = implode(',', $params['segments']);
-      $segment_condition = "AND segment_id IN ({$segment_list_string})";
+      $segment_condition = "AND civicrm_segmentation.segment_id IN ({$segment_list_string})";
     }
 
     if ($exclude_deleted_contacts) {
