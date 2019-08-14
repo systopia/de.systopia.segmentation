@@ -474,7 +474,7 @@ abstract class CRM_Segmentation_Exporter {
     if ($prefix == 'custom_') {
       $suffix = substr($field_name, 7);
       if (!is_numeric($suffix)) {
-        $path = split("\\.", $suffix);
+        $path = preg_split("/\./", $suffix);
         $field = NULL;
         if (count($path) == 1) {
           $field = $this->getField($field_name, array('name' => $path[0]));
