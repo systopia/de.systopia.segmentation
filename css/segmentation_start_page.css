@@ -1,0 +1,22 @@
+.sort-segments-btn {
+    cursor: pointer;
+    text-align: center;
+    vertical-align: middle !important;
+}
+
+.sort-segments-btn-ico {
+    display: inline-block;
+}
+
+.sort-segments-btn.is-moving {
+    cursor: grabbing;
+}
+
+.ui-state-highlight {
+    height: 30px;
+    width: 100%;
+    border: 2px solid #4999DA;
+    margin: 0 0 0.75rem 0;
+    position: relative;
+    z-index: 6;
+}
