@@ -41,6 +41,7 @@ function civicrm_api3_segmentation_order_custom_split($params) {
 
   $segmentNames = [];
   $sumOfContacts = 0;
+  $sumPercentOfContacts = 0;
   foreach ($params['new_segments_data'] as $segment) {
     if (!CRM_Segmentation_SegmentationOrder::isSegmentNameAvailable($segmentationOrder->campaign_id, $segment['name'], $segmentationOrder->segment_id)) {
       return civicrm_api3_create_error("Segment with name {$segment['name']} already exists in this campaign.");
@@ -48,11 +49,18 @@ function civicrm_api3_segmentation_order_custom_split($params) {
     if ($params['mode'] == 'number') {
       $sumOfContacts += $segment['number'];
     }
+    if ($params['mode'] == 'percent') {
+      $sumPercentOfContacts += $segment['percent'];
+    }
     $segmentNames[] = $segment['name'];
   }
 
   if ($params['mode'] == 'number' && $sumOfContacts > $segmentCounts) {
     return civicrm_api3_create_error("Sum of contacts can not be more than " . $segmentCountOfContact);
+  }
+
+  if ($params['mode'] == 'percent' && $sumPercentOfContacts !== 100) {
+    return civicrm_api3_create_error("Sum of contacts percent must be 100%.");
   }
 
   if (count($segmentNames) !== count(array_unique($segmentNames))) {
