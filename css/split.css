@@ -60,5 +60,9 @@
 }
 
 .crm-segmentation-split-type-content {
-    padding-top: 20px;
+    padding: 20px;
+}
+
+#crm-segmentation-split-generic {
+    padding: 20px;
 }

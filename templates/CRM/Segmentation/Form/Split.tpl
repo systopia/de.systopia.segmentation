@@ -158,7 +158,7 @@
             <th>{ts}Actions{/ts}</th>
           </tr>
           {section name=bar loop=$customSplitSegmentCount step=1}
-            <tr class="custom-split-segment-row">
+            <tr class="custom-split-segment-row {cycle values="odd-row, even-row"}">
               <td>
                 <div class="custom-split-segment-index">
                   {math equation="x + y" x=$smarty.section.bar.index y=1}
@@ -191,10 +191,12 @@
           {/section}
         </table>
         <div class="crm-segmentation-add-new-segment-wrap">
-          <button class="crm-segmentation-add-new-segment crm-button crm-i-button" >
-            <i class="crm-segmentation-fa-icon fa fa-plus-circle" aria-hidden="true"></i>
-            <span>{ts}Add new segment{/ts}</span>
-          </button>
+          <a title="{ts}Add new segment{/ts}" class="crm-segmentation-add-new-segment button">
+            <span>
+              <i class="crm-i fa-plus-circle"></i>
+              {ts}Add new segment{/ts}
+            </span>
+          </a>
         </div>
       </div>
 
