@@ -16,11 +16,12 @@
   <div id="crm-segmentation-split-generic">
     <p>
       {ts}You can split segments to perform A/B or exclusion tests.{/ts}
-      <ol>
-        <li>{ts}Use A/B tests to split a segment into two or more buckets. Useful if you want to test the performance of different copy text variants, etc.{/ts}</li>
-        <li>{ts}Use A/B/Main tests to split a segment into a number of test buckets, and one Main or remainder. Useful, if you want to perform a in situ tests, and use the winner for the main segment.{/ts}</li>
-        <li>{ts}Use exclusion tests to remove a subset of contacts from a segment. Test how contacts who receive a mailing perform compared to those who do not.{/ts}</li>
-      </ol>
+      <ul>
+        <li>{ts}Use <strong>A/B Test</strong> to split a segment into two or more buckets. Useful if you want to test the performance of different copy text variants, etc.{/ts}</li>
+        <li>{ts}Use <strong>A/B/Main Test</strong> to split a segment into a number of test buckets, and one Main or remainder. Useful, if you want to perform a in situ tests, and use the winner for the main segment.{/ts}</li>
+        <li>{ts}Use <strong>Exclusion Test</strong> to remove a subset of contacts from a segment. Test how contacts who receive a mailing perform compared to those who do not.{/ts}</li>
+        <li>{ts}Use <strong>Custom</strong> to split a segment arbitrarily into other segments based on percentages or an absolute number of contacts.{/ts}</li>
+      </ul>
     </p>
   </div>
 
@@ -132,10 +133,10 @@
 
   <div class="crm-segmentation-split-type-content" id="crm-segmentation-split-custom">
     <div>
-      <p>{ts}In this tab you can split segments by percentage/number of Contacts.{/ts}</p>
-      <p>{ts 1=$segmentContactCount}Current segment is included <strong>%1</strong> Contacts.{/ts}</p>
-      <p>{ts}Segment names must be unique{/ts}</p>
-      <p>{ts 1=$minSplitSegments 2=$maxSplitSegments}This segment can be split minimum on <strong>%1</strong> and maximum on <strong>%2</strong>{/ts} segments.</p>
+      <p>{ts}In this tab you can split segments arbitrarily by percentage or number of contacts.{/ts}</p>
+      <p>{ts 1=$segmentContactCount}There are <strong>%1</strong> contacts in this segment.{/ts}</p>
+      <p>{ts}Segment names must be unique.{/ts}</p>
+      <p>{ts 1=$minSplitSegments 2=$maxSplitSegments}This segment can be split into a minimum of <strong>%1</strong> and a maximum of <strong>%2</strong>{/ts} segments.</p>
       <div class="custom-split-mode-block">
         <span>{$form.custom_split_mode.label}</span>
         <span class="custom-split-mode-block-values">{$form.custom_split_mode.html}</span>
@@ -262,7 +263,6 @@
       var segmentNameInput = segmentRow.find('input[id^="name_of_segment"]');
       segmentRow.removeClass('crm-segmentation-hidden-segment');
       segmentRow.find('input[id^="is_active_segment["]').attr("checked", true);
-      segmentNameInput.val(ts('Sample Segment - ') + segmentNameInput.data('alphabet-char'));
       segmentRow.effect("highlight", {}, 3000);
       recalculateSegmentsNumber();
       handleAddSegmentButton();

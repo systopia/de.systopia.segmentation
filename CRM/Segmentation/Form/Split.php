@@ -228,7 +228,7 @@ class CRM_Segmentation_Form_Split extends CRM_Core_Form {
       'custom_split_mode',
       ts('Split mode:'),
       [
-        'percent' => ts('Percent of Contacts'),
+        'percent' => ts('Percentage of Contacts'),
         'number' => ts('Number of Contacts')
       ],
       [],
@@ -295,29 +295,29 @@ class CRM_Segmentation_Form_Split extends CRM_Core_Form {
         $countOfSegments++;
 
         if (empty($fields['name_of_segment'][$key])) {
-          $errors["name_of_segment[". $key ."]"] = ts('Please enter name of segment.');
+          $errors["name_of_segment[". $key ."]"] = ts('Please enter a segment name.');
         }
 
 
         if (!empty($fields['name_of_segment'][$key])) {
           if (in_array($fields['name_of_segment'][$key], $segmentNames)) {
-            $errors["name_of_segment[". $key ."]"] = ts('Name of segment must be unique.');
+            $errors["name_of_segment[". $key ."]"] = ts('Segment name must be unique.');
           } else {
             $segmentNames[] = $fields['name_of_segment'][$key];
           }
         }
 
         if (!empty($fields['name_of_segment'][$key]) && !CRM_Segmentation_SegmentationOrder::isSegmentNameAvailable($campaignId, $fields['name_of_segment'][$key], $segmentId)) {
-          $errors["name_of_segment[". $key ."]"] = ts("Name of thr segment already exists in this campaign.");
+          $errors["name_of_segment[". $key ."]"] = ts("This segment name already exists in this campaign.");
         }
 
         if (!empty($fields['name_of_segment'][$key]) && strlen($fields['name_of_segment'][$key]) > 255) {
-          $errors["name_of_segment[". $key ."]"] = ts('Max length of segment name is 255 chars.');
+          $errors["name_of_segment[". $key ."]"] = ts('Segment name may contain only 255 characters.');
         }
 
         if ($splitMode == 'percent') {
           if (empty((int) $fields['segment_count_contact_in_percents'][$key])) {
-            $errors["segment_count_contact_in_percents[". $key ."]"] = ts('Please enter percent of Contact.');
+            $errors["segment_count_contact_in_percents[". $key ."]"] = ts('Please enter the percentage of contacts.');
           } else {
             $percentSum += (int) $fields['segment_count_contact_in_percents'][$key];
           }
@@ -325,7 +325,7 @@ class CRM_Segmentation_Form_Split extends CRM_Core_Form {
 
         if ($splitMode == 'number') {
           if (empty((int) $fields['segment_count_contact_in_number'][$key])) {
-            $errors["segment_count_contact_in_number[". $key ."]"] = ts('Please enter number of Contact.');
+            $errors["segment_count_contact_in_number[". $key ."]"] = ts('Please enter the number of contacts.');
           }
           $numberSum += (int) $fields['segment_count_contact_in_number'][$key];
         }
@@ -336,29 +336,29 @@ class CRM_Segmentation_Form_Split extends CRM_Core_Form {
     $numberModeErrors = '';
 
     if ($countOfSegments > $segmentContactCount && $splitMode == 'percent') {
-      $percentModeErrors .= ts('The number of segments must be not more than - ') . $segmentContactCount . '.';
+      $percentModeErrors .= ts('The number of segments must not be more than %1.', $segmentContactCount);
     }
 
     if ($countOfSegments > $segmentContactCount && $splitMode == 'number') {
-      $numberModeErrors .= ts('The number of segments must be not more than - ') . $segmentContactCount . '.';
+      $numberModeErrors .= ts('The number of segments must not be more than %1.', $segmentContactCount);
     }
 
     if ($splitMode == 'percent' && $percentSum != 100) {
-      $percentModeErrors .=  ts('Sum of the segment percent must be 100.');
+      $percentModeErrors .=  ts('Sum of the segment percentage must be 100.');
     }
 
     if ($countOfSegments < self::CUSTOM_SPLIT_MIN_SEGMENTS && $splitMode == 'number') {
-      $numberModeErrors .= ts('The number of segments must be at least - ') . self::CUSTOM_SPLIT_MIN_SEGMENTS . '.';
+      $numberModeErrors .= ts('The number of segments must be at least %1.', self::CUSTOM_SPLIT_MIN_SEGMENTS);
     }
 
     if ($countOfSegments >= self::CUSTOM_SPLIT_MIN_SEGMENTS && $splitMode == 'number') {
       if ($segmentContactCount !== $numberSum) {
-        $numberModeErrors .= ts('The sum of contacts must be - ') . $segmentContactCount;
+        $numberModeErrors .= ts('The sum of contacts must be %1.', $segmentContactCount);
       }
     }
 
     if ($countOfSegments < self::CUSTOM_SPLIT_MIN_SEGMENTS && $splitMode == 'percent') {
-      $percentModeErrors .= ts('The number of segments must be at least - ') . self::CUSTOM_SPLIT_MIN_SEGMENTS . '.';
+      $percentModeErrors .= ts('The number of segments must be at least %1.', self::CUSTOM_SPLIT_MIN_SEGMENTS);
     }
 
     if (!empty($percentModeErrors))  {
@@ -386,7 +386,7 @@ class CRM_Segmentation_Form_Split extends CRM_Core_Form {
 
     for ($i = 0; $i < self::CUSTOM_SPLIT_SEGMENT_COUNT; $i++) {
       $defaults['is_active_segment'][$i] = ($i < self::CUSTOM_SPLIT_ACTIVE_SEGMENTS_COUNT) ? '1' :'0';
-      $defaults['name_of_segment'][$i] = ts('Sample Segment - ') . static::getAlphabetChar($i);
+      $defaults['name_of_segment'][$i] = $this->segment['name'] . ' / ' . static::getAlphabetChar($i);
       $defaults['segment_count_contact_in_percents'][$i] = '';
       $defaults['segment_count_contact_in_number'][$i] = '';
     }
@@ -401,10 +401,7 @@ class CRM_Segmentation_Form_Split extends CRM_Core_Form {
    * @return mixed|string
    */
   public static function getAlphabetChar($number) {
-    $alphabet = [
-      "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
-      "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"
-    ];
+    $alphabet = range('A', 'Z');
 
     $length = count($alphabet);
     if ($number >= $length) {
