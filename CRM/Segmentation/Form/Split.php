@@ -190,7 +190,10 @@ class CRM_Segmentation_Form_Split extends CRM_Core_Form {
         'text',
         'name_of_segment[' . $i . ']',
         'Mame of segment(#' . $i . ')',
-        ['data-alphabet-char' => static::getAlphabetChar($i)]
+        [
+          'data-alphabet-char' => static::getAlphabetChar($i),
+          'class'              => 'huge'
+        ]
       );
 
       $this->add(
