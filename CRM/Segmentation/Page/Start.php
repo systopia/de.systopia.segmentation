@@ -16,7 +16,7 @@
 
 /**
  * This page manages starting a campaign,
- * i.e. chaging the status from "planned" to "running"
+ * i.e. changing the status from "planned" to "running"
  *   which includes considating and freezing the segments.
  */
 class CRM_Segmentation_Page_Start extends CRM_Core_Page {
@@ -67,16 +67,20 @@ class CRM_Segmentation_Page_Start extends CRM_Core_Page {
     $this->assign('campaign_id', $campaign['id']);
     $this->assign('total_count', $total_count);
     CRM_Utils_System::setTitle(ts("Start Campaign '%1'", array(1 => $campaign['title'])));
+    CRM_Core_Resources::singleton()->addScriptFile('de.systopia.segmentation', 'js/SortSegments.js');
+    CRM_Core_Resources::singleton()->addStyleFile('de.systopia.segmentation', 'css/segmentation_start_page.css');
 
     parent::run();
   }
 
-
   /**
-   * process any ordering commands to modify the given segment_order
+   * Process any ordering commands to modify the given segment_order
    *
-   * @param $segment_order  the current segment order
-   * @return the new segment order
+   * @param $segment_order(the current segment order)
+   *
+   * @return array(the new segment order)
+   *
+   * @throws \CRM_Core_Exception
    */
   protected function processOrderCommands($segment_order) {
     foreach (array('top', 'up', 'down', 'bottom') as $cmd) {
@@ -109,6 +113,10 @@ class CRM_Segmentation_Page_Start extends CRM_Core_Page {
   /**
    * Process a delete command if there is one,
    * deleting an entire segment
+   *
+   * @param $campaign_id
+   *
+   * @throws \CRM_Core_Exception
    */
   protected function processDeleteCommand($campaign_id) {
     if (empty($campaign_id)) return;
@@ -133,7 +141,8 @@ class CRM_Segmentation_Page_Start extends CRM_Core_Page {
           AND `segment_id`  = {$segment_id}");
 
       // create notice
-      CRM_Core_Session::setStatus(ts("Segment sucessfully removed."), ts("Success"), "info");
+      CRM_Core_Session::setStatus(ts("Segment successfully removed."), ts("Success"), "info");
     }
   }
+
 }

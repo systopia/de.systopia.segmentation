@@ -36,11 +36,12 @@
       <th>{ts}Text Block{/ts}</th>
       <th>{ts}Segment Order{/ts}</th>
       <th>{ts}Actions{/ts}</th>
+      <th>{ts}Sort{/ts}</th>
     </tr>
   </thead>
-  <tbody>
+  <tbody id="segmentsTableWrap" data-campaign-id="{$campaign_id}">
   {foreach from=$segments item=segment}
-    <tr id="SegmentationOrder-{$segment.segmentation_order_id}" data-action="create" class="crm-entity even-row">
+    <tr id="SegmentationOrder-{$segment.segmentation_order_id}" data-segmentation-id="{$segment.segment_id}" data-action="create" class="crm-entity even-row sorting-init">
       <td class="crm-admin-options-label" data-field="label">
         <div class="" title="{$segment.name|escape}">{$segment.name|escape}</div>
       </td>
@@ -67,6 +68,9 @@
         </a>
         {/if}
       </td>
+      <td class="sort-segments-btn">
+        <div class="sort-segments-btn-ico">&#8693;</div>
+      </td>
     </tr>
   {/foreach}
   </tbody>
@@ -75,9 +79,6 @@
 <div>
   <a href="{crmURL p='civicrm/segmentation/start' q="cid=$campaign_id&start=now"}" class="button"><span>{ts}Start Campaign{/ts}</span></a>
 </div>
-
-
-
 
 <script type="text/javascript">
 // reset the URL
