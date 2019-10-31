@@ -398,6 +398,21 @@
       {
         "action": "copy",
         "from": "contact.country",
+        "to": "Land_Name"
+      },
+      {
+        "action": "load",
+        "to": "country",
+        "type": "Country",
+        "cached": true,
+        "params": {
+          "id": "var:contact.country_id",
+          "return": "iso_code"
+        }
+      },
+      {
+        "action": "copy",
+        "from": "country.iso_code",
         "to": "Land"
       },
       {
