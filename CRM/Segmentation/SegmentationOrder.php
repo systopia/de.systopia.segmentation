@@ -24,6 +24,47 @@ class CRM_Segmentation_SegmentationOrder {
   }
 
   /**
+   * Gets SegmentationOrder id by 'campaign' id and 'segment' id
+   *
+   * @param $campaignId
+   * @param $segmentId
+   * @return string|null
+   */
+  public static function getSegmentationOrderId($campaignId, $segmentId) {
+    $segmentOrderId = CRM_Core_DAO::singleValueQuery(
+      "SELECT id FROM civicrm_segmentation_order
+      WHERE campaign_id=%0 AND segment_id=%1",
+      [
+        [$campaignId, 'Integer'],
+        [$segmentId, 'Integer']
+      ]
+    );
+
+    return $segmentOrderId;
+  }
+
+  /**
+   * Is SegmentationOrder exist?
+   *
+   * @param $segmentOrderId
+   * @return Object|null
+   */
+  public static function getSegmentationOrderData($segmentOrderId) {
+    $segmentationOrder = CRM_Core_DAO::executeQuery(
+      "SELECT * FROM civicrm_segmentation_order WHERE id = %0 ",
+      [
+        [$segmentOrderId, 'Integer']
+      ]
+    );
+
+    while ($segmentationOrder->fetch()) {
+      return $segmentationOrder;
+    }
+
+    return NULL;
+  }
+
+  /**
    * @param $segment_ids list of segment orders to fetch
    * @param $campaign_id ID of campaign
    *
@@ -116,6 +157,20 @@ class CRM_Segmentation_SegmentationOrder {
       $data[] = [$excludedSegmentId, 'Integer'];
     }
     return 0 == CRM_Core_DAO::singleValueQuery($query, $data);
+  }
+
+  /**
+   * Deletes 'civicrm_segmentation_order' item by id
+   *
+   * @param $segmentationOrderId
+   */
+  public static function delete($segmentationOrderId) {
+    CRM_Core_DAO::executeQuery(
+      "DELETE FROM civicrm_segmentation_order WHERE id=%0",
+      [
+        [$segmentationOrderId, 'Integer'],
+      ]
+    );
   }
 
 }

@@ -1,0 +1,68 @@
+.crm-segmentation-split-type label {
+    padding-right: 20px;
+    padding-left: 5px;
+    display: inline-block;
+    vertical-align: middle;
+    cursor: pointer;
+}
+
+.crm-segmentation-split-type input {
+    vertical-align: middle;
+    cursor: pointer;
+}
+
+#crm-segmentation-split-buckets, #crm-segmentation-split-exclusion, #crm-segmentation-split-custom {
+    display: none;
+}
+
+.custom-split-table-wrap {
+    padding-top: 20px;
+}
+
+.custom-split-mode-block-values label {
+    padding-right: 20px;
+    padding-left: 5px;
+    display: inline-block;
+    vertical-align: middle;
+    cursor: pointer;
+}
+
+.custom-split-mode-block-values input {
+    vertical-align: middle;
+    cursor: pointer;
+}
+
+.custom-split-segment-hidden {
+    display: none;
+}
+
+.crm-segmentation-fa-icon {
+    max-width: 20px;
+    max-height: 20px;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    overflow: hidden;
+    vertical-align: middle;
+    text-indent: 0;
+}
+
+.crm-segmentation-hidden-segment {
+    display: none;
+}
+
+.custom-split-segment-input input + span.crm-error {
+    display: block;
+}
+
+.crm-segmentation-add-new-segment-wrap {
+    margin-bottom: 20px;
+}
+
+.crm-segmentation-split-type-content {
+    padding: 20px;
+}
+
+#crm-segmentation-split-generic {
+    padding: 20px;
+}

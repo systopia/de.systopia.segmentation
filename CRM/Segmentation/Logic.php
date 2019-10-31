@@ -442,4 +442,78 @@ class CRM_Segmentation_Logic {
     ]);
   }
 
+  /**
+   * Make space for new segments: Move each segment with order_number > the
+   * segment being split n steps down, where n is the number of buckets to be
+   * created - 1 (since the segment being split already has the right order)
+   *
+   * @param $segmentCount
+   * @param $campaignId
+   * @param $orderNumber
+   */
+  public static function moveSegmentOrderNumber($segmentCount, $campaignId, $orderNumber) {
+    CRM_Core_DAO::executeQuery(
+      "UPDATE civicrm_segmentation_order
+    SET order_number = order_number + %0
+    WHERE civicrm_segmentation_order.campaign_id=%1 AND order_number > %2",
+      [
+        [$segmentCount - 1, 'Integer'],
+        [$campaignId, 'Integer'],
+        [$orderNumber, 'Integer'],
+      ]
+    );
+  }
+
+  /**
+   * Convert percent of Contact to count of Contact
+   *
+   * @param $newSegments
+   * @param $sumCountOfContact
+   * @return array
+   */
+  public static function convertPercentToCountOfContact($newSegments, $sumCountOfContact) {
+    $sum = 0;
+    foreach ($newSegments as $key => $newSegment) {
+      $absoluteContactCount = $newSegment['percent'] * $sumCountOfContact / 100;
+      $newSegments[$key]['number'] = floor($absoluteContactCount);
+      $newSegments[$key]['number_coefficient'] = $absoluteContactCount- floor($absoluteContactCount);
+      $sum += floor($absoluteContactCount);
+    }
+
+    $countOfMissedContacts = $sumCountOfContact - $sum;
+    if ($countOfMissedContacts !== 0) {
+      for ($i = 0; $i < $countOfMissedContacts; $i++) {
+        $key = static::findKeyWithTheBiggestCoefficient($newSegments);
+        $newSegments[$key]['number'] = $newSegments[$key]['number'] + 1;
+        $newSegments[$key]['number_coefficient'] = $newSegments[$key]['number_coefficient'] - 1;
+      }
+    }
+
+    foreach ($newSegments as $key => $newSegment) {
+      unset($newSegments[$key]['number_coefficient']);
+    }
+
+    return $newSegments;
+  }
+
+  /**
+   * Finds key of array where the biggest coefficient
+   *
+   * @param $newSegments
+   * @return int
+   */
+  private static function findKeyWithTheBiggestCoefficient($newSegments) {
+    $maxValue = 0;
+    $maxValueKey = 0;
+
+    foreach ($newSegments as $key => $newSegment) {
+      if ($newSegment['number_coefficient'] > $maxValue) {
+        $maxValue = $newSegment['number_coefficient'];
+        $maxValueKey = $key;
+      }
+    }
+
+    return $maxValueKey;
+  }
+
 }
