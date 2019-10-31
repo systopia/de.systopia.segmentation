@@ -780,5 +780,195 @@
         "from": "file_date"
       }
     ]
+  },
+
+
+  {
+    "name": "TM Aktivitätsdaten (Excel)",
+    "id": 8,
+    "type": "Excel",
+    "group_by": "contact_id",
+    "columns": ["contact_id","activity_id","parent_activity_id","Aktivitätstyp","Aktivitätsdatum","Betreff","Aktivitätsstatus","Aktivitätsmedium","Aktionscode","Aktionsbezeichnung","Case_Type","Kommunikationskanal_Legacy","UTM_Source","UTM_Medium","UTM_Campaign","UTM_Content"],
+    "loop": [
+      {
+        "type": "Activity",
+        "name": "activity",
+        "params": {
+          "is_test": "0",
+          "return": "id,activity_type_id,activity_date_time,subject,status_id,medium_id,campaign_id,custom_133,custom_134,custom_135,custom_136,custom_93,custom_103",
+          "target_contact_id": "var:contact.id",
+          "activity_type_id": {"NOT IN":["Contribution","Potential Duplicates","bpk_submission_exclusion","Exclusion Record","DSGVO","streetimport_error","manual_update_required","manual_check_required"]}
+        }
+      }
+    ],
+    "rules": [
+      {
+        "action": "copy",
+        "from": "contact.id",
+        "to": "contact_id"
+      },
+      {
+        "action": "copy",
+        "from": "activity.id",
+        "to": "activity_id"
+      },
+      {
+        "action": "copy",
+        "from": "activity.custom_103",
+        "to": "parent_activity_id"
+      },
+      {
+        "action": "load",
+        "to": "activity_type",
+        "type": "OptionValue",
+        "cached": true,
+        "params": {
+          "option_group_id": "activity_type",
+          "value": "var:activity.activity_type_id",
+          "return": "name"
+        }
+      },
+      {
+        "action": "copy",
+        "from": "activity_type.name",
+        "to": "Aktivitätstyp"
+      },
+      {
+        "action": "date",
+        "from": "activity.activity_date_time",
+        "format": "Y-m-d H:i:s",
+        "to": "Aktivitätsdatum"
+      },
+      {
+        "action": "copy",
+        "from": "activity.subject",
+        "to": "Betreff"
+      },
+      {
+        "action": "load",
+        "to": "activity_status",
+        "type": "OptionValue",
+        "cached": true,
+        "params": {
+          "option_group_id": "activity_status",
+          "value": "var:activity.status_id",
+          "return": "name"
+        }
+      },
+      {
+        "action": "copy",
+        "from": "activity_status.name",
+        "to": "Aktivitätsstatus"
+      },
+      {
+        "action": "load",
+        "to": "activity_medium",
+        "type": "OptionValue",
+        "cached": true,
+        "params": {
+          "option_group_id": "encounter_medium",
+          "value": "var:activity.medium_id",
+          "return": "name"
+        }
+      },
+      {
+        "action": "copy",
+        "from": "activity_medium.name",
+        "to": "Aktivitätsmedium"
+      },
+      {
+        "action": "load",
+        "to": "activity_campaign",
+        "type": "Campaign",
+        "cached": true,
+        "params": {
+          "id": "var:activity.campaign_id",
+          "return": "external_identifier,title"
+        }
+      },
+      {
+        "action": "copy",
+        "from": "activity_campaign.custom_campaign_objective.campaign_code",
+        "to": "Aktionscode"
+      },
+      {
+        "action": "copy",
+        "from": "activity_campaign.title",
+        "to": "Aktionsbezeichnung"
+      },
+      {
+        "action": "load",
+        "to": "case",
+        "type": "Case",
+        "cached": true,
+        "params": {
+          "activity_id": "var:activity.id",
+          "return": "case_type_id"
+        }
+      },
+      {
+        "action": "load",
+        "to": "case_type",
+        "type": "CaseType",
+        "cached": true,
+        "params": {
+          "option_group_id": "case_type",
+          "id": "var:case.case_type_id",
+          "return": "name"
+        }
+      },
+      {
+        "action": "copy",
+        "from": "case_type.name",
+        "to": "Case_Type"
+      },
+      {
+        "action": "load",
+        "to": "activity_channel",
+        "type": "OptionValue",
+        "cached": true,
+        "params": {
+          "option_group_id": "channel_20180528131747",
+          "value": "var:activity.custom_93",
+          "return": "name"
+        }
+      },
+      {
+        "action": "copy",
+        "from": "activity_channel.name",
+        "to": "Kommunikationskanal_Legacy"
+      },
+      {
+        "action": "copy",
+        "from": "activity.custom_133",
+        "to": "UTM_Source"
+      },
+      {
+        "action": "copy",
+        "from": "activity.custom_134",
+        "to": "UTM_Medium"
+      },
+      {
+        "action": "copy",
+        "from": "activity.custom_135",
+        "to": "UTM_Campaign"
+      },
+      {
+        "action": "copy",
+        "from": "activity.custom_136",
+        "to": "UTM_Content"
+      },
+      {
+        "comment": "calculate file name",
+        "action": "sprintf",
+        "from": "campaign.id",
+        "format": "Aktivitätsdaten_Aktion_C%04d.csv",
+        "to": "file_date"
+      },
+      {
+        "action": "setfilename",
+        "from": "file_date"
+      }
+    ]
   }
 ]
