@@ -14,6 +14,9 @@
 | written permission from the original author(s).        |
 +--------------------------------------------------------*/
 
+use CRM_Segmentation_ExtensionUtil as E;
+
+
 define('SEGMENTATION_EXPORT_CHUNK_SIZE', 100);
 
 /**
@@ -280,25 +283,59 @@ abstract class CRM_Segmentation_Exporter {
   }
 
   /**
-   * Get the list of configured exporters
+   * Get the list of absolute paths where resources can be found
    *
-   * @return array( exporter_id => array<exporter spec>)
+   * @return array absolute folder paths
    */
-  public static function getAllExporters() {
-    $exporters = CRM_Core_BAO_Setting::getItem('Segmentation', 'segmentation_exporters');
-    if (!is_array($exporters)) {
-      // load default file
-      $default_exporter_data = file_get_contents(__DIR__ . "/../../resources/default_exporters.json");
-      $exporters = json_decode($default_exporter_data, TRUE);
+  public static function getExporterConfigurationLocations() {
+    $locations = array();
+
+    // add the folder in this extension
+    $in_extension_location = E::path('segmentation_exporters');
+    if (file_exists($in_extension_location) && is_dir($in_extension_location)) {
+      $locations[] = $in_extension_location;
     }
 
-    $exporter_list = array();
-    foreach ($exporters as $exporter) {
-      $exporter_list[$exporter['id']] = $exporter;
+    // add xportx_configurations in upload dir
+    $persist_location = Civi::paths()->getPath('[civicrm.files]/persist/segmentation_exporters');
+    if (file_exists($persist_location) && is_dir($persist_location)) {
+      $locations[] = $persist_location;
     }
-    return $exporter_list;
+
+    return $locations;
   }
 
+  /**
+   * get all currently stored export configurations
+   */
+  public static function getAllExporters() {
+    // find all available export configurations
+    $configurations = array();
+
+    $locations = self::getExporterConfigurationLocations();
+    foreach ($locations as $folder) {
+      $files = scandir($folder);
+      foreach ($files as $file) {
+        if (preg_match("#[a-zA-Z0-9_]+[.]json#", $file)) {
+          // this is a json file
+          $content = file_get_contents($folder . DIRECTORY_SEPARATOR . $file);
+          $config = json_decode($content, TRUE);
+          if ($config && isset($config['id'])) {
+            // check if the entity match
+            $config_id = $config['id'];
+            if (isset($configurations[$config_id])) {
+              Civi::log()->debug("Segmentation Extension: Exporter configuration [{$config_id}] has multiple definitions.");
+            }
+            $configurations[$config_id] = $config;
+          } else {
+            Civi::log()->debug("Segmentation Extension: Exporter configuration '{$file}' in '{$folder}' doesn't seem to be valid json or is missing the 'id'.");
+          }
+        }
+      }
+    }
+
+    return $configurations;
+  }
 
   /*************************************************
    **       INTERNAL GEARWORKS: RULES             **

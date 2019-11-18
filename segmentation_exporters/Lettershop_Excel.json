@@ -1,0 +1,201 @@
+{
+  "name": "Lettershopformat (Excel)",
+  "id": 3,
+  "type": "Excel",
+  "group_by": "contact_id",
+  "columns": [
+    "contact_id",
+    "titel",
+    "anrede",
+    "vorname",
+    "nachname",
+    "co",
+    "strasse",
+    "plz",
+    "ort",
+    "postfach",
+    "land",
+    "zielgruppe ID",
+    "zielgruppe",
+    "paket",
+    "kundennummer",
+    "sepa_belegart",
+    "iban_empfaenger",
+    "bic_empfaenger",
+    "pruefziffer",
+    "paket",
+    "textbaustein"
+  ],
+  "rules": [
+    {
+      "action": "copy",
+      "from": "contact.id",
+      "to": "contact_id"
+    },
+    {
+      "action": "copy",
+      "from": "contact.formal_title",
+      "to": "titel"
+    },
+    {
+      "action": "copy",
+      "from": "contact.individual_prefix",
+      "to": "anrede"
+    },
+    {
+      "action": "preg_replace",
+      "from": "anrede",
+      "search": "#^$#",
+      "replace": "An",
+      "to": "anrede"
+    },
+    {
+      "action": "copy",
+      "from": "contact.first_name",
+      "to": "vorname"
+    },
+    {
+      "action": "copy",
+      "from": "contact.last_name",
+      "to": "nachname"
+    },
+    {
+      "action": "append",
+      "from": "contact.household_name",
+      "to": "nachname"
+    },
+    {
+      "action": "append",
+      "from": "contact.organization_name",
+      "to": "nachname"
+    },
+    {
+      "action": "copy",
+      "from": "contact.supplemental_address_1",
+      "to": "co"
+    },
+    {
+      "action": "copy",
+      "from": "contact.street_address",
+      "to": "strasse"
+    },
+    {
+      "action": "copy",
+      "from": "contact.postal_code",
+      "to": "plz"
+    },
+    {
+      "action": "copy",
+      "from": "contact.city",
+      "to": "ort"
+    },
+    {
+      "action": "copy",
+      "from": "contact.country",
+      "to": "land"
+    },
+    {
+      "action": "copy",
+      "from": "segment.segment_id",
+      "to": "zielgruppe ID"
+    },
+    {
+      "action": "copy",
+      "from": "segment.segment_name",
+      "to": "zielgruppe"
+    },
+    {
+      "action": "copy",
+      "from": "segment.test_group",
+      "to": "paket"
+    },
+    {
+      "action": "sprintf",
+      "from": "campaign.id",
+      "format": "1%05d",
+      "to": "kundennummer"
+    },
+    {
+      "action": "sprintf",
+      "from": "contact.id",
+      "format": "%09d",
+      "to": "kundennummer_contact"
+    },
+    {
+      "action": "append",
+      "from": "kundennummer_contact",
+      "separator": "",
+      "to": "kundennummer"
+    },
+    {
+      "action": "set",
+      "value": "32+",
+      "to": "sepa_belegart"
+    },
+    {
+      "action": "set",
+      "value": "IBANPLACEHOLDER",
+      "to": "iban_empfaenger"
+    },
+    {
+      "action": "set",
+      "value": "GIBAATWWXXX",
+      "to": "bic_empfaenger"
+    },
+    {
+      "action": "mod97",
+      "from": "kundennummer",
+      "to": "pruefziffer"
+    },
+    {
+      "action": "sprintf",
+      "from": "pruefziffer",
+      "format": "%s11",
+      "to": "pruefziffer"
+    },
+    {
+      "comment": "calculate file name",
+      "action": "set",
+      "value": "now",
+      "to": "file_date"
+    },
+    {
+      "action": "date",
+      "from": "file_date",
+      "format": "Ymd_His",
+      "to": "file_date"
+    },
+    {
+      "action": "append",
+      "from": "campaign.title",
+      "separator": "_",
+      "to": "file_date"
+    },
+    {
+      "action": "append",
+      "from": "campaign.id",
+      "separator": "_",
+      "to": "file_date"
+    },
+    {
+      "action": "sprintf",
+      "from": "file_date",
+      "format": "%s.csv",
+      "to": "file_date"
+    },
+    {
+      "action": "setfilename",
+      "from": "file_date"
+    },
+    {
+      "action": "copy",
+      "from": "segment.bundle",
+      "to": "paket"
+    },
+    {
+      "action": "copy",
+      "from": "segment.text_block",
+      "to": "textbaustein"
+    }
+  ]
+}

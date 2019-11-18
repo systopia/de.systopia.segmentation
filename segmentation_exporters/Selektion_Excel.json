@@ -1,0 +1,166 @@
+{
+  "name": "Selektion (Excel)",
+  "id": 2,
+  "type": "Excel",
+  "group_by": "contact_id",
+  "encoding": "UTF8",
+  "delimiter": ";",
+  "columns": [
+    "contact_id",
+    "titel",
+    "anrede",
+    "vorname",
+    "nachname",
+    "geburtsdatum",
+    "strasse",
+    "plz",
+    "ort",
+    "land",
+    "zielgruppe ID",
+    "zielgruppe",
+    "telefon",
+    "mobilnr",
+    "email",
+    "paket",
+    "textbaustein"
+  ],
+  "rules": [
+    {
+      "action": "copy",
+      "from": "contact.id",
+      "to": "contact_id"
+    },
+    {
+      "action": "copy",
+      "from": "contact.formal_title",
+      "to": "titel"
+    },
+    {
+      "action": "copy",
+      "from": "contact.individual_prefix",
+      "to": "anrede"
+    },
+    {
+      "action": "preg_replace",
+      "from": "anrede",
+      "search": "#^$#",
+      "replace": "An",
+      "to": "anrede"
+    },
+    {
+      "action": "copy",
+      "from": "contact.first_name",
+      "to": "vorname"
+    },
+    {
+      "action": "copy",
+      "from": "contact.last_name",
+      "to": "nachname"
+    },
+    {
+      "action": "append",
+      "from": "contact.household_name",
+      "to": "nachname"
+    },
+    {
+      "action": "append",
+      "from": "contact.organization_name",
+      "to": "nachname"
+    },
+    {
+      "action": "date",
+      "from": "contact.birth_date",
+      "format": "d.m.Y",
+      "to": "geburtsdatum"
+    },
+    {
+      "action": "copy",
+      "from": "contact.street_address",
+      "to": "strasse"
+    },
+    {
+      "action": "copy",
+      "from": "contact.postal_code",
+      "to": "plz"
+    },
+    {
+      "action": "copy",
+      "from": "contact.city",
+      "to": "ort"
+    },
+    {
+      "action": "copy",
+      "from": "contact.country",
+      "to": "land"
+    },
+    {
+      "action": "copy",
+      "from": "segment.segment_id",
+      "to": "zielgruppe ID"
+    },
+    {
+      "action": "copy",
+      "from": "segment.segment_name",
+      "to": "zielgruppe"
+    },
+    {
+      "action": "copy",
+      "from": "phone_phone.phone",
+      "to": "telefon"
+    },
+    {
+      "action": "copy",
+      "from": "phone_mobile.phone",
+      "to": "mobilnr"
+    },
+    {
+      "action": "copy",
+      "from": "contact.email",
+      "to": "email"
+    },
+    {
+      "comment": "calculate file name",
+      "action": "set",
+      "value": "now",
+      "to": "file_date"
+    },
+    {
+      "action": "date",
+      "from": "file_date",
+      "format": "Ymd_His",
+      "to": "file_date"
+    },
+    {
+      "action": "append",
+      "from": "campaign.title",
+      "separator": "_",
+      "to": "file_date"
+    },
+    {
+      "action": "append",
+      "from": "campaign.id",
+      "separator": "_",
+      "to": "file_date"
+    },
+    {
+      "action": "sprintf",
+      "from": "file_date",
+      "format": "%s.csv",
+      "to": "file_date"
+    },
+    {
+      "action": "setfilename",
+      "from": "file_date"
+    },
+    {
+      "action": "copy",
+      "from": "segment.bundle",
+      "to": "paket"
+    },
+    {
+      "action": "copy",
+      "from": "segment.text_block",
+      "to": "textbaustein"
+    }
+  ]
+}

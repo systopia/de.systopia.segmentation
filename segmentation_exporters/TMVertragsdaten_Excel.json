@@ -1,0 +1,134 @@
+{
+  "name": "TM Vertragsdaten (Excel)",
+  "id": 7,
+  "type": "Excel",
+  "group_by": "membership_id",
+  "not_null": "membership_id",
+  "columns": ["contact_id","Vertragsnummer","Anlagedatum","Jahresbeitrag","Buchungsinterval","Vertragsbeginn","Kontonummer","Bankleitzahl","Bic","Iban","Bankinstitut","Kontoinhaber","Buchungnext","Vertragstyp","Stornodatum","Stornogrund"],
+  "rules": [
+    {
+      "action": "copy",
+      "from": "contact.id",
+      "to": "contact_id"
+    },
+    {
+      "action": "copy",
+      "from": "contact.display_name",
+      "to": "Kontoinhaber"
+    },
+    {
+      "action": "copy",
+      "from": "membership.id",
+      "to": "Vertragsnummer"
+    },
+    {
+      "action": "copy",
+      "from": "membership.membership_name",
+      "to": "Vertragstyp"
+    },
+    {
+      "action": "copy",
+      "from": "membership.custom_membership_payment.membership_annual",
+      "to": "Jahresbeitrag"
+    },
+    {
+      "action": "copy",
+      "from": "membership.custom_membership_payment.membership_frequency",
+      "to": "Buchungsinterval"
+    },
+    {
+      "action": "map",
+      "from": "Buchungsinterval",
+      "to": "Buchungsinterval",
+      "map": {
+        "": "keine/unbekannt",
+        "1": "jährlich",
+        "2": "halbjährlich",
+        "3": "trimestral",
+        "4": "quartalsweise",
+        "6": "zweimonatlich",
+        "12": "monatlich"
+      }
+    },
+    {
+      "action": "date",
+      "from": "membership.start_date",
+      "format": "d.m.Y",
+      "to": "Anlagedatum"
+    },
+    {
+      "action": "date",
+      "from": "membership.start_date",
+      "format": "d.m.Y",
+      "to": "Vertragsbeginn"
+    },
+    {
+      "action": "date",
+      "from": "membership.custom_membership_cancellation.membership_cancel_date",
+      "format": "d.m.Y",
+      "to": "Stornodatum"
+    },
+    {
+      "action": "copy",
+      "from": "membership.custom_membership_cancellation.membership_cancel_reason",
+      "to": "Stornogrund"
+    },
+    {
+      "action": "preg_replace",
+      "from": "Stornogrund",
+      "search": "#^$#",
+      "replace": "k.A.",
+      "to": "Stornogrund"
+    },
+    {
+      "action": "load",
+      "to": "membership_rcur",
+      "type": "ContributionRecur",
+      "cached": false,
+      "required": ["id"],
+      "params": {
+        "id": "var:membership.custom_membership_payment.membership_recurring_contribution",
+        "return": "id,next_sched_contribution_date"
+      }
+    },
+    {
+      "action": "date",
+      "from": "membership_rcur.next_sched_contribution_date",
+      "format": "d.m.Y",
+      "to": "Buchungnext"
+    },
+    {
+      "action": "load",
+      "to": "membership_mandate",
+      "type": "SepaMandate",
+      "cached": false,
+      "required": ["entity_id","entity_table"],
+      "params": {
+        "entity_id": "var:membership_rcur.id",
+        "entity_table": "civicrm_contribution_recur",
+        "return": "iban,bic"
+      }
+    },
+    {
+      "action": "copy",
+      "from": "membership_mandate.iban",
+      "to": "Iban"
+    },
+    {
+      "action": "copy",
+      "from": "membership_mandate.bic",
+      "to": "Bic"
+    },
+    {
+      "comment": "calculate file name",
+      "action": "sprintf",
+      "from": "campaign.id",
+      "format": "Vertragsdaten_Aktion_C%04d.csv",
+      "to": "file_date"
+    },
+    {
+      "action": "setfilename",
+      "from": "file_date"
+    }
+  ]
+}
