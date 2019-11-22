@@ -33,7 +33,15 @@ function civicrm_api3_segmentation_sort($params) {
 
   CRM_Segmentation_Logic::setSegmentOrder($campaignId, $parsedNewOrderOfSegment);
 
-  return civicrm_api3_create_success(['Order have successfully modified.']);
+  $reorderedSegments = [];
+  foreach (CRM_Segmentation_Logic::getSegmentCounts($campaignId, $parsedNewOrderOfSegment) as $segmentId => $segmentCount) {
+    $reorderedSegments[] = [
+      'segment_id' => $segmentId,
+      'segment_count' => $segmentCount,
+    ];
+  }
+
+  return civicrm_api3_create_success($reorderedSegments);
 }
 
 /**

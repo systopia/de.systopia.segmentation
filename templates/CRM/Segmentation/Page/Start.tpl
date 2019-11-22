@@ -45,7 +45,7 @@
       <td class="crm-admin-options-label" data-field="label">
         <div class="" title="{$segment.name|escape}">{$segment.name|escape}</div>
       </td>
-      <td class="crm-admin-options-value">{$segment.count}</td>
+      <td class="crm-admin-options-value segmentation-count">{$segment.count}</td>
       <td class="crm-admin-options-value">{$segment.excluded_count}</td>
       <td class="crm-admin-options-value {if $segment.exclude neq 1}crm-editable{/if}" data-field="bundle">{$segment.bundle|escape}</td>
       <td class="crm-admin-options-value {if $segment.exclude neq 1}crm-editable{/if}" data-field="text_block">{$segment.text_block|escape}</td>
