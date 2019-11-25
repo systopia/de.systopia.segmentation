@@ -33,9 +33,13 @@ cj(document).ready(function () {
             window.location.reload();
           } else if(result.values !== undefined) {
             for (var i = 0; i < result.values.length; i++) {
-              cj("#segmentsTableWrap tr[data-segmentation-id='" + result.values[i].segment_id +  "'] .segmentation-count")
-                .empty()
-                .html(result.values[i].segment_count);
+              var mainRowElement = cj("#segmentsTableWrap tr[data-segmentation-id='" + result.values[i].segment_id +  "']");
+              mainRowElement.find('.segmentation-count').empty().html(result.values[i].segment_count);
+              if (result.values[i].is_show_split_btn == 1) {
+                mainRowElement.find('.segmentation-split-btn').show();
+              } else {
+                mainRowElement.find('.segmentation-split-btn').hide();
+              }
             }
           }
         }).fail(function (result) {

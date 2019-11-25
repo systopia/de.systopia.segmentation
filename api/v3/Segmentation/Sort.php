@@ -33,11 +33,20 @@ function civicrm_api3_segmentation_sort($params) {
 
   CRM_Segmentation_Logic::setSegmentOrder($campaignId, $parsedNewOrderOfSegment);
 
-  $reorderedSegments = [];
+  $segments = CRM_Segmentation_SegmentationOrder::getSegmentationOrderByCampaignAndSegmentList($campaignId, $parsedNewOrderOfSegment);
   foreach (CRM_Segmentation_Logic::getSegmentCounts($campaignId, $parsedNewOrderOfSegment) as $segmentId => $segmentCount) {
+    $segments[$segmentId]['count'] = $segmentCount;
+  }
+  foreach (CRM_Segmentation_Logic::getExcludedCounts($campaignId, $parsedNewOrderOfSegment) as $segmentId => $segmentCount) {
+    $segments[$segmentId]['excluded_count'] = $segmentCount;
+  }
+
+  $reorderedSegments = [];
+  foreach ($segments as $segmentId => $segment) {
     $reorderedSegments[] = [
       'segment_id' => $segmentId,
-      'segment_count' => $segmentCount,
+      'segment_count' => $segment['count'],
+      'is_show_split_btn' => ($segment['exclude'] != 1 && $segment['count'] > 0 && $segment['excluded_count'] == 0) ? 1 : 0,
     ];
   }
 
