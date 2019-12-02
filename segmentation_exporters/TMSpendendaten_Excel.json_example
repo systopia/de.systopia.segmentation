@@ -1,0 +1,89 @@
+{
+  "name": "TM Spendendaten (Excel)",
+  "id": 5,
+  "type": "Excel",
+  "group_by": "contact_id",
+  "columns": ["contact_id","Spendendatum","Spendenbetrag","Spendenstatus","Aktionscode","Aktionsbezeichnung"],
+  "loop": [
+    {
+      "type": "Contribution",
+      "name": "contribution",
+      "params": {
+        "is_test": "0",
+        "return": "receive_date,total_amount,contribution_status_id,contribution_campaign_id",
+        "contact_id": "var:contact.id"
+      }
+    }
+  ],
+  "rules": [
+    {
+      "action": "copy",
+      "from": "contact.id",
+      "to": "contact_id"
+    },
+    {
+      "action": "date",
+      "from": "contribution.receive_date",
+      "format": "Y-m-d",
+      "to": "Spendendatum"
+    },
+    {
+      "action": "copy",
+      "from": "contribution.total_amount",
+      "to": "Spendenbetrag"
+    },
+    {
+      "commend": "skip/suppress line if no contribution found",
+      "action": "skip",
+      "from": "Spendenbetrag",
+      "matches": "#^$#"
+    },
+    {
+      "action": "load",
+      "to": "contribution_status",
+      "type": "OptionValue",
+      "cached": true,
+      "params": {
+        "option_group_id": "contribution_status",
+        "value": "var:contribution.contribution_status_id",
+        "return": "name"
+      }
+    },
+    {
+      "action": "copy",
+      "from": "contribution_status.name",
+      "to": "Spendenstatus"
+    },
+    {
+      "action": "load",
+      "to": "contribution_campaign",
+      "type": "Campaign",
+      "cached": true,
+      "params": {
+        "id": "var:contribution.contribution_campaign_id",
+        "return": "external_identifier,title"
+      }
+    },
+    {
+      "action": "copy",
+      "from": "contribution_campaign.custom_campaign_objective.campaign_code",
+      "to": "Aktionscode"
+    },
+    {
+      "action": "copy",
+      "from": "contribution_campaign.title",
+      "to": "Aktionsbezeichnung"
+    },
+    {
+      "comment": "calculate file name",
+      "action": "sprintf",
+      "from": "campaign.id",
+      "format": "Spendendaten_Aktion_C%04d.csv",
+      "to": "file_date"
+    },
+    {
+      "action": "setfilename",
+      "from": "file_date"
+    }
+  ]
+}
