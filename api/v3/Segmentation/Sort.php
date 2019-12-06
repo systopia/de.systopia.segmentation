@@ -43,10 +43,13 @@ function civicrm_api3_segmentation_sort($params) {
 
   $reorderedSegments = [];
   foreach ($segments as $segmentId => $segment) {
+    $segment_exclude        = CRM_Utils_Array::value('exclude',        $segment, 0);
+    $segment_count          = CRM_Utils_Array::value('count',          $segment, 0);
+    $segment_excluded_count = CRM_Utils_Array::value('excluded_count', $segment, 0);
     $reorderedSegments[] = [
       'segment_id' => $segmentId,
       'segment_count' => $segment['count'],
-      'is_show_split_btn' => ($segment['exclude'] != 1 && $segment['count'] > 0 && $segment['excluded_count'] == 0) ? 1 : 0,
+      'is_show_split_btn' => ($segment_exclude != 1 && $segment_count > 0 && $segment_excluded_count == 0) ? 1 : 0,
     ];
   }
 
