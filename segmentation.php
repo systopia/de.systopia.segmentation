@@ -117,6 +117,7 @@ function segmentation_civicrm_alterAPIPermissions($entity, $action, &$params, &$
   $permissions['segmentation']['getsegmentid'] = array('manage campaign');
   $permissions['segmentationorder']['create'] = array('manage campaign');
   $permissions['segmentation_order']['update'] = array('manage campaign');
+  $permissions['segmentation']['sort'] = array('manage campaign');
 }
 
 /**
