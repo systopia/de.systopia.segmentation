@@ -70,6 +70,10 @@ class CRM_Segmentation_ExporterExcel extends CRM_Segmentation_Exporter {
    * This function encodes each entry in the array according to the config
    */
   protected function writeExcelLine($data_array) {
+    // iconv may produce bad transliteration results with some locales. set it
+    // to en_US.UTF-8 temporarily so we produce consistent results
+    $originalLocale = setlocale(LC_CTYPE, 0);
+    setlocale(LC_CTYPE, 'en_US.UTF-8');
     $values = array();
     foreach ($data_array as $value) {
       // first: make sure there's no ';' in the value
@@ -92,5 +96,8 @@ class CRM_Segmentation_ExporterExcel extends CRM_Segmentation_Exporter {
     // write to file
     fwrite($this->tmpFileHandle, implode(';', $values));
     fwrite($this->tmpFileHandle, "\r\n");
+
+    // restore original locale
+    setlocale(LC_CTYPE, $originalLocale);
   }
 }
