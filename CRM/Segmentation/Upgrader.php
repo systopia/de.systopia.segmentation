@@ -5,7 +5,7 @@ use CRM_Segmentation_ExtensionUtil as E;
 /**
  * Collection of upgrade steps.
  */
-class CRM_Segmentation_Upgrader extends CRM_Segmentation_Upgrader_Base {
+class CRM_Segmentation_Upgrader extends CRM_Extension_Upgrader_Base {
 
   public function upgrade_0900() {
     $this->ctx->log->info('Updating segmentation schema to 0.9.0');

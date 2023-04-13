@@ -168,39 +168,12 @@ function segmentation_civicrm_config(&$config) {
 }
 
 /**
- * Implements hook_civicrm_xmlMenu().
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_xmlMenu
- */
-function segmentation_civicrm_xmlMenu(&$files) {
-  _segmentation_civix_civicrm_xmlMenu($files);
-}
-
-/**
  * Implements hook_civicrm_install().
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_install
  */
 function segmentation_civicrm_install() {
   _segmentation_civix_civicrm_install();
-}
-
-/**
- * Implements hook_civicrm_postInstall().
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_postInstall
- */
-function segmentation_civicrm_postInstall() {
-  _segmentation_civix_civicrm_postInstall();
-}
-
-/**
- * Implements hook_civicrm_uninstall().
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_uninstall
- */
-function segmentation_civicrm_uninstall() {
-  _segmentation_civix_civicrm_uninstall();
 }
 
 /**
@@ -229,72 +202,6 @@ function segmentation_civicrm_enable() {
   $customData->syncCustomGroup(__DIR__ . '/resources/segmentation_custom_group.json');
 }
 
-/**
- * Implements hook_civicrm_disable().
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_disable
- */
-function segmentation_civicrm_disable() {
-  _segmentation_civix_civicrm_disable();
-}
-
-/**
- * Implements hook_civicrm_upgrade().
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_upgrade
- */
-function segmentation_civicrm_upgrade($op, CRM_Queue_Queue $queue = NULL) {
-  return _segmentation_civix_civicrm_upgrade($op, $queue);
-}
-
-/**
- * Implements hook_civicrm_managed().
- *
- * Generate a list of entities to create/deactivate/delete when this module
- * is installed, disabled, uninstalled.
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_managed
- */
-function segmentation_civicrm_managed(&$entities) {
-  _segmentation_civix_civicrm_managed($entities);
-}
-
-/**
- * Implements hook_civicrm_caseTypes().
- *
- * Generate a list of case-types.
- *
- * Note: This hook only runs in CiviCRM 4.4+.
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_caseTypes
- */
-function segmentation_civicrm_caseTypes(&$caseTypes) {
-  _segmentation_civix_civicrm_caseTypes($caseTypes);
-}
-
-/**
- * Implements hook_civicrm_angularModules().
- *
- * Generate a list of Angular modules.
- *
- * Note: This hook only runs in CiviCRM 4.5+. It may
- * use features only available in v4.6+.
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_angularModules
- */
-function segmentation_civicrm_angularModules(&$angularModules) {
-  _segmentation_civix_civicrm_angularModules($angularModules);
-}
-
-/**
- * Implements hook_civicrm_alterSettingsFolders().
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_alterSettingsFolders
- */
-function segmentation_civicrm_alterSettingsFolders(&$metaDataFolders = NULL) {
-  _segmentation_civix_civicrm_alterSettingsFolders($metaDataFolders);
-}
-
 function segmentation_civicrm_pre($op, $objectName, $id, &$params) {
   if ($objectName == 'Activity' && $op == 'create') {
     if (isset($params['target_contact_id'])) {
@@ -311,7 +218,6 @@ function segmentation_civicrm_pre($op, $objectName, $id, &$params) {
     }
   }
 }
-
 
 function segmentation_civicrm_post($op, $objectName, $objectId, &$objectRef) {
   if ($objectName == 'Activity' && $op == 'create') {
@@ -330,7 +236,6 @@ function segmentation_civicrm_apiWrappers(&$wrappers, $apiRequest) {
   }
 }
 
-
 // --- Functions below this ship commented out. Uncomment as required. ---
 
 /**
@@ -338,9 +243,8 @@ function segmentation_civicrm_apiWrappers(&$wrappers, $apiRequest) {
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_preProcess
  *
-function segmentation_civicrm_preProcess($formName, &$form) {
 
-} // */
+ // */
 
 /**
  * Implements hook_civicrm_navigationMenu().
