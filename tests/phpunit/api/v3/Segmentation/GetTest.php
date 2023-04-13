@@ -9,7 +9,7 @@ use Civi\Test\TransactionalInterface;
  *
  * @group headless
  */
-class api_v3_Segmentation_GetTest extends \PHPUnit_Framework_TestCase implements HeadlessInterface, HookInterface, TransactionalInterface {
+class api_v3_Segmentation_GetTest extends \PHPUnit\Framework\TestCase implements HeadlessInterface, HookInterface, TransactionalInterface {
   use \Civi\Test\Api3TestTrait;
 
   private $_segmentId;

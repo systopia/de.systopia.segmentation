@@ -10,7 +10,7 @@ use Civi\Test\TransactionalInterface;
  *
  * @group headless
  */
-class CRM_Segmentation_LogicTest extends \PHPUnit_Framework_TestCase implements HeadlessInterface, HookInterface, TransactionalInterface {
+class CRM_Segmentation_LogicTest extends \PHPUnit\Framework\TestCase implements HeadlessInterface, HookInterface, TransactionalInterface {
   use \Civi\Test\Api3TestTrait;
 
   private $_campaignId;
