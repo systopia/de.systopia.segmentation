@@ -232,6 +232,7 @@ function _civicrm_api3_segmentation_order_split_test_buckets($params) {
  * Perform the exclusion of a subset
  * @param $params
  * @return array
+ * @throws \Civi\Core\Exception\DBQueryException
  */
 function _civicrm_api3_segmentation_order_split_exclude($params) {
   $segmentationOrder = CRM_Segmentation_SegmentationOrder::getSegmentationOrderData((int) $params['id']);
