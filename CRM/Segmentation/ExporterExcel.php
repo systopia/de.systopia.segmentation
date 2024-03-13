@@ -70,17 +70,34 @@ class CRM_Segmentation_ExporterExcel extends CRM_Segmentation_Exporter {
    * This function encodes each entry in the array according to the config
    */
   protected function writeExcelLine($data_array) {
+    // iconv may produce bad transliteration results with some locales. set it
+    // to en_US.UTF-8 temporarily so we produce consistent results
+    $originalLocale = setlocale(LC_CTYPE, 0);
+    setlocale(LC_CTYPE, 'en_US.UTF-8');
     $values = array();
     foreach ($data_array as $value) {
       // first: make sure there's no ';' in the value
       $value = str_replace(';', ',', $value);
 
       // then: encode
-      $values[] = mb_convert_encoding($value, 'CP1252');
+      if (function_exists('iconv') && defined('ICONV_IMPL') && ICONV_IMPL != 'libiconv') {
+        // iconv is available, use with transliteration
+        // note: the libiconv implementation (shipped e.g. with macOS) produces
+        // bad results during transliteration, so we're not using it.
+        // see https://stackoverflow.com/questions/57648563/iconv-separates-accents-from-letter-when-using-libiconv
+        $values[] = iconv('UTF-8', 'CP1252//TRANSLIT//IGNORE', $value);
+      }
+      else {
+        $values[] = mb_convert_encoding($value, 'CP1252');
+      }
+
     }
 
     // write to file
     fwrite($this->tmpFileHandle, implode(';', $values));
     fwrite($this->tmpFileHandle, "\r\n");
+
+    // restore original locale
+    setlocale(LC_CTYPE, $originalLocale);
   }
 }
