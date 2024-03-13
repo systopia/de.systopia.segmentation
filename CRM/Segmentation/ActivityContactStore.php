@@ -29,7 +29,7 @@ class CRM_Segmentation_ActivityContactStore {
   protected function __construct() {
   }
 
-  private function __wakeup() {
+  public function __wakeup() {
   }
 
 }
