@@ -44,7 +44,7 @@ function _civicrm_api3_segmentation_order_split_spec(&$spec) {
  * Perform the BUCKET (equal) split
  * @param $params
  * @return array
- * @throws CiviCRM_API3_Exception
+ * @throws CRM_Core_Exception
  */
 function _civicrm_api3_segmentation_order_split_buckets($params) {
   $segmentationOrder = CRM_Segmentation_SegmentationOrder::getSegmentationOrderData((int) $params['id']);
@@ -138,7 +138,7 @@ function _civicrm_api3_segmentation_order_split_buckets($params) {
  * Performs the A/B/Main split, where only a certain percentage gets pushed in the non-Main segment
  * @param $params
  * @return array
- * @throws CiviCRM_API3_Exception
+ * @throws CRM_Core_Exception
  */
 function _civicrm_api3_segmentation_order_split_test_buckets($params) {
   $segmentationOrder = CRM_Segmentation_SegmentationOrder::getSegmentationOrderData((int) $params['id']);

@@ -6,7 +6,7 @@
  * @param array $params
  *
  * @return array
- * @throws CiviCRM_API3_Exception
+ * @throws CRM_Core_Exception
  */
 function civicrm_api3_segmentation_order_custom_split($params) {
   $segmentationOrder = CRM_Segmentation_SegmentationOrder::getSegmentationOrderData((int) $params['id']);
