@@ -56,10 +56,10 @@
           <a class="crm-weight-arrow" href="{crmURL p='civicrm/segmentation/start' q="cid=$campaign_id&bottom=`$segment.segment_id`"}"><img src="{$config->resourceBase}i/arrow/last.gif" title="Move to bottom" alt="Move to bottom" class="order-icon"></a>
       </td>
       <td>
-        <a name="contact_list" href="{crmURL p='civicrm/segmentation/contacts' q="snippet=1&cid=$campaign_id&sid=`$segment.segment_id`"}" alt="{ts}View in Popup{/ts}" title="{ts}Show contact list in popup window{/ts}" class="crm-hover-button">
+        <a name="contact_list" href="{crmURL p='civicrm/segmentation/contacts' q="snippet=1&cid=$campaign_id&sid=`$segment.segment_id`"}" alt="{ts escape='htmlattribute'}View in Popup{/ts}" title="{ts escape='htmlattribute'}Show contact list in popup window{/ts}" class="crm-hover-button">
           <div>{ts}Contact List{/ts}</div>
         </a>
-        <a href="{crmURL p='civicrm/segmentation/start' q="cid=$campaign_id&delete=`$segment.segment_id`"}" alt="{ts}Delete Segment{/ts}" title="{ts}Delete the entire segment{/ts}" class="crm-hover-button">
+        <a href="{crmURL p='civicrm/segmentation/start' q="cid=$campaign_id&delete=`$segment.segment_id`"}" alt="{ts escape='htmlattribute'}Delete Segment{/ts}" title="{ts escape='htmlattribute'}Delete the entire segment{/ts}" class="crm-hover-button">
           <div>{ts}Delete Segment{/ts}</div>
         </a>
         <a {if $segment.exclude neq 1 && $segment.count > 0 && $segment.excluded_count == 0}{else}style="display: none;"{/if}
