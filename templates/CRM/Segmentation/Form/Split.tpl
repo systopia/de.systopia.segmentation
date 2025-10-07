@@ -193,7 +193,7 @@
         <div class="crm-segmentation-add-new-segment-wrap">
           <a title="{ts escape='htmlattribute'}Add new segment{/ts}" class="crm-segmentation-add-new-segment button">
             <span>
-              <i class="crm-i fa-plus-circle"></i>
+              <i class="crm-i fa-plus-circle" role="img" aria-hidden="true"></i>
               {ts}Add new segment{/ts}
             </span>
           </a>
