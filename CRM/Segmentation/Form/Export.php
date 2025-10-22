@@ -88,8 +88,8 @@ class CRM_Segmentation_Form_Export extends CRM_Core_Form {
     $values = $this->exportValues();
     return array(
       'campaign_id' => $this->getCampaignID(),
-      'segments'    => CRM_Utils_Array::value('segments', $values),
-      'exporter_id' => CRM_Utils_Array::value('exporter_id', $values),
+      'segments'    => $values['segments'] ?? NULL,
+      'exporter_id' => $values['exporter_id'] ?? NULL,
       );
   }
 
