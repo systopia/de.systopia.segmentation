@@ -29,7 +29,7 @@ function _civicrm_api3_segmentation_get_spec(&$spec) {
  * @return array API result descriptor
  * @see civicrm_api3_create_success
  * @see civicrm_api3_create_error
- * @throws API_Exception
+ * @throws CRM_Core_Exception
  */
 function civicrm_api3_segmentation_get($params) {
   if (empty($params['id'])) {
