@@ -50,7 +50,7 @@ function _civicrm_api3_segmentation_order_create_spec(&$spec) {
  * @return array API result descriptor
  * @see civicrm_api3_create_success
  * @see civicrm_api3_create_error
- * @throws API_Exception
+ * @throws CRM_Core_Exception
  */
 function civicrm_api3_segmentation_order_create($params) {
   if (empty($params['id'])) {
