@@ -29,45 +29,45 @@ class CRM_Segmentation_Form_Task_AssignContactMembership extends CRM_Contact_For
    * Compile task form
    */
   function buildQuickForm() {
-    CRM_Utils_System::setTitle(ts("Assign Contacts' Memberships", array('domain' => 'de.systopia.segmentation')));
+    CRM_Utils_System::setTitle(ts("Assign Contacts' Memberships", ['domain' => 'de.systopia.segmentation']));
 
     // campaign selector
     $this->addElement('select',
                       'campaign_id',
-                      ts('Campaign', array('domain' => 'de.systopia.segmentation')),
+                      ts('Campaign', ['domain' => 'de.systopia.segmentation']),
                       CRM_Segmentation_Form_Task_Assign::getCampaigns(),
-                      array('class' => 'crm-select2 huge'));
-    $this->addRule('campaign_id', ts('You have to select a campaign', array('domain' => 'de.systopia.segmentation')), 'required');
+                      ['class' => 'crm-select2 huge']);
+    $this->addRule('campaign_id', ts('You have to select a campaign', ['domain' => 'de.systopia.segmentation']), 'required');
 
     // segment options
     $generic_segments = CRM_Segmentation_Form_Task_Assign::getGenericSegments();
     $this->assign('generic_segments', json_encode($generic_segments));
     $this->addElement('select',
                       'segment_list',
-                      ts('Segment Suggestions', array('domain' => 'de.systopia.segmentation')),
+                      ts('Segment Suggestions', ['domain' => 'de.systopia.segmentation']),
                       $generic_segments,
-                      array('class' => 'crm-select2 huge'));
+                      ['class' => 'crm-select2 huge']);
 
     // segment field
     $this->addElement('text',
                       'segment',
-                      ts('Segment', array('domain' => 'de.systopia.segmentation')),
-                      array('class' => 'huge'));
-    $this->addRule('segment', ts('Please select a segment or enter a new name.', array('domain' => 'de.systopia.segmentation')), 'required');
+                      ts('Segment', ['domain' => 'de.systopia.segmentation']),
+                      ['class' => 'huge']);
+    $this->addRule('segment', ts('Please select a segment or enter a new name.', ['domain' => 'de.systopia.segmentation']), 'required');
 
     // add membership types
     $this->addElement('select',
                       'membership_type_id',
-                      ts('Membership Type', array('domain' => 'de.systopia.segmentation')),
+                      ts('Membership Type', ['domain' => 'de.systopia.segmentation']),
                       self::getMembershipTypes(),
-                      array('class' => 'crm-select2 huge', 'multiple' => 'multiple'));
+                      ['class' => 'crm-select2 huge', 'multiple' => 'multiple']);
 
     // add membership types
     $this->addElement('select',
                       'membership_status_id',
-                      ts('Membership Status', array('domain' => 'de.systopia.segmentation')),
+                      ts('Membership Status', ['domain' => 'de.systopia.segmentation']),
                       self::getMembershipStatuses(),
-                      array('class' => 'crm-select2 huge', 'multiple' => 'multiple'));
+                      ['class' => 'crm-select2 huge', 'multiple' => 'multiple']);
 
 
     // add segments URL
@@ -75,7 +75,7 @@ class CRM_Segmentation_Form_Task_AssignContactMembership extends CRM_Contact_For
     $this->assign('segments_url', CRM_Utils_System::url('civicrm/admin/options', "reset=1&gid={$group_id}"));
 
     // create a lookup sample
-    $sample = array();
+    $sample = [];
     $count  = count($this->_contactIds);
     if ($count > ASSIGN_MEMBERSHIP__PREVIEW_SAMPLE_SIZE) {
       $indexes = array_rand ($this->_contactIds, ASSIGN_MEMBERSHIP__PREVIEW_SAMPLE_SIZE);
@@ -102,8 +102,8 @@ class CRM_Segmentation_Form_Task_AssignContactMembership extends CRM_Contact_For
 
     if (!empty($this->_contactIds)) {
       // look up segment ID
-      $segment = civicrm_api3('Segmentation', 'getsegmentid', array(
-        'name' => $values['segment']));
+      $segment = civicrm_api3('Segmentation', 'getsegmentid', [
+        'name' => $values['segment']]);
 
       // derive status clause
       if (!empty($values['membership_status_id']) && is_array($values['membership_status_id'])) {
@@ -134,10 +134,10 @@ class CRM_Segmentation_Form_Task_AssignContactMembership extends CRM_Contact_For
           WHERE civicrm_membership.contact_id IN ({$contact_id_list})
             AND {$membership_status_clause}
             AND {$membership_type_clause}",
-          array(
-            1 => array($values['campaign_id'], 'Integer'),
-            2 => array($segment['id'],         'Integer'),
-          )
+          [
+            1 => [$values['campaign_id'], 'Integer'],
+            2 => [$segment['id'],         'Integer'],
+          ]
         );
 
       // add segement to order
@@ -150,11 +150,11 @@ class CRM_Segmentation_Form_Task_AssignContactMembership extends CRM_Contact_For
    * Return a dropdown list of all membership statuses
    */
   protected static function getMembershipStatuses() {
-    $statuses = array();
-    $query = civicrm_api3('MembershipStatus', 'get', array(
+    $statuses = [];
+    $query = civicrm_api3('MembershipStatus', 'get', [
       'is_active'    => 1,
       'return'       => 'id,label',
-      'option.limit' => 0));
+      'option.limit' => 0]);
     foreach ($query['values'] as $membership_status) {
       $statuses[$membership_status['id']] = $membership_status['label'];
     }
@@ -165,11 +165,11 @@ class CRM_Segmentation_Form_Task_AssignContactMembership extends CRM_Contact_For
    * Return a dropdown list of all membership statuses
    */
   protected static function getMembershipTypes() {
-    $types = array();
-    $query = civicrm_api3('MembershipType', 'get', array(
+    $types = [];
+    $query = civicrm_api3('MembershipType', 'get', [
       'is_active'    => 1,
       'return'       => 'id,name',
-      'option.limit' => 0));
+      'option.limit' => 0]);
     foreach ($query['values'] as $membership_type) {
       $types[$membership_type['id']] = $membership_type['name'];
     }

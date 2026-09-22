@@ -83,7 +83,7 @@ class CRM_Utils_CustomData {
          $customGroup = $this->createEntity('CustomGroup', $data);
       } else {
          // update CustomGroup
-         $this->updateEntity('CustomGroup', $data, $customGroup, array('extends'));
+         $this->updateEntity('CustomGroup', $data, $customGroup, ['extends']);
       }
 
       // now run the update for the CustomFields
@@ -93,7 +93,7 @@ class CRM_Utils_CustomData {
          $customFieldSpec['custom_group_id'] = $customGroup['id'];
          if (!empty($customFieldSpec['option_group_id']) && !is_numeric($customFieldSpec['option_group_id'])) {
             // look up custom group id
-            $optionGroup = $this->geyEntityID('OptionGroup', array('name' => $customFieldSpec['option_group_id']));
+            $optionGroup = $this->geyEntityID('OptionGroup', ['name' => $customFieldSpec['option_group_id']]);
             $customFieldSpec['option_group_id'] = $optionGroup['id'];
          }
 
@@ -104,7 +104,7 @@ class CRM_Utils_CustomData {
             $customField = $this->createEntity('CustomField', $customFieldSpec);
          } else {
             // update CustomField
-            $this->updateEntity('CustomField', $customFieldSpec, $customField, array('in_selector', 'is_view', 'is_searchable'));
+            $this->updateEntity('CustomField', $customFieldSpec, $customField, ['in_selector', 'is_view', 'is_searchable']);
          }
       }
    }
@@ -115,7 +115,7 @@ class CRM_Utils_CustomData {
    protected function geyEntityID($entity_type, $selector) {
       if (empty($selector)) return NULL;
       $selector['sequential'] = 1;
-      $selector['options'] = array('limit' => 2);
+      $selector['options'] = ['limit' => 2];
 
       $lookup_result = civicrm_api3($entity_type, 'get', $selector);
       switch ($lookup_result['count']) {
@@ -137,9 +137,9 @@ class CRM_Utils_CustomData {
     * lookup attributes
     */
    protected function identifyEntity($entity_type, $data) {
-      $lookup_query = array(
+      $lookup_query = [
          'sequential' => 1,
-         'options'    => array('limit' => 2));
+         'options'    => ['limit' => 2]];
 
       foreach ($data['_lookup'] as $lookup_key) {
          $lookup_query[$lookup_key] = $data[$lookup_key];
@@ -182,8 +182,8 @@ class CRM_Utils_CustomData {
    /**
     * create a new entity
     */
-   protected function updateEntity($entity_type, $requested_data, $current_data, $required_fields = array()) {
-      $update_query = array();
+   protected function updateEntity($entity_type, $requested_data, $current_data, $required_fields = []) {
+      $update_query = [];
 
       // first: identify fields that need to be updated
       foreach ($requested_data as $field => $value) {
@@ -224,7 +224,7 @@ class CRM_Utils_CustomData {
       foreach ($data['_translate'] as $translate_key) {
          $value = $data[$translate_key];
          if (is_string($value)) {
-            $data[$translate_key] = ts($value, array('domain' => $this->ts_domain));
+            $data[$translate_key] = ts($value, ['domain' => $this->ts_domain]);
          }
       }
    }

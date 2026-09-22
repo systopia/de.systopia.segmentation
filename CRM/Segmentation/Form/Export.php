@@ -31,52 +31,52 @@ class CRM_Segmentation_Form_Export extends CRM_Core_Form {
     }
 
     // load campaign and data
-    $campaign       = civicrm_api3('Campaign', 'getsingle', array('id' => $campaign_id));
+    $campaign       = civicrm_api3('Campaign', 'getsingle', ['id' => $campaign_id]);
     $segment_counts = CRM_Segmentation_Logic::getSegmentCounts($campaign_id);
     $segment_titles = CRM_Segmentation_Logic::getSegmentTitles(array_keys($segment_counts));
 
-    $segment_list = array();
+    $segment_list = [];
     foreach ($segment_counts as $segment_id => $segment_count) {
       $segment_list[$segment_id] = "{$segment_titles[$segment_id]} ({$segment_count})";
     }
 
     // build page
-    CRM_Utils_System::setTitle(ts("Export Campaign '%1'", array(1 => $campaign['title'])));
+    CRM_Utils_System::setTitle(ts("Export Campaign '%1'", [1 => $campaign['title']]));
 
     // campaign selector
     $this->addElement('select',
                       'exporter_id',
-                      ts('Select Exporter', array('domain' => 'de.systopia.segmentation')),
+                      ts('Select Exporter', ['domain' => 'de.systopia.segmentation']),
                       CRM_Segmentation_Exporter::getExporterList(),
-                      array('class' => 'crm-select2 huge'));
+                      ['class' => 'crm-select2 huge']);
 
     $this->addElement('select',
                       'segments',
-                      ts('Segments', array('domain' => 'de.systopia.segmentation')),
+                      ts('Segments', ['domain' => 'de.systopia.segmentation']),
                       $segment_list,
-                      array('multiple' => "multiple", 'class' => 'crm-select2 huge'));
+                      ['multiple' => "multiple", 'class' => 'crm-select2 huge']);
 
     $this->addDate('assigned_start_date',
-                   ts('Assigned after', array('domain' => 'de.systopia.segmentation')),
+                   ts('Assigned after', ['domain' => 'de.systopia.segmentation']),
                    FALSE,
-                   array('formatType' => 'activityDateTime'));
+                   ['formatType' => 'activityDateTime']);
 
     $this->addDate('assigned_end_date',
-                   ts('Assigned before', array('domain' => 'de.systopia.segmentation')),
+                   ts('Assigned before', ['domain' => 'de.systopia.segmentation']),
                    FALSE,
-                   array('formatType' => 'activityDateTime'));
+                   ['formatType' => 'activityDateTime']);
 
     $this->addElement('hidden',
                       'campaign_id',
                       $campaign_id);
 
-    $this->addButtons(array(
-      array(
+    $this->addButtons([
+      [
         'type' => 'submit',
         'name' => ts('Export'),
         'isDefault' => TRUE,
-      ),
-    ));
+      ],
+    ]);
 
     parent::buildQuickForm();
   }
@@ -86,11 +86,11 @@ class CRM_Segmentation_Form_Export extends CRM_Core_Form {
    */
   public function setDefaultValues() {
     $values = $this->exportValues();
-    return array(
+    return [
       'campaign_id' => $this->getCampaignID(),
       'segments'    => $values['segments'] ?? NULL,
       'exporter_id' => $values['exporter_id'] ?? NULL,
-      );
+      ];
   }
 
 
@@ -99,7 +99,7 @@ class CRM_Segmentation_Form_Export extends CRM_Core_Form {
     $values = $this->exportValues();
 
     // compile parameters
-    $parameters = array();
+    $parameters = [];
     $parameters['segments'] = $values['segments'];
     if (!empty($values['assigned_start_date'])) {
       $parameters['start_date'] = date('YmdHis', strtotime("{$values['assigned_start_date']} {$values['assigned_start_date_time']}"));

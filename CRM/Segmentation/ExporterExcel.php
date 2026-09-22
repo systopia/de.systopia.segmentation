@@ -46,7 +46,7 @@ class CRM_Segmentation_ExporterExcel extends CRM_Segmentation_Exporter {
    */
   public function exportLine($data) {
     // compile a row
-    $row = array();
+    $row = [];
     foreach ($this->config['columns'] as $column_name) {
       if (isset($data[$column_name])) {
         $row[] = $data[$column_name];
@@ -70,7 +70,7 @@ class CRM_Segmentation_ExporterExcel extends CRM_Segmentation_Exporter {
    * This function encodes each entry in the array according to the config
    */
   protected function writeExcelLine($data_array) {
-    $values = array();
+    $values = [];
     foreach ($data_array as $value) {
       // first: make sure there's no ';' in the value
       $value = str_replace(';', ',', $value);
