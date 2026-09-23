@@ -32,29 +32,29 @@ class CRM_Segmentation_Page_ContactList extends CRM_Core_Page {
     }
 
     if ($segment_id) {
-      $segments = array($segment_id);
+      $segments = [$segment_id];
       $segment_titles = CRM_Segmentation_Logic::getSegmentTitles($segments);
       $this->assign('segment_name', reset($segment_titles));
     } else {
-      $segments = array();
+      $segments = [];
     }
 
     // load campaign
-    $campaign = civicrm_api3('Campaign', 'getsingle', array('id' => $campaign_id));
+    $campaign = civicrm_api3('Campaign', 'getsingle', ['id' => $campaign_id]);
 
     // load contacts
     $query_sql = CRM_Segmentation_Configuration::getContactQuery($campaign_id, $segments);
     $query = CRM_Core_DAO::executeQuery($query_sql);
-    $contacts = array();
+    $contacts = [];
     while ($query->fetch()) {
-      $contacts[] = array(
+      $contacts[] = [
         'contact_id'   => $query->contact_id,
         'display_name' => $query->display_name,
         'contact_type' => $query->contact_type,
         'is_deleted'   => $query->is_deleted,
         // 'segment_id'   => $query->segment_id,
         // 'segment_name' => $query->segment_name,
-      );
+      ];
     }
 
     $this->assign('contacts', $contacts);

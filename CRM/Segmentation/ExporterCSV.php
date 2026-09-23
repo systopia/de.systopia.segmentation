@@ -34,7 +34,7 @@ class CRM_Segmentation_ExporterCSV extends CRM_Segmentation_Exporter {
    */
   public function exportLine($data) {
     // compile a row
-    $row = array();
+    $row = [];
     foreach ($this->config['columns'] as $column_name) {
       if (isset($data[$column_name])) {
         $row[] = $data[$column_name];

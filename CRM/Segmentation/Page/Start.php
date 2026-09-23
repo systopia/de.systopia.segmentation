@@ -32,7 +32,7 @@ class CRM_Segmentation_Page_Start extends CRM_Core_Page {
     }
 
     // load campaign
-    $campaign = civicrm_api3('Campaign', 'getsingle', array('id' => $campaign_id));
+    $campaign = civicrm_api3('Campaign', 'getsingle', ['id' => $campaign_id]);
 
     // delete segment if requested
     $this->processDeleteCommand($campaign_id);
@@ -66,7 +66,7 @@ class CRM_Segmentation_Page_Start extends CRM_Core_Page {
     $this->assign('baseurl', $base_url);
     $this->assign('campaign_id', $campaign['id']);
     $this->assign('total_count', $total_count);
-    CRM_Utils_System::setTitle(ts("Start Campaign '%1'", array(1 => $campaign['title'])));
+    CRM_Utils_System::setTitle(ts("Start Campaign '%1'", [1 => $campaign['title']]));
     CRM_Core_Resources::singleton()->addScriptFile('de.systopia.segmentation', 'js/SortSegments.js');
     CRM_Core_Resources::singleton()->addStyleFile('de.systopia.segmentation', 'css/segmentation_start_page.css');
 
@@ -83,7 +83,7 @@ class CRM_Segmentation_Page_Start extends CRM_Core_Page {
    * @throws \CRM_Core_Exception
    */
   protected function processOrderCommands($segment_order) {
-    foreach (array('top', 'up', 'down', 'bottom') as $cmd) {
+    foreach (['top', 'up', 'down', 'bottom'] as $cmd) {
       $segment_id = CRM_Utils_Request::retrieve($cmd, 'Integer');
       $index = array_search($segment_id, $segment_order);
       if ($index !== FALSE) {

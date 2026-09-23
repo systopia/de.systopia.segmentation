@@ -18,17 +18,17 @@
 // The record will be automatically inserted, updated, or deleted from the
 // database as appropriate. For more details, see "hook_civicrm_managed" at:
 // http://wiki.civicrm.org/confluence/display/CRMDOC42/Hook+Reference
-return array (
+return [
   0 =>
-  array (
+  [
     'name'   => 'CRM_Segmentation_Form_Search_SegmentSearch',
     'entity' => 'CustomSearch',
     'params' =>
-    array (
+    [
       'version'     => 3,
       'label'       => ts('SegmentSearch'),
       'description' => ts('Search for Contacts in Segments (de.systopia.segmentation)'),
       'class_name'  => 'CRM_Segmentation_Form_Search_SegmentSearch',
-    ),
-  ),
-);
+    ],
+  ],
+];

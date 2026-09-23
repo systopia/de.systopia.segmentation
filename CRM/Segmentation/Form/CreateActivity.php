@@ -42,7 +42,7 @@ class CRM_Segmentation_Form_CreateActivity extends CRM_Core_Form {
     // load some stats
     $total_count_sql = CRM_Segmentation_Configuration::getContactCount($cid);
     $this->total_count = CRM_Core_DAO::singleValueQuery($total_count_sql);
-    CRM_Utils_System::setTitle(ts("Create mass activity for %1 contacts", array(1 => $this->total_count)));
+    CRM_Utils_System::setTitle(ts("Create mass activity for %1 contacts", [1 => $this->total_count]));
     if (!$this->total_count) {
       CRM_Core_Session::setStatus(ts("No contacts assigned to this campaign!"), ts("Warning"), "warn");
     }
@@ -50,7 +50,7 @@ class CRM_Segmentation_Form_CreateActivity extends CRM_Core_Form {
     $this->assign('warning_count', WARNING_COUNT);
 
     // load campaign and data
-    $this->campaign = civicrm_api3('Campaign', 'getsingle', array('id' => $cid));
+    $this->campaign = civicrm_api3('Campaign', 'getsingle', ['id' => $cid]);
     $this->addElement('hidden', 'cid', $cid);
 
     // compile form
@@ -60,7 +60,7 @@ class CRM_Segmentation_Form_CreateActivity extends CRM_Core_Form {
       ts('Activity Type'),
       $this->getActivityTypes(),
       FALSE,
-      array('class' => 'crm-select2')
+      ['class' => 'crm-select2']
     );
 
     // compile form
@@ -70,14 +70,14 @@ class CRM_Segmentation_Form_CreateActivity extends CRM_Core_Form {
       ts('Kind of Activity'),
       $this->getActivityKinds(),
       FALSE,
-      array('class' => 'huge')
+      ['class' => 'huge']
     );
 
     $this->add(
       'text',
       'subject',
       ts('Activity Subject'),
-      array('class' => 'huge'),
+      ['class' => 'huge'],
       TRUE // is required
     );
 
@@ -103,23 +103,23 @@ class CRM_Segmentation_Form_CreateActivity extends CRM_Core_Form {
       ts('Campaign'),
       $this->getActivityCampaigns(),
       FALSE,
-      array('class' => 'crm-select2')
+      ['class' => 'crm-select2']
     );
 
     $this->addDate(
       'activity_date_time',
       ts('Date'),
       TRUE,
-      array('formatType' => 'activityDateTime'));
+      ['formatType' => 'activityDateTime']);
 
 
-    $this->addButtons(array(
-      array(
+    $this->addButtons([
+      [
         'type' => 'submit',
         'name' => ts('Create'),
         'isDefault' => TRUE,
-      ),
-    ));
+      ],
+    ]);
 
 
     $this->setDefaults();
@@ -148,8 +148,8 @@ class CRM_Segmentation_Form_CreateActivity extends CRM_Core_Form {
     $values = $this->exportValues();
 
     // compile activity data
-    $activity_data = array();
-    $activity_fields = array('activity_type_id', 'subject', 'status_id', 'medium_id', 'campaign_id');
+    $activity_data = [];
+    $activity_fields = ['activity_type_id', 'subject', 'status_id', 'medium_id', 'campaign_id'];
     foreach ($activity_fields as $key) {
       if (isset($values[$key])) {
         $activity_data[$key] = $values[$key];
@@ -170,7 +170,7 @@ class CRM_Segmentation_Form_CreateActivity extends CRM_Core_Form {
       }
       // create popup
       CRM_Core_Session::setStatus(ts("%1 activities created.",
-        array(1 => $this->total_count)), ts("Success"), "info");
+        [1 => $this->total_count]), ts("Success"), "info");
 
     } else {
       // create mass activity
@@ -197,7 +197,7 @@ class CRM_Segmentation_Form_CreateActivity extends CRM_Core_Form {
       // create popup
       $activity_edit_url = CRM_Utils_System::url('civicrm/activity/add', "atype=1&action=update&reset=1&id={$activity['id']}");
       CRM_Core_Session::setStatus(ts("New activity created for %1 contacts (<a href='%2'>edit</a>).",
-        array(1 => $this->total_count, 2 => $activity_edit_url)), ts("Success"), "info");
+        [1 => $this->total_count, 2 => $activity_edit_url]), ts("Success"), "info");
     }
 
     // check if there are any excluded contacts
@@ -241,11 +241,11 @@ class CRM_Segmentation_Form_CreateActivity extends CRM_Core_Form {
    * get all active campaigns to select from
    */
   protected function getActivityCampaigns() {
-    $campaign_list = array();
-    $query = civicrm_api3('Campaign', 'get', array(
+    $campaign_list = [];
+    $query = civicrm_api3('Campaign', 'get', [
       'is_active'       => 1,
       'option.limit'    => 0,
-      'return'          => 'id,title'));
+      'return'          => 'id,title']);
     foreach ($query['values'] as $campaign) {
       $campaign_list[$campaign['id']] = $campaign['title'];
     }
@@ -256,9 +256,9 @@ class CRM_Segmentation_Form_CreateActivity extends CRM_Core_Form {
    * get options for activity kind (mass/individual)
    */
   protected function getActivityKinds() {
-    return array(
+    return [
       1 => ts("Mass: a single activity linked to all contacts"),
-      0 => ts("Individual: one activity per contact"));
+      0 => ts("Individual: one activity per contact")];
   }
 
 
@@ -287,16 +287,16 @@ class CRM_Segmentation_Form_CreateActivity extends CRM_Core_Form {
    */
   protected function getOptionValueList($option_group_name, $noValue = FALSE) {
     if ($noValue) {
-      $value_list = array('' => ts("None"));
+      $value_list = ['' => ts("None")];
     } else {
-      $value_list = array();
+      $value_list = [];
     }
 
-    $query = civicrm_api3('OptionValue', 'get', array(
+    $query = civicrm_api3('OptionValue', 'get', [
       'option_group_id' => $option_group_name,
       'is_active'       => 1,
       'option.limit'    => 0,
-      'return'          => 'value,label'));
+      'return'          => 'value,label']);
     foreach ($query['values'] as $value) {
       $value_list[$value['value']] = $value['label'];
     }

@@ -41,8 +41,8 @@ class CRM_Segmentation_ExportJob {
     $this->count         = $count;
 
     // set title
-    $this->title = ts("Exporting contacts %1-%2", array(
-          1 => $this->offset, 2 => $this->offset + $this->count, 'domain' => 'de.systopia.segmentation'));
+    $this->title = ts("Exporting contacts %1-%2", [
+          1 => $this->offset, 2 => $this->offset + $this->count, 'domain' => 'de.systopia.segmentation']);
   }
 
   public function run($context) {
@@ -79,7 +79,7 @@ class CRM_Segmentation_ExportJob {
    */
   public static function launchExportRunner($campaign_id, $exporter_id, $params) {
     // load campaign
-    $campaign = civicrm_api3('Campaign', 'getsingle', array('id' => $campaign_id));
+    $campaign = civicrm_api3('Campaign', 'getsingle', ['id' => $campaign_id]);
 
     // get total count
     $total_count_sql = CRM_Segmentation_Configuration::getContactCount($campaign_id, $params);
@@ -89,11 +89,11 @@ class CRM_Segmentation_ExportJob {
     $tmp_file = tempnam(sys_get_temp_dir(), "segmentation_export_{$campaign_id}_" . substr(sha1(rand()), 0, 8) . '_');
 
     // create a queue
-    $queue = CRM_Queue_Service::singleton()->create(array(
+    $queue = CRM_Queue_Service::singleton()->create([
       'type'  => 'Sql',
       'name'  => 'segmentation_export',
       'reset' => TRUE,
-    ));
+    ]);
 
     // create the items
     if ($total_count > 0) {
@@ -125,11 +125,11 @@ class CRM_Segmentation_ExportJob {
     $download_url = str_replace('&amp;', '&', $download_url); // why does this happen?
 
     // create a runner and launch it
-    $runner = new CRM_Queue_Runner(array(
-      'title'     => ts("Exporting Campaign '%1'", array(1 => $campaign['title'], 'domain' => 'de.systopia.segmentation')),
+    $runner = new CRM_Queue_Runner([
+      'title'     => ts("Exporting Campaign '%1'", [1 => $campaign['title'], 'domain' => 'de.systopia.segmentation']),
       'queue'     => $queue,
       'errorMode' => CRM_Queue_Runner::ERROR_ABORT,
       'onEndUrl'  => $download_url,
-    ));
+    ]);
     $runner->runAllViaWeb(); // does not return
   }}

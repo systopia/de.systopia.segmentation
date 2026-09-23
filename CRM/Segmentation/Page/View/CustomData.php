@@ -29,8 +29,8 @@ class CRM_Segmentation_Page_View_CustomData {
     $segments_details = $segments_query['values'];
 
     // compile campaign data
-    $campaign_details = array();
-    $campaign_status = array();
+    $campaign_details = [];
+    $campaign_status = [];
     $campaign_query = CRM_Core_DAO::executeQuery("
       SELECT
         civicrm_campaign.id        AS campaign_id,
@@ -40,14 +40,14 @@ class CRM_Segmentation_Page_View_CustomData {
        LEFT JOIN civicrm_campaign ON civicrm_campaign.id = civicrm_segmentation.campaign_id
        WHERE civicrm_segmentation.entity_id = %1
        GROUP BY civicrm_campaign.id;",
-       array(1 => array($page->_contactId, 'Integer')));
+       [1 => [$page->_contactId, 'Integer']]);
     while ($campaign_query->fetch()) {
       $campaign_details[$campaign_query->campaign_id] = "{$campaign_query->campaign_title} [{$campaign_query->campaign_id}]";
       $campaign_status[$campaign_query->campaign_id] = $campaign_query->campaign_status;
     }
 
     // compile membership data
-    $membership_details = array();
+    $membership_details = [];
     $membership_query = CRM_Core_DAO::executeQuery("
       SELECT
         civicrm_membership.id AS membership_id,
@@ -58,7 +58,7 @@ class CRM_Segmentation_Page_View_CustomData {
        WHERE civicrm_segmentation.entity_id = %1
          AND civicrm_membership.id IS NOT NULL
        GROUP BY civicrm_membership.id;",
-       array(1 => array($page->_contactId, 'Integer')));
+       [1 => [$page->_contactId, 'Integer']]);
     while ($membership_query->fetch()) {
       $membership_details[$membership_query->membership_id] = "{$membership_query->type_name} [{$membership_query->membership_id}]";
     }
@@ -74,14 +74,14 @@ class CRM_Segmentation_Page_View_CustomData {
     $script = str_replace('CAMPAIGN_STATUS',   json_encode($campaign_status), $script);
     $script = str_replace('CAMPAIGN_FIELD_ID', CRM_Segmentation_Configuration::getFieldID('campaign_id'), $script);
     $script = str_replace('SEGMENT_GROUP_ID',   CRM_Segmentation_Configuration::groupID(), $script);
-    CRM_Core_Region::instance('page-header')->add(array(
+    CRM_Core_Region::instance('page-header')->add([
       'script' => $script,
-      ));
+      ]);
 
     // inject CSS
     $css = file_get_contents("{$extension_folder}/css/adjust_segment_tab.css");
-    CRM_Core_Region::instance('page-header')->add(array(
+    CRM_Core_Region::instance('page-header')->add([
       'style' => $css,
-      ));
+      ]);
   }
 }

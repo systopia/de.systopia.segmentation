@@ -29,9 +29,9 @@ class CRM_Segmentation_Configuration {
    */
   public static function groupID() {
     if (self::$custom_group_id === NULL) {
-      $query = civicrm_api3('CustomGroup', 'getvalue', array(
+      $query = civicrm_api3('CustomGroup', 'getvalue', [
         'return'     => 'id',
-        'table_name' => 'civicrm_segmentation'));
+        'table_name' => 'civicrm_segmentation']);
       self::$custom_group_id = (int) $query;
     }
     return self::$custom_group_id;
@@ -43,7 +43,7 @@ class CRM_Segmentation_Configuration {
    */
   public static function segmentationFields() {
     if (self::$custom_fields === NULL) {
-      $query = civicrm_api3('CustomField', 'get', array('custom_group_id' => self::groupID()));
+      $query = civicrm_api3('CustomField', 'get', ['custom_group_id' => self::groupID()]);
       self::$custom_fields = $query['values'];
     }
     return self::$custom_fields;
@@ -68,9 +68,9 @@ class CRM_Segmentation_Configuration {
    */
   public static function segmentsGroupID() {
     if (self::$option_group_id === NULL) {
-      $query = civicrm_api3('OptionGroup', 'getvalue', array(
+      $query = civicrm_api3('OptionGroup', 'getvalue', [
         'return' => 'id',
-        'name'   => 'segments'));
+        'name'   => 'segments']);
       self::$option_group_id = (int) $query;
     }
     return self::$option_group_id;
@@ -83,7 +83,7 @@ class CRM_Segmentation_Configuration {
    * @param $campaign_id  id of campaign
    * @param $segment_list  array of segment IDs
    */
-  public static function getSegmentQuery($campaign_id, $params = array(), $exclude_deleted_contacts = TRUE, $offset = 0, $limit = 0) {
+  public static function getSegmentQuery($campaign_id, $params = [], $exclude_deleted_contacts = TRUE, $offset = 0, $limit = 0) {
     $_campaign_id = (int) $campaign_id;
     if (!$_campaign_id) {
       throw new Exception("Illegal campaign_id '{$campaign_id}'", 1);
@@ -165,7 +165,7 @@ class CRM_Segmentation_Configuration {
    * @param $campaign_id  id of campaign
    * @param $segment_list  array of segment IDs
    */
-  public static function getContactCount($campaign_id, $params = array(), $exclude_deleted_contacts = TRUE) {
+  public static function getContactCount($campaign_id, $params = [], $exclude_deleted_contacts = TRUE) {
     $_campaign_id = (int) $campaign_id;
     if (!$_campaign_id) {
       throw new Exception("Illegal campaign_id '{$campaign_id}'", 1);

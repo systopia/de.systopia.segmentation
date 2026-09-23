@@ -38,7 +38,7 @@ class CRM_Segmentation_Form_Search_SegmentSearch extends CRM_Contact_Form_Search
   public static function generateSearchLink($campaign_id) {
     $campaign_id = (int) $campaign_id;
     if (self::$search_entity == NULL) {
-      self::$search_entity = civicrm_api3('CustomSearch', 'getsingle', array('name' => "CRM_Segmentation_Form_Search_SegmentSearch"));
+      self::$search_entity = civicrm_api3('CustomSearch', 'getsingle', ['name' => "CRM_Segmentation_Form_Search_SegmentSearch"]);
     }
     $search = self::$search_entity;
     return CRM_Utils_System::url('civicrm/contact/search/custom', "reset=1&csid={$search['value']}&cid={$campaign_id}");
@@ -56,36 +56,36 @@ class CRM_Segmentation_Form_Search_SegmentSearch extends CRM_Contact_Form_Search
     // campaign selector
     $form->addElement('select',
                       'campaign_id',
-                      ts('Campaign', array('domain' => 'de.systopia.segmentation')),
+                      ts('Campaign', ['domain' => 'de.systopia.segmentation']),
                       CRM_Segmentation_Logic::getAllCampaigns(),
-                      array('multiple' => 'multiple', 'class' => 'crm-select2 huge'));
+                      ['multiple' => 'multiple', 'class' => 'crm-select2 huge']);
 
     // segment options
     $form->addElement('select',
                       'segment_list',
-                      ts('Segment', array('domain' => 'de.systopia.segmentation')),
-                      array(),
-                      array('multiple' => 'multiple', 'class' => 'crm-select2 huge'));
+                      ts('Segment', ['domain' => 'de.systopia.segmentation']),
+                      [],
+                      ['multiple' => 'multiple', 'class' => 'crm-select2 huge']);
 
     // segment options
     $form->addElement('select',
                       'subcampaigns',
-                      ts('Include Subcampaigns', array('domain' => 'de.systopia.segmentation')),
-                      array(
-                        0 => ts('No',  array('domain' => 'de.systopia.segmentation')),
-                        1 => ts('Yes', array('domain' => 'de.systopia.segmentation'))),
-                      array());
+                      ts('Include Subcampaigns', ['domain' => 'de.systopia.segmentation']),
+                      [
+                        0 => ts('No',  ['domain' => 'de.systopia.segmentation']),
+                        1 => ts('Yes', ['domain' => 'de.systopia.segmentation'])],
+                      []);
 
     // hidden field for value
     $form->addElement('text', // hidden doesn't work...
                       'segment_id',
-                      ts('Segment ID', array('domain' => 'de.systopia.segmentation')));
+                      ts('Segment ID', ['domain' => 'de.systopia.segmentation']));
 
     /**
      * if you are using the standard template, this array tells the template what elements
      * are part of the search criteria
      */
-    $form->assign('elements', array('campaign_id', 'segment_list', 'subcampaigns', 'segment_id'));
+    $form->assign('elements', ['campaign_id', 'segment_list', 'subcampaigns', 'segment_id']);
   }
 
   /**
@@ -109,14 +109,14 @@ class CRM_Segmentation_Form_Search_SegmentSearch extends CRM_Contact_Form_Search
    * @return array, keys are printable column headers and values are SQL column names
    */
   function &columns() {
-    $columns = array(
+    $columns = [
       // ts('Contact ID')   => 'civicrm_contact_id',
       ts('Contact Name') => 'contact_name',
       ts('Segment')      => 'segment',
       // ts('Campaign ID')  => 'campaign_id',
       ts('Campaign')     => 'campaign_name',
       ts('Assignment')   => 'datetime',
-    );
+    ];
     return $columns;
   }
 
@@ -175,7 +175,7 @@ class CRM_Segmentation_Form_Search_SegmentSearch extends CRM_Contact_Form_Search
    * @return string, sql fragment with conditional expressions
    */
   function where($includeContactIDs = FALSE) {
-    $clauses = array();
+    $clauses = [];
 
     // exclude deleted contacts
     $clauses[] = "contact_a.is_deleted = 0";
@@ -184,7 +184,7 @@ class CRM_Segmentation_Form_Search_SegmentSearch extends CRM_Contact_Form_Search
     if (!empty($this->_formValues['campaign_id'])) {
       $campaign_ids = $this->_formValues['campaign_id'];
       if (!is_array($campaign_ids)) {
-        $campaign_ids = array($campaign_ids);
+        $campaign_ids = [$campaign_ids];
       }
 
       // inlude subcampaigns

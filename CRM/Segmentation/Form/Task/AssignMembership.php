@@ -27,33 +27,33 @@ class CRM_Segmentation_Form_Task_AssignMembership extends CRM_Member_Form_Task {
    * Compile task form
    */
   function buildQuickForm() {
-    CRM_Utils_System::setTitle(ts('Assign %1 Memberships', array(
+    CRM_Utils_System::setTitle(ts('Assign %1 Memberships', [
       'domain' => 'de.systopia.segmentation',
-      1        => count($this->_memberIds))));
+      1        => count($this->_memberIds)]));
 
     // campaign selector
     $this->addElement('select',
                       'campaign_id',
-                      ts('Campaign', array('domain' => 'de.systopia.segmentation')),
+                      ts('Campaign', ['domain' => 'de.systopia.segmentation']),
                       CRM_Segmentation_Form_Task_Assign::getCampaigns(),
-                      array('class' => 'crm-select2 huge'));
-    $this->addRule('campaign_id', ts('You have to select a campaign', array('domain' => 'de.systopia.segmentation')), 'required');
+                      ['class' => 'crm-select2 huge']);
+    $this->addRule('campaign_id', ts('You have to select a campaign', ['domain' => 'de.systopia.segmentation']), 'required');
 
     // segment options
     $generic_segments = CRM_Segmentation_Form_Task_Assign::getGenericSegments();
     $this->assign('generic_segments', json_encode($generic_segments));
     $this->addElement('select',
                       'segment_list',
-                      ts('Segment Suggestions', array('domain' => 'de.systopia.segmentation')),
+                      ts('Segment Suggestions', ['domain' => 'de.systopia.segmentation']),
                       $generic_segments,
-                      array('class' => 'crm-select2 huge'));
+                      ['class' => 'crm-select2 huge']);
 
     // segment field
     $this->addElement('text',
                       'segment',
-                      ts('Segment', array('domain' => 'de.systopia.segmentation')),
-                      array('class' => 'huge'));
-    $this->addRule('segment', ts('Please select a segment or enter a new name.', array('domain' => 'de.systopia.segmentation')), 'required');
+                      ts('Segment', ['domain' => 'de.systopia.segmentation']),
+                      ['class' => 'huge']);
+    $this->addRule('segment', ts('Please select a segment or enter a new name.', ['domain' => 'de.systopia.segmentation']), 'required');
 
     // add segments URL
     $group_id = CRM_Segmentation_Configuration::segmentsGroupID();
@@ -68,8 +68,8 @@ class CRM_Segmentation_Form_Task_AssignMembership extends CRM_Member_Form_Task {
     // TODO: use API?
     if (!empty($this->_memberIds)) {
       // look up segment ID
-      $segment = civicrm_api3('Segmentation', 'getsegmentid', array(
-        'name' => $values['segment']));
+      $segment = civicrm_api3('Segmentation', 'getsegmentid', [
+        'name' => $values['segment']]);
 
       $membership_id_list = implode(',', $this->_memberIds);
       CRM_Core_DAO::executeQuery("
@@ -81,10 +81,10 @@ class CRM_Segmentation_Form_Task_AssignMembership extends CRM_Member_Form_Task {
                  NULL                          AS test_group,
                  civicrm_membership.id         AS membership_id
           FROM civicrm_membership WHERE civicrm_membership.id IN ({$membership_id_list})",
-          array(
-            1 => array($values['campaign_id'], 'Integer'),
-            2 => array($segment['id'],         'Integer'),
-          )
+          [
+            1 => [$values['campaign_id'], 'Integer'],
+            2 => [$segment['id'],         'Integer'],
+          ]
         );
 
       // add segement to order

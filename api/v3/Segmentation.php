@@ -25,15 +25,15 @@ function civicrm_api3_segmentation_getsegmentid($params) {
 
   // first try to find it
   $segment_id = CRM_Core_DAO::singleValueQuery("SELECT MAX(id) FROM civicrm_segmentation_index WHERE name = %1;",
-    array(1 => array($params['name'], 'String')));
+    [1 => [$params['name'], 'String']]);
 
   // if it doesn't exist: create
   if (!$segment_id) {
     CRM_Core_DAO::executeQuery("INSERT INTO civicrm_segmentation_index SET name = %1 ",
-      array(1 => array($params['name'], 'String')));
+      [1 => [$params['name'], 'String']]);
     // then reload it
     $segment_id = CRM_Core_DAO::singleValueQuery("SELECT MAX(id) FROM civicrm_segmentation_index WHERE name = %1;",
-      array(1 => array($params['name'], 'String')));
+      [1 => [$params['name'], 'String']]);
   }
 
   if (!$segment_id) {
@@ -42,7 +42,7 @@ function civicrm_api3_segmentation_getsegmentid($params) {
     // $result = array('id' => $segment_id, 'name' => $params['name']);
     // $noDAO = NULL;
     // return civicrm_api3_create_success($result, $params, NULL, NULL, $noDAO, array('id' => $segment_id));
-    return civicrm_api3_create_success(array($segment_id => $params['name']));
+    return civicrm_api3_create_success([$segment_id => $params['name']]);
   }
 }
 
@@ -62,37 +62,37 @@ function _civicrm_api3_segmentation_getsegmentid_spec(&$params) {
 function civicrm_api3_segmentation_segmentlist($params) {
 
   // build query
-  $where_clauses = array();
-  $where_params = array();
+  $where_clauses = [];
+  $where_params = [];
 
   if (!empty($params['contact_id'])) {
     $index = count($where_clauses) + 1;
     $where_clauses[] = "entity_id = %{$index}";
-    $where_params[$index] = array($params['contact_id'], 'Integer');
+    $where_params[$index] = [$params['contact_id'], 'Integer'];
   }
 
   if (!empty($params['campaign_id'])) {
     $index = count($where_clauses) + 1;
     $where_clauses[] = "campaign_id = %{$index}";
-    $where_params[$index] = array($params['campaign_id'], 'Integer');
+    $where_params[$index] = [$params['campaign_id'], 'Integer'];
   }
 
   if (!empty($params['campaign_ids']) && is_array($params['campaign_ids'])) {
     $campaign_id_list = implode(',', $params['campaign_ids']);
     $where_clauses[] = "campaign_id IN ({$campaign_id_list})";
-    $where_params[$index] = array($params['campaign_id'], 'Integer');
+    $where_params[$index] = [$params['campaign_id'], 'Integer'];
   }
 
   if (!empty($params['membership_id'])) {
     $index = count($where_clauses) + 1;
     $where_clauses[] = "membership_id = %{$index}";
-    $where_params[$index] = array($params['membership_id'], 'Integer');
+    $where_params[$index] = [$params['membership_id'], 'Integer'];
   }
 
   if (!empty($params['test_group'])) {
     $index = count($where_clauses) + 1;
     $where_clauses[] = "test_group = %{$index}";
-    $where_params[$index] = array($params['test_group'], 'String');
+    $where_params[$index] = [$params['test_group'], 'String'];
   }
 
   if (empty($where_clauses)) {
@@ -112,7 +112,7 @@ function civicrm_api3_segmentation_segmentlist($params) {
       GROUP BY civicrm_segmentation.segment_id
       ;", $where_params);
 
-  $segments = array();
+  $segments = [];
   while ($query->fetch()) {
     if ($query->segment !== NULL) {
       $segments[$query->segment_id] = $query->segment;

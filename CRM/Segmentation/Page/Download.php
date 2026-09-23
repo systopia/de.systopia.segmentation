@@ -33,7 +33,7 @@ class CRM_Segmentation_Page_Download extends CRM_Core_Page {
     }
 
     // load the campaign
-    $campaign = civicrm_api3('Campaign', 'getsingle', array('id' => $campaign_id));
+    $campaign = civicrm_api3('Campaign', 'getsingle', ['id' => $campaign_id]);
 
     // get file data
     $tmpfolder = dirname(tempnam(sys_get_temp_dir(), '_test_'));
@@ -69,7 +69,7 @@ class CRM_Segmentation_Page_Download extends CRM_Core_Page {
         $size_string = sprintf("%.1f kB", $size);
       }
 
-      CRM_Utils_System::setTitle(ts("Campaign Export: '%1'", array(1 => $campaign['title'])));
+      CRM_Utils_System::setTitle(ts("Campaign Export: '%1'", [1 => $campaign['title']]));
       $this->assign('download_name', $download_name);
       $this->assign('file_size', $size_string);
       $this->assign('download_link', CRM_Utils_System::url('civicrm/segmentation/download', "cid={$campaign_id}&file={$file_name}&download=1"));

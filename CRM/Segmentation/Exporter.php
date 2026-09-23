@@ -43,10 +43,10 @@ abstract class CRM_Segmentation_Exporter {
    */
   protected function __construct($config) {
     $this->config = $config;
-    $this->_contacts = array();
-    $this->_details = array();
-    $this->_loadCache = array();
-    $this->_fieldCache = array();
+    $this->_contacts = [];
+    $this->_details = [];
+    $this->_loadCache = [];
+    $this->_fieldCache = [];
   }
 
 
@@ -86,7 +86,7 @@ abstract class CRM_Segmentation_Exporter {
   /**
    * export the given campaig and segments
    */
-  public function generateFile($campaign_id, $params = array(), $offset = 0, $count = 0, $is_last = TRUE, $exclude_deleted_contacts = TRUE) {
+  public function generateFile($campaign_id, $params = [], $offset = 0, $count = 0, $is_last = TRUE, $exclude_deleted_contacts = TRUE) {
     $exportedRows = 0;
     // create a tmp file (if not yet exists)
     $this->createTmpFile();
@@ -109,11 +109,11 @@ abstract class CRM_Segmentation_Exporter {
     $more_data = TRUE;
     while ($more_data) {
       // compile a chunk
-      $segment_chunk = array();
+      $segment_chunk = [];
       $more_data = FALSE; // will be set back to TRUE below
       while ($main_query->fetch()) {
         $exportedRows++;
-        $segment_chunk[] = array(
+        $segment_chunk[] = [
           'contact_id'    => $main_query->contact_id,
           'datetime'      => $main_query->datetime,
           'campaign_id'   => $main_query->campaign_id,
@@ -122,7 +122,7 @@ abstract class CRM_Segmentation_Exporter {
           'test_group'    => $main_query->test_group,
           'membership_id' => $main_query->membership_id,
           'bundle'        => $main_query->bundle,
-          'text_block'    => $main_query->text_block);
+          'text_block'    => $main_query->text_block];
         if (count($segment_chunk) >= $this->chunk_size) {
           $more_data = TRUE;
           break;
@@ -189,7 +189,7 @@ abstract class CRM_Segmentation_Exporter {
    */
   public function exportChunk($chunk) {
     foreach ($chunk as $segmentation_line) {
-      $data = array();
+      $data = [];
       while ($this->loopNext($data, $segmentation_line)) {
         // execute rules to get all data
          $this->executeRules($segmentation_line, $data);
@@ -275,7 +275,7 @@ abstract class CRM_Segmentation_Exporter {
    */
   public static function getExporterList() {
     $exporters = self::getAllExporters();
-    $exporter_list = array();
+    $exporter_list = [];
     foreach ($exporters as $exporter_id => $exporter) {
       $exporter_list[$exporter_id] = $exporter['name'];
     }
@@ -288,7 +288,7 @@ abstract class CRM_Segmentation_Exporter {
    * @return array absolute folder paths
    */
   public static function getExporterConfigurationLocations() {
-    $locations = array();
+    $locations = [];
 
     // add the folder in this extension
     $in_extension_location = E::path('segmentation_exporters');
@@ -310,7 +310,7 @@ abstract class CRM_Segmentation_Exporter {
    */
   public static function getAllExporters() {
     // find all available export configurations
-    $configurations = array();
+    $configurations = [];
 
     $locations = self::getExporterConfigurationLocations();
     foreach ($locations as $folder) {
@@ -425,8 +425,8 @@ abstract class CRM_Segmentation_Exporter {
           if (!empty($rule['type'])) {
             $data[$rule['to']] = $this->loadEntity(
               CRM_Utils_Array::value('type', $rule, ''),
-              CRM_Utils_Array::value('params', $rule, array()),
-              CRM_Utils_Array::value('required', $rule, array()),
+              CRM_Utils_Array::value('params', $rule, []),
+              CRM_Utils_Array::value('required', $rule, []),
               $line,
               $data,
               CRM_Utils_Array::value('cached', $rule, FALSE));
@@ -514,9 +514,9 @@ abstract class CRM_Segmentation_Exporter {
         $path = preg_split("/\./", $suffix);
         $field = NULL;
         if (count($path) == 1) {
-          $field = $this->getField($field_name, array('name' => $path[0]));
+          $field = $this->getField($field_name, ['name' => $path[0]]);
         } else {
-          $field = $this->getField($field_name, array('name' => $path[1], 'custom_group_id' => $path[0]));
+          $field = $this->getField($field_name, ['name' => $path[1], 'custom_group_id' => $path[0]]);
         }
         if ($field['id']) {
           // custom field found
@@ -538,7 +538,7 @@ abstract class CRM_Segmentation_Exporter {
         $field = civicrm_api3('CustomField', 'getsingle', $parameters);
       } catch (Exception $e) {
         // field not found
-        $field = array('id' => 0, 'name' => 'not found');
+        $field = ['id' => 0, 'name' => 'not found'];
       }
       $this->_fieldCache[$key] = $field;
     }
@@ -553,7 +553,7 @@ abstract class CRM_Segmentation_Exporter {
       case 'contact':
         if (!isset($this->_contacts[$line['contact_id']])) {
           // error_log("CACHE MISS: Contact.{$line['contact_id']}");
-          $this->_contacts[$line['contact_id']] = civicrm_api3('Contact', 'getsingle', array('id' => $line['contact_id']));
+          $this->_contacts[$line['contact_id']] = civicrm_api3('Contact', 'getsingle', ['id' => $line['contact_id']]);
         }
         return $this->_contacts[$line['contact_id']];
 
@@ -564,7 +564,7 @@ abstract class CRM_Segmentation_Exporter {
         if (!empty($line['membership_id'])) {
           if (!isset($this->_memberships[$line['membership_id']])) {
             // error_log("CACHE MISS: Membership.{$line['membership_id']}");
-            $this->_memberships[$line['membership_id']] = civicrm_api3('Membership', 'getsingle', array('id' => $line['membership_id']));
+            $this->_memberships[$line['membership_id']] = civicrm_api3('Membership', 'getsingle', ['id' => $line['membership_id']]);
           }
           return $this->_memberships[$line['membership_id']];
         } else {
@@ -575,18 +575,18 @@ abstract class CRM_Segmentation_Exporter {
       case 'campaign':
         if ($this->_campaign == NULL || $this->_campaign['id'] != $line['campaign_id']) {
           // error_log("CACHE MISS: Campaign.{$line['campaign_id']}");
-          $this->_campaign = civicrm_api3('Campaign', 'getsingle', array('id' => $line['campaign_id']));
+          $this->_campaign = civicrm_api3('Campaign', 'getsingle', ['id' => $line['campaign_id']]);
         }
         return $this->_campaign;
 
       case 'phone_primary':
-        return $this->getDetailEntity($line, 'Phone', array('is_primary' => 1));
+        return $this->getDetailEntity($line, 'Phone', ['is_primary' => 1]);
 
       case 'phone_phone':
-        return $this->getDetailEntity($line, 'Phone', array('phone_type_id' => 1));
+        return $this->getDetailEntity($line, 'Phone', ['phone_type_id' => 1]);
 
       case 'phone_mobile':
-        return $this->getDetailEntity($line, 'Phone', array('phone_type_id' => 2));
+        return $this->getDetailEntity($line, 'Phone', ['phone_type_id' => 2]);
 
       default:
         // maybe it's in the data
@@ -604,7 +604,7 @@ abstract class CRM_Segmentation_Exporter {
   protected function getDetailEntity($line, $type, $search_params, $preferred = 'is_primary') {
     $contact_id = $line['contact_id'];
     $type_index = strtolower($type);
-    $entity = array(); // fallback
+    $entity = []; // fallback
 
     if (isset($this->_details[$contact_id][$type_index])) {
       foreach ($this->_details[$contact_id][$type_index] as $entity_candidate) {
@@ -628,10 +628,10 @@ abstract class CRM_Segmentation_Exporter {
 
     } else {
       // cache entry not set -> details not loaded yet
-      $this->_details[$contact_id][$type_index] = array();
-      $query = civicrm_api3($type, 'get', array(
+      $this->_details[$contact_id][$type_index] = [];
+      $query = civicrm_api3($type, 'get', [
         'contact_id'   => $contact_id,
-        'option.limit' => 0));
+        'option.limit' => 0]);
 
       foreach ($query['values'] as $entity) {
         $this->_details[$contact_id][$type_index][] = $entity;
@@ -654,7 +654,7 @@ abstract class CRM_Segmentation_Exporter {
     foreach ($required_parameters as $required_parameter) {
       if (!isset($params[$required_parameter]) || $params[$required_parameter]=='') {
         // required parameter not set
-        return array();
+        return [];
       }
     }
 
@@ -671,7 +671,7 @@ abstract class CRM_Segmentation_Exporter {
       $entity = reset($result['values']);
     } else {
       // not found / not unique
-      $entity = array();
+      $entity = [];
     }
 
     if ($cached) {
@@ -704,7 +704,7 @@ abstract class CRM_Segmentation_Exporter {
    *************************************************/
 
   protected $loop_status = NULL;
-  protected $loop_stack  = array();
+  protected $loop_stack  = [];
 
   /**
    * this allows you to loop over certain entities
@@ -730,8 +730,8 @@ abstract class CRM_Segmentation_Exporter {
       try {
         if ($this->loop_status === NULL) {
           // init
-          $this->loop_status = array();
-          $this->loop_stack  = array();
+          $this->loop_status = [];
+          $this->loop_stack  = [];
           $this->pushStack($data, $line);
           return TRUE;
         } else {
@@ -739,7 +739,7 @@ abstract class CRM_Segmentation_Exporter {
         }
       } catch (Exception $e) {
         // something went wrong...
-        $this->loop_stack = array();
+        $this->loop_stack = [];
         $this->loop_status = NULL;
         error_log($e->getMessage());
         return FALSE;
@@ -811,7 +811,7 @@ abstract class CRM_Segmentation_Exporter {
     $this->loop_stack[]  = $query_result['values'];
 
     // mark in data
-    $data[$loop_spec['name']] = $query_result['count'] ? $query_result['values'][0] : array();
+    $data[$loop_spec['name']] = $query_result['count'] ? $query_result['values'][0] : [];
 
     // push all the way to the end
     if (count($this->loop_stack) < count($this->config['loop'])) {
@@ -823,7 +823,7 @@ abstract class CRM_Segmentation_Exporter {
    * get the API parameters from the query spec
    */
   protected function getQueryParams($spec, $data, $line) {
-    $parameters = array();
+    $parameters = [];
     foreach ($spec as $key => $value) {
       if (substr($value, 0, 4) == 'var:') {
         $value = $this->getValue(substr($value, 4), $line, $data);
@@ -844,8 +844,8 @@ abstract class CRM_Segmentation_Exporter {
    */
   protected function preCache($chunk) {
     // gather IDs
-    $contact_ids    = array();
-    $membership_ids = array();
+    $contact_ids    = [];
+    $membership_ids = [];
     foreach ($chunk as $segment) {
       $contact_ids[] = $segment['contact_id'];
       if (!empty($segment['membership_id'])) {
@@ -854,10 +854,10 @@ abstract class CRM_Segmentation_Exporter {
     }
 
     // gather fields
-    $contact_fields = array();
-    $membership_fields = array();
+    $contact_fields = [];
+    $membership_fields = [];
     // TODO: $email_types = array();
-    $phone_types = array();
+    $phone_types = [];
     // TODO: $address_types = array();
     foreach ($this->config['rules'] as $rule) {
       if (isset($rule['from']) && preg_match('#^(?P<entity>\w+)[.](?P<attribute>[\w.]+)$#', $rule['from'], $entity_source)) {
@@ -891,11 +891,11 @@ abstract class CRM_Segmentation_Exporter {
 
     // load contact data
     if (!empty($contact_fields) && !empty($contact_ids)) {
-      $contact_query = civicrm_api3('Contact', 'get', array(
-        'id'           => array('IN' => $contact_ids),
+      $contact_query = civicrm_api3('Contact', 'get', [
+        'id'           => ['IN' => $contact_ids],
         'option.limit' => 0,
         'return'       => implode(',', array_keys($contact_fields))
-        ));
+        ]);
       foreach ($contact_query['values'] as $contact) {
         $this->_contacts[$contact['id']] = $contact;
       }
@@ -903,12 +903,12 @@ abstract class CRM_Segmentation_Exporter {
 
     // load membership data
     if (!empty($membership_fields) && !empty($membership_ids)) {
-      $membership_query = civicrm_api3('Membership', 'get', array(
-        'id'           => array('IN' => $membership_ids),
+      $membership_query = civicrm_api3('Membership', 'get', [
+        'id'           => ['IN' => $membership_ids],
         'option.limit' => 0,
         // FIXME: this doesn't really work:
         // 'return'       => implode(',', array_keys($membership_fields))
-        ));
+        ]);
       foreach ($membership_query['values'] as $membership) {
         $this->_memberships[$membership['id']] = $membership;
       }
@@ -918,15 +918,15 @@ abstract class CRM_Segmentation_Exporter {
     if (!empty($phone_types) && !empty($contact_ids)) {
       // create array
       foreach ($contact_ids as $contact_id) {
-        $this->_details[$contact_id]['phone'] = array();
+        $this->_details[$contact_id]['phone'] = [];
       }
-      $phone_query = civicrm_api3('Phone', 'get', array(
-        'contact_id'    => array('IN' => $contact_ids),
+      $phone_query = civicrm_api3('Phone', 'get', [
+        'contact_id'    => ['IN' => $contact_ids],
         'option.limit'  => 0,
-        ));
+        ]);
       // if specific phone types (not primary) are requested, restrict to those
       if (!in_array('P', $phone_types)) {
-        $phone_query['phone_type_id'] = array('IN' => array_keys($phone_types));
+        $phone_query['phone_type_id'] = ['IN' => array_keys($phone_types)];
       }
       foreach ($phone_query['values'] as $phone) {
         $this->_details[$phone['contact_id']]['phone'][] = $phone;
@@ -940,7 +940,7 @@ abstract class CRM_Segmentation_Exporter {
    * flush the cache
    */
   protected function flushCache($chunk) {
-    $this->_contacts = array();
-    $this->_details = array();
+    $this->_contacts = [];
+    $this->_details = [];
   }
 }

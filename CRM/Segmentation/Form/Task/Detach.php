@@ -27,24 +27,24 @@ class CRM_Segmentation_Form_Task_Detach extends CRM_Contact_Form_Task {
    * Compile task form
    */
   function buildQuickForm() {
-    CRM_Utils_System::setTitle(ts('Detach %1 Contacts', array(
+    CRM_Utils_System::setTitle(ts('Detach %1 Contacts', [
       'domain' => 'de.systopia.segmentation',
-      1        => count($this->_contactIds))));
+      1        => count($this->_contactIds)]));
 
     // campaign selector
     $this->addElement('select',
                       'campaign_id',
-                      ts('Campaign', array('domain' => 'de.systopia.segmentation')),
+                      ts('Campaign', ['domain' => 'de.systopia.segmentation']),
                       CRM_Segmentation_Form_Task_Assign::getCampaigns(),
-                      array('class' => 'crm-select2 huge'));
-    $this->addRule('campaign_id', ts('You have to select a campaign', array('domain' => 'de.systopia.segmentation')), 'required');
+                      ['class' => 'crm-select2 huge']);
+    $this->addRule('campaign_id', ts('You have to select a campaign', ['domain' => 'de.systopia.segmentation']), 'required');
 
     // segment options
     $this->addElement('select',
                       'segment_list',
-                      ts('Segment', array('domain' => 'de.systopia.segmentation')),
-                      array('' => 'all'), // will be filled via AJAX
-                      array('class' => 'huge'));
+                      ts('Segment', ['domain' => 'de.systopia.segmentation']),
+                      ['' => 'all'], // will be filled via AJAX
+                      ['class' => 'huge']);
 
     CRM_Core_Form::addDefaultButtons("Detach");
   }
@@ -57,9 +57,9 @@ class CRM_Segmentation_Form_Task_Detach extends CRM_Contact_Form_Task {
 
     if (!empty($this->_contactIds) && !empty($values['campaign_id'])) {
       $contact_id_list = implode(',', $this->_contactIds);
-      $campaign = civicrm_api3('Campaign', 'getsingle', array(
+      $campaign = civicrm_api3('Campaign', 'getsingle', [
         'id' => $values['campaign_id'],
-        'return' => 'id,title'));
+        'return' => 'id,title']);
 
       if (empty($values['segment_list'])) {
         $segment_clause = 'TRUE';
@@ -76,9 +76,9 @@ class CRM_Segmentation_Form_Task_Detach extends CRM_Contact_Form_Task {
           AND {$segment_clause}");
 
       // create notice
-      $variables = array(
+      $variables = [
         1 => count($this->_contactIds),
-        2 => $campaign['title']);
+        2 => $campaign['title']];
       CRM_Core_Session::setStatus(ts("Detached %1 contacts from campaign '%2'", $variables), ts("Success"), "info");
     }
   }
