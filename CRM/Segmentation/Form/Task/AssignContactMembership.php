@@ -16,8 +16,6 @@
 
 define('ASSIGN_MEMBERSHIP__PREVIEW_SAMPLE_SIZE', 500);
 
-require_once 'CRM/Core/Form.php';
-
 /**
  * Form controller class
  *
