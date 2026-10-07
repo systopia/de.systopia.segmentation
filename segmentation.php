@@ -196,7 +196,6 @@ function segmentation_civicrm_enable() {
   CRM_Utils_File::sourceSQLFile($config->dsn, $sqlfile);
 
   // add custom fields
-  require_once 'CRM/Utils/CustomData.php';
   $customData = new CRM_Utils_CustomData('de.systopia.segmentation');
   $customData->syncOptionGroup(__DIR__ . '/resources/segments_option_group.json');
   $customData->syncOptionGroup(__DIR__ . '/resources/activity_type_option_group.json');
